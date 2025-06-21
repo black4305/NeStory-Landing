@@ -36,6 +36,7 @@
     "deploy": "npm run build"
   },
   "homepage": ".",
+  "license": "MIT",
   "eslintConfig": {
     "extends": [
       "react-app",
