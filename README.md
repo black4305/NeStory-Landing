@@ -1,46 +1,72 @@
-# Getting Started with Create React App
+# 🚀 Family Travel Test
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+가족 여행 성향 분석 및 맞춤 추천 서비스
 
-## Available Scripts
+## 🎯 주요 기능
 
-In the project directory, you can run:
+- **32가지 여행 유형** 정밀 분석 (A/R × C/N × F/E × B/L × K/P)
+- **신뢰도 측정** 시스템으로 응답 품질 관리
+- **관리자 대시보드** 4개 탭 (개요/사용자/과정분석/데이터관리)
+- **브라우저 간 데이터 공유** 시스템
+- **모바일 반응형** 디자인
 
-### `npm start`
+## 🚀 빠른 배포 (Private 레포지토리 지원!)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 1단계: GitHub (Private 권장)
+```bash
+git init
+git add .
+git commit -m "feat: Family Travel Test complete"
+git remote add origin https://github.com/YOUR_USERNAME/family-travel-test.git
+git push -u origin main
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 2단계: Vercel 배포
+1. [vercel.com](https://vercel.com) → GitHub 로그인
+2. "New Project" → **Private 레포지토리도 선택 가능** ✅
+3. "Deploy" → 완료!
 
-### `npm test`
+**배포 URL**: `https://your-project.vercel.app`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🔧 로컬 개발
 
-### `npm run build`
+```bash
+# 개발 서버 시작
+npm start
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# 프로덕션 빌드
+npm run build
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# 테스트 실행
+npm test
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📖 상세 문서
 
-### `npm run eject`
+**모든 개발 과정, 기능 설명, 배포 가이드는 `CLAUDE.md` 파일을 참고하세요.**
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 🔧 기술 스택
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- **Frontend**: React 19, TypeScript, Styled Components
+- **Charts**: Recharts, Chart.js  
+- **Animation**: Framer Motion
+- **Deployment**: Vercel
+- **Data**: localStorage + 백업 시스템
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 🎮 Demo
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- **메인 설문**: `/`
+- **관리자 페이지**: `/admin` (로그인: admin/password123)
+- **데이터 관리**: 브라우저 간 공유 URL 생성 가능
+- **신뢰도 분석**: 응답 패턴 실시간 분석
 
-## Learn More
+## 🔒 Private 레포지토리 배포 가능!
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Vercel은 Private GitHub 레포지토리를 완전 지원합니다:
+- ✅ 소스코드 보안 유지
+- ✅ 웹사이트는 공개 접근 가능  
+- ✅ 자동 배포 및 모니터링
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+
+💡 **모든 작업 내용과 상세 가이드는 `CLAUDE.md`에서 확인하세요!**

@@ -1,0 +1,58 @@
+export interface Question {
+  id: number;
+  text: string;
+  axis: 'A' | 'C' | 'F' | 'B' | 'K';
+  isReverse?: boolean;
+}
+
+export interface Answer {
+  questionId: number;
+  score: number;
+  timeSpent: number;
+  responseConsistency?: number;
+}
+
+export interface TravelType {
+  code: string;
+  title: string;
+  description: string;
+  recommendations: string[];
+}
+
+export interface UserInfo {
+  name: string;
+  phone: string;
+  email: string;
+  age: string;
+  gender: string;
+  familySize: number;
+  region: string;
+  marketingConsent: boolean;
+  privacyConsent: boolean;
+}
+
+export interface AnalyticsData {
+  sessionId: string;
+  startTime: number;
+  answers: Answer[];
+  totalTime: number;
+  clickCount: number;
+  scrollDepth: number;
+  deviceType: 'mobile' | 'tablet' | 'desktop';
+  userAgent: string;
+  completed: boolean;
+  result?: string;
+  userInfo?: UserInfo;
+  submittedAt?: number;
+  reliabilityScore?: number;
+  questionProgress?: number[];
+  responsePattern?: 'consistent' | 'inconsistent' | 'random';
+}
+
+export interface AxisScore {
+  A: number; // Active vs Relaxing
+  C: number; // Culture vs Nature
+  F: number; // Foodie vs Experience
+  B: number; // Budget vs Luxury
+  K: number; // Kid-Initiated vs Parent-Initiated
+}

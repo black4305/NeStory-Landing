@@ -11,9 +11,20 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/styled-components": "^5.1.34",
+    "chart.js": "^4.5.0",
+    "framer-motion": "^12.18.1",
+    "html2canvas": "^1.4.1",
     "react": "^19.1.0",
+    "react-chartjs-2": "^5.3.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.6.2",
     "react-scripts": "5.0.1",
+    "recharts": "^2.15.4",
+    "styled-components": "^6.1.19",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
@@ -21,8 +32,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "npm run build"
   },
+  "homepage": ".",
   "eslintConfig": {
     "extends": [
       "react-app",
