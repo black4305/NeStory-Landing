@@ -4,6 +4,8 @@
 - **목적**: 가족 여행 성향 분석 설문 시스템
 - **구조**: React + TypeScript + Styled Components
 - **여행 유형**: 5개 축 × 2가지 = 32가지 조합 가능
+- **GitHub**: https://github.com/black4305/NeStory-Landing
+- **라이센스**: MIT License (상업적 사용 허용)
 
 ## 🎯 여행 유형 분류 체계
 ### 5개 축 (각 축당 2가지 유형)
@@ -193,7 +195,7 @@ Vercel은 **Private GitHub 레포지토리를 완전 지원**합니다. 오히�
 
 #### 🚀 배포 단계별 가이드
 
-##### 1단계: Private GitHub 레포지토리 생성
+##### 1단계: GitHub 레포지토리 연결 ✅ 완료
 ```bash
 # Git 초기화
 git init
@@ -202,14 +204,19 @@ git init
 git add .
 
 # 첫 커밋
-git commit -m "feat: Family Travel Test with reliability system and 32 travel types"
+git commit -m "feat: Family Travel Test with 32 travel types and reliability system"
 
-# GitHub에서 새 레포지토리 생성 (PRIVATE 선택)
-git remote add origin https://github.com/YOUR_USERNAME/family-travel-test.git
+# GitHub 레포지토리 연결 (이미 완료)
+git remote add origin https://github.com/black4305/NeStory-Landing.git
 
-# 업로드
+# main 브랜치로 업로드 완료
 git push -u origin main
 ```
+
+**✅ 현재 상태**: https://github.com/black4305/NeStory-Landing
+- **MIT License** 적용
+- **Private 레포지토리** 설정 가능
+- **자동 배포** 준비 완료
 
 ##### 2단계: Vercel에서 Private 레포지토리 배포
 1. **[vercel.com](https://vercel.com)** 접속
@@ -276,6 +283,26 @@ X-Content-Type-Options: nosniff
 X-Frame-Options: DENY  
 X-XSS-Protection: 1; mode=block
 ```
+
+## 📜 라이센스 정보
+
+### MIT License ✅
+- **파일**: `LICENSE`
+- **특징**: 가장 인기있는 오픈소스 라이센스
+- **허용사항**:
+  - ✅ 상업적 사용 (회사에서 사용 가능)
+  - ✅ 수정 및 배포
+  - ✅ 사적 사용
+  - ✅ 특허 사용
+- **의무사항**: 
+  - 📄 라이센스 및 저작권 고지 포함
+- **면책사항**: 보증 없음
+
+### 왜 MIT License를 선택했나?
+- 🌟 **GitHub에서 가장 많이 사용** (30%+ 점유율)
+- 🏢 **기업 친화적**: 상업적 사용 자유
+- 📖 **간단명료**: 이해하기 쉬운 조건
+- 🔄 **호환성**: 다른 라이센스와 호환 좋음
 
 ## 📝 남은 개선 사항
 - [ ] 실제 데이터베이스 연동 (현재는 localStorage + 백업)
