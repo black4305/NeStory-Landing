@@ -304,6 +304,80 @@ X-XSS-Protection: 1; mode=block
 - 📖 **간단명료**: 이해하기 쉬운 조건
 - 🔄 **호환성**: 다른 라이센스와 호환 좋음
 
+## 🔧 Vercel 배포 문제 해결 (2025-06-21 완료)
+
+### 🚨 발생한 문제
+- **증상**: Vercel에서 빌드 및 배포 실패
+- **원인**: 복잡한 `vercel.json` 설정 및 환경 변수 충돌
+
+### ✅ 해결한 방법들
+
+#### 1. Vercel 설정 단순화
+**이전 `vercel.json`**: 복잡한 빌드 설정, 함수 설정 등
+```json
+// 복잡했던 이전 설정 (50+ 라인)
+{
+  "version": 2,
+  "builds": [...],
+  "functions": {...},
+  "routes": [...]
+}
+```
+
+**현재 `vercel.json`**: 최소한의 SPA 라우팅만 ✅
+```json
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
+
+#### 2. Node.js 버전 명시
+`package.json`에 엔진 요구사항 추가:
+```json
+"engines": {
+  "node": ">=18.0.0",
+  "npm": ">=8.0.0"
+}
+```
+
+#### 3. 환경 변수 문제 해결
+- **문제**: `.env.production` 파일이 빌드 오류 유발
+- **해결**: 파일 삭제, 하드코딩된 설정 사용
+- **관리자 비밀번호**: AdminLogin.tsx에서 PIN '1234' 하드코딩
+
+#### 4. 로컬 빌드 검증 ✅
+```bash
+npm run build
+# ✅ 성공: 경고만 있고 에러 없음
+# ✅ 빌드 크기: 308.49 kB (gzipped)
+```
+
+### 🚀 최종 GitHub 상태
+- **레포지토리**: https://github.com/black4305/NeStory-Landing
+- **브랜치**: main
+- **커밋**: 4개 (초기 + 라이센스 + 문서 + Vercel 수정)
+- **라이센스**: MIT License
+
+### 📊 배포 준비 완료 체크리스트
+- [x] GitHub 레포지토리 연결
+- [x] MIT License 설정
+- [x] Vercel 설정 최적화
+- [x] 로컬 빌드 검증
+- [x] 환경 변수 정리
+- [x] SPA 라우팅 설정
+- [x] 문서 업데이트
+
+### 🎯 다음 단계 (배포자가 수행)
+1. **Vercel 대시보드** 접속
+2. **프로젝트 선택** → **Redeploy** 클릭
+3. **자동 배포** 성공 확인
+4. **배포 URL** 테스트
+
 ## 📝 남은 개선 사항
 - [ ] 실제 데이터베이스 연동 (현재는 localStorage + 백업)
 - [ ] 응답자별 개별 PDF 리포트 생성
@@ -311,3 +385,4 @@ X-XSS-Protection: 1; mode=block
 - [ ] 실시간 협업 기능 (여러 관리자)
 - [ ] Google Analytics 연동
 - [ ] 푸시 알림 시스템
+- [ ] Vercel 환경 변수로 관리자 비밀번호 보안 강화
