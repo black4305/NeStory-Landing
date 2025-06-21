@@ -5,6 +5,7 @@ import StartScreen from './components/StartScreen';
 import QuestionCard from './components/QuestionCard';
 import ResultScreen from './components/ResultScreen';
 import UserInfoForm from './components/UserInfoForm';
+import ThankYouScreen from './components/ThankYouScreen';
 import AdminLogin from './components/AdminLogin';
 import EnhancedAdminDashboard from './components/EnhancedAdminDashboard';
 import { questions } from './data/questions';
@@ -44,7 +45,7 @@ const AppContainer = styled.div`
   min-height: 100vh;
 `;
 
-type AppState = 'start' | 'survey' | 'userInfo' | 'result';
+type AppState = 'start' | 'survey' | 'userInfo' | 'thankYou' | 'result';
 
 // 관리자 인증 상태 관리
 const AdminRoute: React.FC = () => {
@@ -137,13 +138,17 @@ const SurveyApp: React.FC = () => {
     if (result) {
       analytics.trackCompletion(result.typeCode, info);
     }
-    setAppState('result');
+    setAppState('thankYou');
   };
 
   const handleSkipUserInfo = () => {
     if (result) {
       analytics.trackCompletion(result.typeCode);
     }
+    setAppState('thankYou');
+  };
+
+  const handleThankYouComplete = () => {
     setAppState('result');
   };
 
@@ -174,6 +179,13 @@ const SurveyApp: React.FC = () => {
         <UserInfoForm
           onSubmit={handleUserInfoSubmit}
           onSkip={handleSkipUserInfo}
+        />
+      )}
+      
+      {appState === 'thankYou' && (
+        <ThankYouScreen
+          userName={userInfo?.name}
+          onComplete={handleThankYouComplete}
         />
       )}
       
