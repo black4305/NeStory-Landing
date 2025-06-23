@@ -173,9 +173,11 @@ const ButtonGroup = styled.div`
   gap: 1rem;
   justify-content: center;
   margin-top: 2rem;
+  width: 100%;
   
   @media (max-width: 768px) {
     flex-direction: column;
+    align-items: center;
   }
 `;
 
@@ -195,21 +197,22 @@ const Button = styled(motion.button)<{ variant?: 'primary' | 'secondary'; disabl
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   opacity: ${props => props.disabled ? 0.7 : 1};
   min-height: 50px;
-  width: 100%;
+  flex: 1;
   max-width: 200px;
   
   @media (max-width: 768px) {
     padding: 1rem 1.5rem;
     font-size: 0.95rem;
     min-height: 48px;
-    max-width: 180px;
+    width: 100%;
+    max-width: 300px;
   }
   
   @media (max-width: 375px) {
     padding: 0.9rem 1.25rem;
     font-size: 0.9rem;
     min-height: 44px;
-    max-width: 160px;
+    max-width: 280px;
   }
 `;
 
