@@ -137,7 +137,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        🧳 가족여행 유형 테스트
+        휴가 궁합 테스트❤️
       </Title>
       
       <Subtitle
@@ -145,7 +145,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
       >
-        우리 가족만의 특별한 여행 스타일을 찾아보세요!
+        우리 가족의 찰떡 여행 콤보를 1분 만에!
       </Subtitle>
       
       <Description
@@ -153,15 +153,15 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.4 }}
       >
-        <h3 style={{ marginTop: 0 }}>📊 5가지 축으로 분석</h3>
+        <h3 style={{ marginTop: 0 }}>📊 3가지 축으로 분석</h3>
         <p style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>
-          활동성, 선호지역, 여행목적, 예산, 주도권을 기준으로 
-          총 32가지 유형 중 하나로 분류해드립니다.
+          활동성, 선호지역, 여행목적을 기준으로 
+          총 8가지 유형 중 하나로 분류해드립니다.
         </p>
         
         <Features>
-          <Feature>⏱️ 1-2분 소요</Feature>
-          <Feature>🎮 10개 밸런스게임</Feature>
+          <Feature>⏱️ 1분 소요</Feature>
+          <Feature>🎮 6개 밸런스게임</Feature>
           <Feature>🎯 맞춤 추천</Feature>
         </Features>
       </Description>

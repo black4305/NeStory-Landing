@@ -62,14 +62,28 @@ const BackButton = styled(motion.button)`
 
 const TypesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  max-width: 1400px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 1rem;
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
+    padding: 0 0.5rem;
+  }
+  
+  @media (min-width: 768px) and (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(4, 1fr);
   }
 `;
 
@@ -103,16 +117,16 @@ const TypeCode = styled.div`
 `;
 
 const CharacterContainer = styled.div`
-  margin: 1rem 0;
+  margin: 1.5rem 0;
   
   /* CharacterAvatar 크기 조정 */
   > div {
-    width: 100px !important;
-    height: 100px !important;
-    margin: 0 auto 0.5rem;
+    width: 120px !important;
+    height: 120px !important;
+    margin: 0 auto 1rem;
     
     div {
-      transform: scale(0.7);
+      transform: scale(0.85);
       transform-origin: center;
     }
   }
@@ -173,9 +187,9 @@ const AllTypesScreen: React.FC<AllTypesScreenProps> = ({ onBack, onSelectType })
         >
           ← 뒤로가기
         </BackButton>
-        <Title>🎭 32가지 가족여행 유형</Title>
+        <Title>🎭 8가지 가족여행 유형</Title>
         <Subtitle>
-          모든 여행 유형의 캐릭터를 확인해보세요!<br/>
+          간소화된 8가지 여행 유형의 캐릭터를 확인해보세요!<br/>
           각 캐릭터를 클릭하면 자세한 정보를 볼 수 있습니다.
         </Subtitle>
       </Header>

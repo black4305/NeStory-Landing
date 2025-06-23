@@ -51,7 +51,7 @@ class Analytics {
     });
   }
 
-  trackCompletion(result: string, userInfo?: UserInfo): void {
+  async trackCompletion(result: string, userInfo?: UserInfo): Promise<void> {
     const analyticsData: AnalyticsData = {
       sessionId: this.sessionId,
       startTime: this.startTime,
@@ -67,10 +67,10 @@ class Analytics {
       submittedAt: Date.now()
     };
 
-    this.sendAnalytics(analyticsData);
+    await this.sendAnalytics(analyticsData);
   }
 
-  trackAbandon(): void {
+  async trackAbandon(): Promise<void> {
     const analyticsData: AnalyticsData = {
       sessionId: this.sessionId,
       startTime: this.startTime,
@@ -83,17 +83,23 @@ class Analytics {
       completed: false
     };
 
-    this.sendAnalytics(analyticsData);
+    await this.sendAnalytics(analyticsData);
   }
 
-  private sendAnalytics(data: AnalyticsData): void {
-    // 실제 환경에서는 여기서 분석 서버로 데이터를 전송
-    console.log('Analytics Data:', data);
-    
-    // Local Storage에 저장 (개발용)
-    const existingData = JSON.parse(localStorage.getItem('surveyAnalytics') || '[]');
-    existingData.push(data);
-    localStorage.setItem('surveyAnalytics', JSON.stringify(existingData));
+  private async sendAnalytics(data: AnalyticsData): Promise<void> {
+    try {
+      // Firebase에 저장 시도
+      const { FirebaseService } = await import('../services/firebase');
+      await FirebaseService.saveSurveyResult(data);
+      console.log('✅ Firebase에 분석 데이터 저장 완료');
+    } catch (error) {
+      console.error('❌ Firebase 저장 실패, localStorage로 fallback:', error);
+      
+      // Firebase 실패 시 localStorage 백업
+      const existingData = JSON.parse(localStorage.getItem('surveyAnalytics') || '[]');
+      existingData.push(data);
+      localStorage.setItem('surveyAnalytics', JSON.stringify(existingData));
+    }
   }
 
   getAverageResponseTime(): number {

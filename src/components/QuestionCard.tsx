@@ -69,6 +69,30 @@ const QuestionNumber = styled.div`
   margin-bottom: 1rem;
 `;
 
+const BrandingHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #667eea;
+  font-weight: 700;
+  font-size: 0.9rem;
+`;
+
+const Logo = styled.div`
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 900;
+`;
+
 const QuestionText = styled.h2`
   color: #2d3748;
   font-size: 1.4rem;
@@ -99,8 +123,12 @@ const QuestionDescription = styled.p`
 
 const OptionsContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const OptionButton = styled(motion.button)<{ selected: boolean }>`
@@ -110,14 +138,15 @@ const OptionButton = styled(motion.button)<{ selected: boolean }>`
   color: ${props => props.selected ? 'white' : '#495057'};
   border: 2px solid ${props => props.selected ? '#667eea' : 'transparent'};
   border-radius: 15px;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem 1rem;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 50px; /* 터치 인터페이스를 위한 최소 높이 */
-  width: 100%;
+  min-height: 80px;
+  flex: 1;
   text-align: center;
+  line-height: 1.4;
   
   &:hover {
     transform: translateY(-2px);
@@ -225,13 +254,24 @@ interface QuestionCardProps {
   onBack?: () => void;
 }
 
-const options = [
-  { value: 1, label: '매우 그렇지 않다' },
-  { value: 2, label: '그렇지 않다' },
-  { value: 3, label: '보통이다' },
-  { value: 4, label: '그렇다' },
-  { value: 5, label: '매우 그렇다' }
-];
+const getBinaryOptions = (question: Question) => {
+  // description에서 "vs" 기준으로 나누어 두 옵션 생성
+  if (question.description) {
+    const parts = question.description.split(' vs ');
+    if (parts.length === 2) {
+      return [
+        { value: 1, label: parts[0].trim() },
+        { value: 5, label: parts[1].trim() }
+      ];
+    }
+  }
+  
+  // fallback 옵션
+  return [
+    { value: 1, label: '첫 번째 선택' },
+    { value: 5, label: '두 번째 선택' }
+  ];
+};
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
@@ -266,6 +306,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   const progress = (currentQuestion / totalQuestions) * 100;
+  const options = getBinaryOptions(question);
 
   return (
     <Container>
@@ -286,6 +327,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           exit={{ opacity: 0, x: -50 }}
           transition={{ duration: 0.5 }}
         >
+          <BrandingHeader>
+            <Logo>N</Logo>
+            NeStoryTI
+          </BrandingHeader>
+          
           <QuestionNumber>
             질문 {currentQuestion} / {totalQuestions}
           </QuestionNumber>

@@ -19,6 +19,7 @@ import { AnalyticsData } from '../types';
 import { calculateReliabilityScore, getReliabilityScoreColor, getReliabilityScoreLabel } from '../utils/reliability';
 import { questions } from '../data/questions';
 import { DataManager } from '../utils/dataManager';
+import { useFirebaseData, useFirebaseStatus } from '../hooks/useFirebaseData';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -358,6 +359,10 @@ const COLORS = ['#667eea', '#764ba2', '#48bb78', '#f56565', '#ed8936', '#38b2ac'
 interface EnhancedAdminDashboardProps {}
 
 const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
+  // Firebase 데이터 hooks 사용
+  const { data: firebaseData, loading, error, statistics, refreshData } = useFirebaseData();
+  const { isConnected, checkConnection } = useFirebaseStatus();
+  
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
   const [filteredData, setFilteredData] = useState<AnalyticsData[]>([]);
   const [activeTab, setActiveTab] = useState<string>('overview');
@@ -365,11 +370,31 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<AnalyticsData | null>(null);
 
+  // Firebase 데이터가 로드되면 신뢰도 점수 계산하여 업데이트
   useEffect(() => {
-    loadAnalyticsData();
-  }, []);
+    if (firebaseData.length > 0) {
+      const processedData = firebaseData.map((item: AnalyticsData) => {
+        // 신뢰도 점수 계산
+        if (item.answers && item.answers.length > 0) {
+          const reliability = calculateReliabilityScore(item.answers);
+          return {
+            ...item,
+            reliabilityScore: reliability.score,
+            responsePattern: reliability.pattern
+          };
+        }
+        return item;
+      });
+      
+      setAnalyticsData(processedData);
+      setFilteredData(processedData);
+    } else if (!loading && error) {
+      // Firebase 실패 시 localStorage 백업 사용
+      loadAnalyticsDataFromLocal();
+    }
+  }, [firebaseData, loading, error]);
 
-  const loadAnalyticsData = () => {
+  const loadAnalyticsDataFromLocal = () => {
     // URL에서 데이터 가져오기 시도
     DataManager.importFromURL();
     
@@ -982,7 +1007,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
           const success = DataManager.importFromJSON(content);
           if (success) {
             alert('✅ 데이터 가져오기 성공!');
-            loadAnalyticsData();
+            loadAnalyticsDataFromLocal();
           } else {
             alert('❌ 데이터 가져오기 실패. 파일 형식을 확인해주세요.');
           }
@@ -1000,7 +1025,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
     const handleClearData = () => {
       if (window.confirm('⚠️ 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
         DataManager.clearAllData();
-        loadAnalyticsData();
+        loadAnalyticsDataFromLocal();
         alert('🗑️ 모든 데이터가 삭제되었습니다.');
       }
     };
@@ -1099,11 +1124,18 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
             <div style={{ padding: '2rem' }}>
               <div style={{ marginBottom: '1.5rem' }}>
                 <h4 style={{ color: '#4a5568', marginBottom: '1rem' }}>새로고침 & 동기화</h4>
-                <ExportButton onClick={loadAnalyticsData} whileHover={{ scale: 1.05 }}>
-                  🔄 데이터 새로고침
+                <ExportButton onClick={refreshData} whileHover={{ scale: 1.05 }}>
+                  🔄 Firebase 데이터 새로고침
+                </ExportButton>
+                <ExportButton 
+                  onClick={loadAnalyticsDataFromLocal} 
+                  whileHover={{ scale: 1.05 }}
+                  style={{ marginLeft: '0.5rem', background: 'linear-gradient(45deg, #38b2ac, #319795)' }}
+                >
+                  📦 로컬 데이터 새로고침
                 </ExportButton>
                 <p style={{ fontSize: '0.9rem', color: '#718096', marginTop: '0.5rem' }}>
-                  최신 데이터로 업데이트하고 신뢰도 점수를 재계산합니다.
+                  Firebase에서 최신 데이터를 가져오거나 로컬 백업을 새로고침합니다.
                 </p>
               </div>
 
@@ -1165,6 +1197,51 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
         <HeaderContent>
           <Title>🚀 Family Travel Analytics</Title>
           <Subtitle>실시간 사용자 응답 및 분석 데이터 대시보드</Subtitle>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '1rem', 
+            marginTop: '1rem',
+            fontSize: '0.9rem'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              background: 'rgba(255, 255, 255, 0.2)',
+              padding: '0.5rem 1rem',
+              borderRadius: '20px'
+            }}>
+              <span>{isConnected === true ? '🟢' : isConnected === false ? '🔴' : '🟡'}</span>
+              <span>
+                Firebase: {
+                  isConnected === true ? '연결됨' : 
+                  isConnected === false ? '연결 실패' : 
+                  '연결 중...'
+                }
+              </span>
+            </div>
+            {loading && (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem' 
+              }}>
+                <span>⏳</span>
+                <span>데이터 로딩 중...</span>
+              </div>
+            )}
+            {error && (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem' 
+              }}>
+                <span>⚠️</span>
+                <span>백업 데이터 사용</span>
+              </div>
+            )}
+          </div>
         </HeaderContent>
         <LogoutButton
           onClick={handleLogout}

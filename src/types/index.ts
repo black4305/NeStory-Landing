@@ -2,7 +2,7 @@ export interface Question {
   id: number;
   text: string;
   description?: string; // 밸런스 게임용 상세 설명
-  axis: 'A' | 'C' | 'F' | 'B' | 'K';
+  axis: 'A' | 'C' | 'F';
   isReverse?: boolean;
 }
 
@@ -53,6 +53,4 @@ export interface AxisScore {
   A: number; // Active vs Relaxing
   C: number; // Culture vs Nature
   F: number; // Foodie vs Experience
-  B: number; // Budget vs Luxury
-  K: number; // Kid-Initiated vs Parent-Initiated
 }

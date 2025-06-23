@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase 저장 테스트</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        button { 
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white; 
+            border: none; 
+            padding: 15px 30px; 
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer; 
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover { 
+            transform: scale(1.05); 
+        }
+        #result { 
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px; 
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace; 
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .success { background: #48bb78; }
+        .error { background: #f56565; }
+        .info { background: #4299e1; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        h2 { border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase 저장 테스트</h1>
+        
+        <h2>📡 연결 테스트</h2>
+        <button onclick="testConnection()">Firebase 연결 확인</button>
+        <span id="connectionStatus"></span>
+        
+        <h2>💾 데이터 저장 테스트</h2>
+        <button onclick="testSave()">테스트 데이터 저장</button>
+        <button onclick="testMultipleSave()">다중 데이터 저장 (3개)</button>
+        
+        <h2>📊 데이터 조회 테스트</h2>
+        <button onclick="testLoad()">모든 데이터 조회</button>
+        <button onclick="testStats()">통계 조회</button>
+        <button onclick="testCompleted()">완료된 설문만 조회</button>
+        
+        <h2>🧹 데이터 관리</h2>
+        <button onclick="clearResults()">결과 화면 지우기</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            getDocs, 
+            query, 
+            orderBy, 
+            where,
+            serverTimestamp 
+        } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDMjVUaxrHLKDMJZy5AtuNLbrAjw_tIRo",
+            authDomain: "nestory-landing-5844f.firebaseapp.com",
+            projectId: "nestory-landing-5844f",
+            storageBucket: "nestory-landing-5844f.firebasestorage.app",
+            messagingSenderId: "72742437646",
+            appId: "1:72742437646:web:ddee0a487b93d2a4ea4d5f"
+        };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const SURVEYS_COLLECTION = 'surveys';
+
+        // 결과 표시 함수
+        function logResult(message, type = 'info') {
+            const result = document.getElementById('result');
+            const timestamp = new Date().toLocaleTimeString();
+            result.innerHTML += `[${timestamp}] <span class="status ${type}">${message}</span>\n`;
+            result.scrollTop = result.scrollHeight;
+        }
+
+        // 연결 테스트
+        window.testConnection = async function() {
+            try {
+                logResult('🔄 Firebase 연결 테스트 중...', 'info');
+                const q = query(collection(db, SURVEYS_COLLECTION));
+                await getDocs(q);
+                logResult('✅ Firebase 연결 성공!', 'success');
+                document.getElementById('connectionStatus').innerHTML = '<span class="status success">연결됨</span>';
+            } catch (error) {
+                logResult(`❌ Firebase 연결 실패: ${error.message}`, 'error');
+                document.getElementById('connectionStatus').innerHTML = '<span class="status error">연결 실패</span>';
+            }
+        };
+
+        // 테스트 데이터 생성
+        function createTestData(suffix = '') {
+            return {
+                sessionId: `test_${Date.now()}_${suffix}`,
+                startTime: Date.now() - 60000,
+                answers: [
+                    { questionId: 1, score: 4, timeSpent: 3000 },
+                    { questionId: 2, score: 2, timeSpent: 4000 },
+                    { questionId: 3, score: 5, timeSpent: 2500 },
+                    { questionId: 4, score: 3, timeSpent: 3500 },
+                    { questionId: 5, score: 4, timeSpent: 2800 },
+                    { questionId: 6, score: 1, timeSpent: 5000 }
+                ],
+                totalTime: 20800,
+                clickCount: 15,
+                scrollDepth: 85,
+                deviceType: 'desktop',
+                userAgent: 'Test User Agent',
+                completed: true,
+                result: ['ACF', 'RNE', 'ANF'][Math.floor(Math.random() * 3)],
+                userInfo: {
+                    name: `테스트유저${suffix}`,
+                    region: ['서울 강남구', '부산 해운대구', '대구 중구'][Math.floor(Math.random() * 3)]
+                },
+                submittedAt: Date.now()
+            };
+        }
+
+        // 단일 데이터 저장 테스트
+        window.testSave = async function() {
+            try {
+                logResult('💾 테스트 데이터 저장 중...', 'info');
+                const testData = createTestData('single');
+                
+                const surveyData = {
+                    ...testData,
+                    firebaseTimestamp: serverTimestamp(),
+                    savedAt: new Date().toISOString()
+                };
+
+                const docRef = await addDoc(collection(db, SURVEYS_COLLECTION), surveyData);
+                logResult(`✅ 저장 성공! 문서 ID: ${docRef.id}`, 'success');
+                logResult(`📝 저장된 데이터: ${JSON.stringify(testData, null, 2)}`, 'info');
+            } catch (error) {
+                logResult(`❌ 저장 실패: ${error.message}`, 'error');
+            }
+        };
+
+        // 다중 데이터 저장 테스트
+        window.testMultipleSave = async function() {
+            try {
+                logResult('📦 다중 데이터 저장 시작...', 'info');
+                
+                for (let i = 1; i <= 3; i++) {
+                    const testData = createTestData(`multi_${i}`);
+                    const surveyData = {
+                        ...testData,
+                        firebaseTimestamp: serverTimestamp(),
+                        savedAt: new Date().toISOString()
+                    };
+
+                    const docRef = await addDoc(collection(db, SURVEYS_COLLECTION), surveyData);
+                    logResult(`✅ ${i}번째 데이터 저장 성공! ID: ${docRef.id}`, 'success');
+                    
+                    // 1초 대기
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                logResult('🎉 모든 데이터 저장 완료!', 'success');
+            } catch (error) {
+                logResult(`❌ 다중 저장 실패: ${error.message}`, 'error');
+            }
+        };
+
+        // 데이터 조회 테스트
+        window.testLoad = async function() {
+            try {
+                logResult('📊 모든 데이터 조회 중...', 'info');
+                const q = query(collection(db, SURVEYS_COLLECTION), orderBy('submittedAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                const results = [];
+                querySnapshot.forEach((doc) => {
+                    results.push({ id: doc.id, ...doc.data() });
+                });
+
+                logResult(`📋 총 ${results.length}개 데이터 조회 완료`, 'success');
+                
+                results.slice(0, 5).forEach((item, index) => {
+                    logResult(`${index + 1}. ${item.userInfo?.name || '익명'} - ${item.result} (${item.sessionId})`, 'info');
+                });
+
+                if (results.length > 5) {
+                    logResult(`... 및 ${results.length - 5}개 더`, 'info');
+                }
+            } catch (error) {
+                logResult(`❌ 조회 실패: ${error.message}`, 'error');
+            }
+        };
+
+        // 통계 조회 테스트
+        window.testStats = async function() {
+            try {
+                logResult('📈 통계 조회 중...', 'info');
+                
+                // 모든 데이터 조회
+                const allQuery = query(collection(db, SURVEYS_COLLECTION));
+                const allSnapshot = await getDocs(allQuery);
+                const total = allSnapshot.size;
+
+                // 완료된 데이터만 조회
+                const completedQuery = query(collection(db, SURVEYS_COLLECTION), where('completed', '==', true));
+                const completedSnapshot = await getDocs(completedQuery);
+                const completed = completedSnapshot.size;
+
+                // 오늘 데이터 조회
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayQuery = query(
+                    collection(db, SURVEYS_COLLECTION), 
+                    where('submittedAt', '>=', today.getTime())
+                );
+                const todaySnapshot = await getDocs(todayQuery);
+                const todayCount = todaySnapshot.size;
+
+                logResult('📊 통계 결과:', 'success');
+                logResult(`   전체: ${total}개`, 'info');
+                logResult(`   완료: ${completed}개`, 'info');
+                logResult(`   오늘: ${todayCount}개`, 'info');
+                logResult(`   완료율: ${total > 0 ? Math.round((completed / total) * 100) : 0}%`, 'info');
+
+            } catch (error) {
+                logResult(`❌ 통계 조회 실패: ${error.message}`, 'error');
+            }
+        };
+
+        // 완료된 설문만 조회
+        window.testCompleted = async function() {
+            try {
+                logResult('✅ 완료된 설문만 조회 중...', 'info');
+                const q = query(
+                    collection(db, SURVEYS_COLLECTION),
+                    where('completed', '==', true),
+                    orderBy('submittedAt', 'desc')
+                );
+                const querySnapshot = await getDocs(q);
+                
+                logResult(`📋 완료된 설문: ${querySnapshot.size}개`, 'success');
+                
+                querySnapshot.forEach((doc, index) => {
+                    const data = doc.data();
+                    if (index < 3) { // 최근 3개만 표시
+                        logResult(`${index + 1}. ${data.userInfo?.name || '익명'} - ${data.result}`, 'info');
+                    }
+                });
+
+                if (querySnapshot.size > 3) {
+                    logResult(`... 및 ${querySnapshot.size - 3}개 더`, 'info');
+                }
+            } catch (error) {
+                logResult(`❌ 완료된 설문 조회 실패: ${error.message}`, 'error');
+            }
+        };
+
+        // 결과 화면 지우기
+        window.clearResults = function() {
+            document.getElementById('result').innerHTML = '';
+            logResult('🧹 결과 화면을 지웠습니다.', 'info');
+        };
+
+        // 페이지 로드 시 자동 연결 테스트
+        window.addEventListener('load', function() {
+            logResult('🚀 Firebase 테스트 페이지 로드됨', 'info');
+            testConnection();
+        });
+    </script>
+</body>
+</html>

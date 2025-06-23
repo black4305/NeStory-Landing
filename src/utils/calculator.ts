@@ -5,9 +5,7 @@ export const calculateTravelType = (answers: Answer[]): string => {
   const axisScores: AxisScore = {
     A: 0,
     C: 0,
-    F: 0,
-    B: 0,
-    K: 0
+    F: 0
   };
 
   // 각 축별 점수 계산
@@ -23,13 +21,11 @@ export const calculateTravelType = (answers: Answer[]): string => {
     axisScores[question.axis] += score;
   });
 
-  // 각 축별 유형 결정 (2문항 × 5점 = 10점 만점, 기준점 6점)
+  // 각 축별 유형 결정 (2문항, 1점 또는 5점, 기준점 6점)
   const typeCode = 
     (axisScores.A >= 6 ? 'A' : 'R') +
     (axisScores.C >= 6 ? 'C' : 'N') +
-    (axisScores.F >= 6 ? 'F' : 'E') +
-    (axisScores.B >= 6 ? 'L' : 'B') +
-    (axisScores.K >= 6 ? 'K' : 'P');
+    (axisScores.F >= 6 ? 'F' : 'E');
 
   return typeCode;
 };
@@ -38,9 +34,7 @@ export const getAxisScores = (answers: Answer[]): AxisScore => {
   const axisScores: AxisScore = {
     A: 0,
     C: 0,
-    F: 0,
-    B: 0,
-    K: 0
+    F: 0
   };
 
   answers.forEach(answer => {

@@ -470,16 +470,6 @@ const axisConfig = {
     left: { label: 'Experience', korean: '체험형', desc: '새로운 경험과 액티비티를 중시' },
     right: { label: 'Foodie', korean: '맛집형', desc: '맛집 탐방과 미식 경험을 중시' },
     name: '여행목적'
-  },
-  B: {
-    left: { label: 'Budget', korean: '가성비형', desc: '합리적인 가격과 효율성을 추구' },
-    right: { label: 'Luxury', korean: '프리미엄형', desc: '품질과 특별한 경험을 중시' },
-    name: '예산성향'
-  },
-  K: {
-    left: { label: 'Parent-led', korean: '부모주도형', desc: '부모가 계획하고 이끄는 여행' },
-    right: { label: 'Kid-led', korean: '아이주도형', desc: '아이들의 의견을 우선하는 여행' },
-    name: '주도권'
   }
 };
 
@@ -774,7 +764,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            🎭 32가지 유형 모두 보기
+            🎭 8가지 유형 모두 보기
           </Button>
         </ButtonGroup>
       </ResultCard>

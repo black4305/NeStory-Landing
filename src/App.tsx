@@ -111,9 +111,9 @@ const SurveyApp: React.FC = () => {
 
   useEffect(() => {
     // 페이지 이탈 시 분석 데이터 전송
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = async () => {
       if (appState === 'survey' && answers.length > 0) {
-        analytics.trackAbandon();
+        await analytics.trackAbandon();
       }
     };
 
@@ -172,17 +172,17 @@ const SurveyApp: React.FC = () => {
     }
   };
 
-  const handleUserInfoSubmit = (info: UserInfo) => {
+  const handleUserInfoSubmit = async (info: UserInfo) => {
     setUserInfo(info);
     if (result) {
-      analytics.trackCompletion(result.typeCode, info);
+      await analytics.trackCompletion(result.typeCode, info);
     }
     setAppState('thankYou');
   };
 
-  const handleSkipUserInfo = () => {
+  const handleSkipUserInfo = async () => {
     if (result) {
-      analytics.trackCompletion(result.typeCode);
+      await analytics.trackCompletion(result.typeCode);
     }
     setAppState('thankYou');
   };
@@ -303,14 +303,12 @@ const SharedResult: React.FC = () => {
     setLoading(false);
   }, [location]);
 
-  // TypeCode로부터 AxisScores 역산하는 함수 (10개 문항 기준)
+  // TypeCode로부터 AxisScores 역산하는 함수 (6개 문항 기준)
   const getAxisScoresFromType = (typeCode: string) => {
     return {
-      A: typeCode[0] === 'A' ? 8 : 4,   // Active vs Relaxing (2문항 × 4점 = 8점)
+      A: typeCode[0] === 'A' ? 8 : 4,   // Active vs Relaxing (2문항)
       C: typeCode[1] === 'C' ? 8 : 4,   // Culture vs Nature  
-      F: typeCode[2] === 'F' ? 8 : 4,   // Foodie vs Experience
-      B: typeCode[3] === 'B' ? 4 : 8,   // Budget vs Luxury (B는 역방향)
-      K: typeCode[4] === 'K' ? 8 : 4    // Kid-led vs Parent-led
+      F: typeCode[2] === 'F' ? 8 : 4    // Foodie vs Experience
     };
   };
 
