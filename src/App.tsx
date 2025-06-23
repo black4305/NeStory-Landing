@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 import StartScreen from './components/StartScreen';
 import QuestionCard from './components/QuestionCard';
@@ -265,7 +265,7 @@ const AllTypesRoute: React.FC = () => {
   );
 };
 
-// 공유된 결과 표시 컴포넌트
+// 공유된 결과 표시 컴포넌트 (기존 URL 파라미터 방식)
 const SharedResult: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -338,6 +338,110 @@ const SharedResult: React.FC = () => {
   );
 };
 
+// 고유 ID 기반 공유 결과 표시 컴포넌트
+const UniqueSharedResult: React.FC = () => {
+  const { shareId } = useParams<{ shareId: string }>();
+  const navigate = useNavigate();
+  const [sharedData, setSharedData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    const loadSharedResult = async () => {
+      if (!shareId) {
+        setError('공유 ID가 없습니다.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { FirebaseService } = await import('./services/firebase');
+        const data = await FirebaseService.getSharedResult(shareId);
+        
+        if (data) {
+          setSharedData(data);
+        } else {
+          setError('공유된 결과를 찾을 수 없습니다.');
+        }
+      } catch (error) {
+        console.error('공유 결과 로드 실패:', error);
+        setError('결과를 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSharedResult();
+  }, [shareId]);
+
+  const handleStartNewTest = () => {
+    navigate('/');
+  };
+
+  if (loading) {
+    return (
+      <div style={{ 
+        padding: '2rem', 
+        textAlign: 'center',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white'
+      }}>
+        ⏳ 공유된 결과를 불러오는 중...
+      </div>
+    );
+  }
+
+  if (error || !sharedData) {
+    return (
+      <div style={{ 
+        padding: '2rem', 
+        textAlign: 'center',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white'
+      }}>
+        <h2>😅 링크를 찾을 수 없어요</h2>
+        <p>{error || '잘못된 공유 링크입니다.'}</p>
+        <button 
+          onClick={handleStartNewTest}
+          style={{
+            background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
+            border: 'none',
+            borderRadius: '50px',
+            padding: '1rem 2rem',
+            color: 'white',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            marginTop: '1rem'
+          }}
+        >
+          🚀 새로운 테스트하기
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <ResultScreen
+      typeCode={sharedData.typeCode}
+      axisScores={sharedData.axisScores}
+      analytics={sharedData.analytics}
+      onRestart={handleStartNewTest}
+      userRegion={sharedData.userInfo?.region}
+      hasMarketingConsent={sharedData.userInfo?.marketingConsent}
+      isSharedView={true}
+    />
+  );
+};
+
 function App() {
   return (
     <AppContainer>
@@ -345,6 +449,7 @@ function App() {
       <Routes>
         <Route path="/" element={<SurveyApp />} />
         <Route path="/result" element={<SharedResult />} />
+        <Route path="/share/:shareId" element={<UniqueSharedResult />} />
         <Route path="/all-types" element={<AllTypesRoute />} />
         <Route path="/admin" element={<AdminRoute />} />
       </Routes>

@@ -8,6 +8,7 @@ import { travelTypes } from '../data/travelTypes';
 import { characters } from '../data/characters';
 import { regionalRecommendations } from '../data/regions';
 import CharacterAvatar from './CharacterAvatar';
+import { FirebaseService } from '../services/firebase';
 
 const Container = styled.div`
   display: flex;
@@ -490,6 +491,8 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string>('');
   const resultCardRef = useRef<HTMLDivElement>(null);
   
   const travelType = travelTypes[typeCode] || {
@@ -569,23 +572,63 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     }
   };
 
-  const shareResult = () => {
-    // 공유용 URL 생성
-    const baseUrl = window.location.origin;
-    const userData = userRegion ? encodeURIComponent(JSON.stringify({ region: userRegion })) : '';
-    const shareUrl = `${baseUrl}/result?type=${typeCode}${userData ? `&user=${userData}` : ''}`;
+  const shareResult = async () => {
+    if (isSharing) return;
     
-    const text = `나의 가족여행 유형: ${typeCode} - ${travelType.title}`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: '가족여행 유형 테스트 결과',
-        text: text,
-        url: shareUrl
-      });
-    } else {
-      navigator.clipboard.writeText(`${text}\n${shareUrl}`);
-      alert('결과와 링크가 복사되었습니다!');
+    setIsSharing(true);
+    try {
+      // Firebase에 고유한 공유 결과 저장
+      const shareData = {
+        typeCode,
+        axisScores,
+        analytics,
+        userInfo: hasMarketingConsent ? { 
+          region: userRegion,
+          marketingConsent: hasMarketingConsent 
+        } : undefined
+      };
+      
+      const shareId = await FirebaseService.saveSharedResult(shareData);
+      const baseUrl = window.location.origin;
+      const uniqueShareUrl = `${baseUrl}/share/${shareId}`;
+      
+      setShareUrl(uniqueShareUrl);
+      
+      const text = `나의 가족여행 유형: ${typeCode} - ${travelType.title}`;
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: '가족여행 유형 테스트 결과',
+          text: text,
+          url: uniqueShareUrl
+        });
+      } else {
+        await navigator.clipboard.writeText(`${text}\n${uniqueShareUrl}`);
+        alert('고유한 결과 링크가 복사되었습니다!\n\n링크를 통해 다른 사람들도 당신의 결과와 추천 여행지를 볼 수 있습니다.');
+      }
+    } catch (error) {
+      console.error('공유 링크 생성 실패:', error);
+      
+      // Firebase 실패시 기존 방식으로 fallback
+      const baseUrl = window.location.origin;
+      const userData = userRegion && hasMarketingConsent ? 
+        encodeURIComponent(JSON.stringify({ region: userRegion, marketingConsent: hasMarketingConsent })) : '';
+      const fallbackUrl = `${baseUrl}/result?type=${typeCode}${userData ? `&user=${userData}` : ''}`;
+      
+      const text = `나의 가족여행 유형: ${typeCode} - ${travelType.title}`;
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: '가족여행 유형 테스트 결과',
+          text: text,
+          url: fallbackUrl
+        });
+      } else {
+        await navigator.clipboard.writeText(`${text}\n${fallbackUrl}`);
+        alert('결과 링크가 복사되었습니다!');
+      }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -778,10 +821,11 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
               </Button>
               <Button
                 onClick={shareResult}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                disabled={isSharing}
+                whileHover={{ scale: isSharing ? 1 : 1.05 }}
+                whileTap={{ scale: isSharing ? 1 : 0.95 }}
               >
-                📤 결과 공유하기
+                {isSharing ? '⏳ 공유 링크 생성 중...' : '📤 결과 공유하기'}
               </Button>
             </>
           )}

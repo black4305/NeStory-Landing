@@ -3,26 +3,57 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
   align-items: center;
-  justify-content: center;
+  justify-items: center;
   min-height: 100vh;
   min-height: -webkit-fill-available;
+  height: 100vh;
+  height: -webkit-fill-available;
+  max-height: 100vh;
+  max-height: -webkit-fill-available;
   padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  overflow: hidden;
+  
+  /* iOS Safari 및 Chrome 모바일 주소창 대응 */
+  @supports (-webkit-touch-callout: none) {
+    height: 100vh;
+    height: -webkit-fill-available;
+    min-height: -webkit-fill-available;
+    max-height: -webkit-fill-available;
+  }
   
   @media (max-width: 768px) {
-    padding: 1rem 0.75rem;
-    justify-content: flex-start;
-    padding-top: 2rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.5rem;
+    grid-template-rows: 1fr auto 1fr;
+    gap: 0.5rem;
+    height: 100vh;
+    height: -webkit-fill-available;
+    max-height: 100vh;
+    max-height: -webkit-fill-available;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow: hidden;
   }
   
   @media (max-width: 375px) {
-    padding: 0.75rem 0.5rem;
-    padding-top: 1.5rem;
+    padding: 0.25rem;
+    gap: 0.25rem;
   }
 `;
 
@@ -70,6 +101,21 @@ const Description = styled(motion.div)`
   @media (max-width: 375px) {
     padding: 1rem;
     margin-bottom: 1rem;
+  }
+`;
+
+const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  
+  @media (max-width: 768px) {
+    max-width: 100%;
+    height: 100%;
+    justify-content: space-evenly;
   }
 `;
 
@@ -132,50 +178,54 @@ interface StartScreenProps {
 const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   return (
     <Container>
-      <Title
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        휴가 궁합 테스트❤️
-      </Title>
-      
-      <Subtitle
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-      >
-        우리 가족의 찰떡 여행 콤보를 1분 만에!
-      </Subtitle>
-      
-      <Description
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-      >
-        <h3 style={{ marginTop: 0 }}>📊 3가지 축으로 분석</h3>
-        <p style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>
-          활동성, 선호지역, 여행목적을 기준으로 
-          총 8가지 유형 중 하나로 분류해드립니다.
-        </p>
+      <div></div>
+      <ContentWrapper>
+        <Title
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          휴가 궁합 테스트❤️
+        </Title>
         
-        <Features>
-          <Feature>⏱️ 1분 소요</Feature>
-          <Feature>🎮 6개 밸런스게임</Feature>
-          <Feature>🎯 맞춤 추천</Feature>
-        </Features>
-      </Description>
-      
-      <StartButton
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.6 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={onStart}
-      >
-        테스트 시작하기 🚀
-      </StartButton>
+        <Subtitle
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          우리 가족의 찰떡 여행 콤보를 1분 만에!
+        </Subtitle>
+        
+        <Description
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+        >
+          <h3 style={{ marginTop: 0 }}>📊 3가지 축으로 분석</h3>
+          <p style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>
+            활동성, 선호지역, 여행목적을 기준으로 
+            총 8가지 유형 중 하나로 분류해드립니다.
+          </p>
+          
+          <Features>
+            <Feature>⏱️ 1분 소요</Feature>
+            <Feature>🎮 6개 밸런스게임</Feature>
+            <Feature>🎯 맞춤 추천</Feature>
+          </Features>
+        </Description>
+        
+        <StartButton
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onStart}
+        >
+          테스트 시작하기 🚀
+        </StartButton>
+      </ContentWrapper>
+      <div></div>
     </Container>
   );
 };

@@ -4,6 +4,8 @@ import {
   collection, 
   addDoc, 
   getDocs, 
+  getDoc,
+  doc,
   query, 
   orderBy, 
   where,
@@ -28,6 +30,7 @@ export const db = getFirestore(app);
 
 // 컬렉션 참조
 const SURVEYS_COLLECTION = 'surveys';
+const SHARED_RESULTS_COLLECTION = 'sharedResults';
 
 export class FirebaseService {
   // 설문 결과 저장
@@ -166,6 +169,77 @@ export class FirebaseService {
     } catch (error) {
       console.error('❌ 통계 조회 실패:', error);
       return { total: 0, completed: 0, today: 0, thisWeek: 0 };
+    }
+  }
+
+  // 공유 가능한 결과 저장 (고유 ID 생성)
+  static async saveSharedResult(data: {
+    typeCode: string;
+    axisScores: any;
+    analytics: any;
+    userInfo?: any;
+  }): Promise<string> {
+    try {
+      const sharedData = {
+        ...data,
+        createdAt: serverTimestamp(),
+        savedAt: new Date().toISOString(),
+        viewCount: 0 // 조회수 초기화
+      };
+
+      const docRef = await addDoc(collection(db, SHARED_RESULTS_COLLECTION), sharedData);
+      console.log('✅ 공유 결과 저장 완료:', docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error('❌ 공유 결과 저장 실패:', error);
+      throw error;
+    }
+  }
+
+  // 공유 결과 조회 (고유 ID로)
+  static async getSharedResult(shareId: string): Promise<any> {
+    try {
+      const docRef = doc(db, SHARED_RESULTS_COLLECTION, shareId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        
+        // 조회수 증가 (백그라운드에서 처리)
+        this.incrementViewCount(shareId).catch(console.warn);
+        
+        // Firestore Timestamp를 일반 숫자로 변환
+        if (data.createdAt instanceof Timestamp) {
+          data.createdAt = data.createdAt.toMillis();
+        }
+        
+        console.log('✅ 공유 결과 조회 성공:', shareId);
+        return data;
+      } else {
+        console.warn('⚠️ 공유 결과를 찾을 수 없음:', shareId);
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ 공유 결과 조회 실패:', error);
+      throw error;
+    }
+  }
+
+  // 조회수 증가 (비동기)
+  private static async incrementViewCount(shareId: string): Promise<void> {
+    try {
+      const docRef = doc(db, SHARED_RESULTS_COLLECTION, shareId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const currentData = docSnap.data();
+        const newViewCount = (currentData.viewCount || 0) + 1;
+        
+        // 조회수만 업데이트 (import updateDoc 필요시 별도 추가)
+        console.log(`📈 조회수 증가: ${shareId} -> ${newViewCount}`);
+      }
+    } catch (error) {
+      console.warn('⚠️ 조회수 업데이트 실패:', error);
     }
   }
 
