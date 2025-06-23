@@ -195,6 +195,61 @@ REACT_APP_FIREBASE_APP_ID=your_app_id
 - **애니메이션**: 각 카드별 지연 애니메이션 (0.05초씩 순차)
 - **호버 효과**: 카드 확대 및 그림자 강화
 
+## 🛠️ UI/UX 긴급 수정 사항 완료 (2025-06-23)
+
+### 🎭 캐릭터 표시 오류 수정
+**문제**: AllTypesScreen에서 캐릭터들이 깨져서 표시됨
+**원인**: CSS transform scale로 인한 렌더링 문제
+**해결**: 
+- `transform: scale(0.85)` 제거
+- `display: flex`와 `justify-content: center`로 정렬 방식 변경
+- 캐릭터 컨테이너 크기를 120px로 고정
+
+### 🖼️ NeStory 파비콘 및 브랜딩 완료
+**파비콘 시스템**:
+- ✅ **SVG 파비콘**: `favicon.svg` NeStory 로고 디자인 (N 모양 + 그라데이션)
+- ✅ **manifest.json**: NeStory 브랜딩으로 완전 업데이트
+- ✅ **index.html**: 메타 태그, 타이틀, 설명 모두 NeStory 스타일로 변경
+- ✅ **SEO 최적화**: Open Graph, Twitter Cards 메타데이터 업데이트
+
+**브랜딩 변경사항**:
+- **앱 이름**: "NeStory 가족여행 궁합 테스트"
+- **페이지 타이틀**: "NeStory 휴가 궁합 테스트❤️ - 우리 가족의 찰떡 여행 콤보를 1분 만에!"
+- **테마 색상**: #667eea (NeStory 그라데이션 시작색)
+- **파비콘 디자인**: N 모양 + 여행 아이콘 + 그라데이션 배경
+
+### 📱 설문 페이지 세로 높이 개선
+**문제**: 설문 진행 페이지에서 세로가 잘려서 보기 불편
+**해결**:
+- `height: 100vh` 및 `height: -webkit-fill-available` 명시적 설정
+- `overflow-y: auto` 추가로 스크롤 가능하게 설정
+- 모바일에서 `justify-content: space-around`로 공간 배분 최적화
+- 웹킷 브라우저 주소창 높이 변화에 대응
+
+### 🎯 결과창 막대 표시 개선
+**문제**: 축 결과 막대의 원 위치가 부자연스러움
+**해결**:
+- **막대 높이**: 24px → 28px로 확대
+- **원 크기**: 28px → 32px로 확대 (모바일: 28px)
+- **내부 원**: 14px → 16px로 확대 (모바일: 14px)
+- **border-radius**: 막대 12px → 14px로 조정
+- **완벽한 중심 정렬**: `top: 50%` + `transform: translate(-50%, -50%)` 유지
+
+### 🗑️ 테스트 파일 정리
+**삭제된 파일들**:
+- `firebase-test.js`: Firebase 연결 테스트 스크립트
+- `test-firebase-connection.mjs`: Node.js Firebase 테스트
+- `create-favicon.html`: 파비콘 생성기 HTML
+- `public/firebase-test.html`: 브라우저 Firebase 테스트 페이지
+
+### 📊 수정 완료된 주요 컴포넌트
+1. **AllTypesScreen.tsx**: 캐릭터 표시 방식 개선
+2. **QuestionCard.tsx**: 세로 높이 문제 해결
+3. **ResultScreen.tsx**: 축 막대 표시 개선
+4. **public/index.html**: NeStory 브랜딩 완료
+5. **public/manifest.json**: PWA 설정 NeStory 업데이트
+6. **public/favicon.svg**: 새로운 NeStory 로고 파비콘
+
 ## 🔧 개발 명령어
 ```bash
 npm start        # 개발 서버 시작 (http://localhost:3000)

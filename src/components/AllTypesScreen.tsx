@@ -118,17 +118,16 @@ const TypeCode = styled.div`
 
 const CharacterContainer = styled.div`
   margin: 1.5rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   
-  /* CharacterAvatar 크기 조정 */
+  /* CharacterAvatar 표시 정상화 */
   > div {
     width: 120px !important;
     height: 120px !important;
-    margin: 0 auto 1rem;
-    
-    div {
-      transform: scale(0.85);
-      transform-origin: center;
-    }
+    margin: 0;
+    /* 스케일링 제거로 깨짐 방지 */
   }
 `;
 

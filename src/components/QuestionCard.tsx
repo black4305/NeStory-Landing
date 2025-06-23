@@ -10,18 +10,22 @@ const Container = styled.div`
   justify-content: center;
   min-height: 100vh;
   min-height: -webkit-fill-available;
+  height: 100vh;
+  height: -webkit-fill-available;
   padding: 1rem;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  overflow-y: auto;
   
   @media (max-width: 768px) {
     padding: 1rem 0.75rem;
-    justify-content: flex-start;
-    padding-top: 1.5rem;
+    justify-content: space-around;
+    height: 100vh;
+    height: -webkit-fill-available;
   }
   
   @media (max-width: 375px) {
     padding: 0.75rem 0.5rem;
-    padding-top: 1rem;
+    justify-content: space-around;
   }
 `;
 

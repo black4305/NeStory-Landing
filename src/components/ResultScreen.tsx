@@ -208,9 +208,9 @@ const AxisRightLabel = styled.div`
 
 const AxisProgress = styled.div`
   flex: 1;
-  height: 24px;
+  height: 28px;
   background: linear-gradient(90deg, #667eea 0%, #e2e8f0 50%, #764ba2 100%);
-  border-radius: 12px;
+  border-radius: 14px;
   position: relative;
   overflow: visible;
   border: 2px solid #f1f5f9;
@@ -221,8 +221,8 @@ const AxisIndicator = styled(motion.div)<{ position: number }>`
   top: 50%;
   left: ${props => props.position}%;
   transform: translate(-50%, -50%);
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   background: white;
   border: 4px solid #2d3748;
   border-radius: 50%;
@@ -235,21 +235,21 @@ const AxisIndicator = styled(motion.div)<{ position: number }>`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     background: ${props => props.position < 50 ? '#667eea' : '#764ba2'};
     border-radius: 50%;
   }
   
   /* 모바일에서 크기 조정 */
   @media (max-width: 768px) {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border: 3px solid #2d3748;
     
     &::after {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
     }
   }
 `;
