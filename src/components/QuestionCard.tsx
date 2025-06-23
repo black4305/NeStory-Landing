@@ -12,15 +12,27 @@ const Container = styled.div`
   min-height: -webkit-fill-available;
   height: 100vh;
   height: -webkit-fill-available;
+  max-height: 100vh;
+  max-height: -webkit-fill-available;
   padding: 1rem;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   overflow-y: auto;
+  position: relative;
+  
+  /* iOS Safari 및 Chrome 모바일 주소창 대응 */
+  @supports (-webkit-touch-callout: none) {
+    height: 100vh;
+    height: -webkit-fill-available;
+    min-height: -webkit-fill-available;
+  }
   
   @media (max-width: 768px) {
     padding: 1rem 0.75rem;
     justify-content: space-around;
     height: 100vh;
     height: -webkit-fill-available;
+    max-height: 100vh;
+    max-height: -webkit-fill-available;
   }
   
   @media (max-width: 375px) {

@@ -236,6 +236,7 @@ const SurveyApp: React.FC = () => {
           analytics={result.analytics}
           onRestart={handleRestart}
           userRegion={userInfo?.region}
+          hasMarketingConsent={userInfo?.marketingConsent}
         />
       )}
     </>
@@ -331,6 +332,7 @@ const SharedResult: React.FC = () => {
       analytics={sharedData.result.analytics}
       onRestart={handleStartNewTest}
       userRegion={sharedData.userInfo?.region}
+      hasMarketingConsent={sharedData.userInfo?.marketingConsent}
       isSharedView={true}
     />
   );

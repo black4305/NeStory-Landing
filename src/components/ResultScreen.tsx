@@ -452,6 +452,7 @@ interface ResultScreenProps {
     completionRate: number;
   };
   userRegion?: string;
+  hasMarketingConsent?: boolean;
   isSharedView?: boolean;
 }
 
@@ -479,6 +480,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
   onRestart,
   analytics,
   userRegion,
+  hasMarketingConsent = false,
   isSharedView = false
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
@@ -501,9 +503,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     funFact: '남들과는 다른 특별한 여행을 즐기는 개성파!'
   };
 
-  // 지역 정보 매칭 - 정확한 매칭 또는 시도 단위 fallback
-  const getRegionalInfo = (region: string | undefined) => {
-    if (!region) return null;
+  // 지역 정보 매칭 - 마케팅 동의 시에만 표시
+  const getRegionalInfo = (region: string | undefined, hasConsent: boolean) => {
+    if (!region || !hasConsent) return null;
     
     // 정확한 매칭 먼저 시도
     if (regionalRecommendations[region]) {
@@ -519,7 +521,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     return fallbackKey ? regionalRecommendations[fallbackKey] : null;
   };
 
-  const regionalInfo = getRegionalInfo(userRegion);
+  const regionalInfo = getRegionalInfo(userRegion, hasMarketingConsent);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
@@ -694,29 +696,69 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           </RegionalSection>
         )}
         
-        <RecommendationSection>
-          <RecommendationTitle>
-            {regionalInfo ? `🏡 ${regionalInfo.region} 지역 맞춤 추천` : '🎯 전국 추천 여행지'}
-          </RecommendationTitle>
-          <RecommendationList>
-            {regionalInfo ? (
-              // 지역별 추천 여행지 우선 표시
-              [...regionalInfo.nearbyDestinations, ...travelType.recommendations.slice(0, 2)].map((dest, index) => (
+        {regionalInfo && (
+          <RecommendationSection>
+            <RecommendationTitle>
+              🏡 {regionalInfo.region} 지역 맞춤 추천 (2곳)
+            </RecommendationTitle>
+            <RecommendationList>
+              {regionalInfo.nearbyDestinations.slice(0, 2).map((dest, index) => (
                 <RecommendationItem key={index}>
-                  {index < regionalInfo.nearbyDestinations.length ? '🏡' : '🗺️'} {dest}
-                  {index >= regionalInfo.nearbyDestinations.length && ' (전국 추천)'}
+                  🏡 {dest}
                 </RecommendationItem>
-              ))
-            ) : (
-              // 지역 정보가 없을 때 전국 단위 추천
-              travelType.recommendations.map((rec, index) => (
-                <RecommendationItem key={index}>
-                  🗺️ {rec}
-                </RecommendationItem>
-              ))
-            )}
-          </RecommendationList>
-        </RecommendationSection>
+              ))}
+            </RecommendationList>
+            <div style={{ 
+              textAlign: 'center', 
+              marginTop: '1rem', 
+              padding: '0.75rem', 
+              background: 'rgba(255, 255, 255, 0.1)', 
+              borderRadius: '10px',
+              fontSize: '0.9rem',
+              color: '#4a5568'
+            }}>
+              💡 마케팅 정보 수신 동의로 맞춤 여행지를 추천받으셨습니다!
+            </div>
+          </RecommendationSection>
+        )}
+        
+        {!hasMarketingConsent && (
+          <RecommendationSection>
+            <RecommendationTitle>
+              📍 맞춤 여행지 추천받기
+            </RecommendationTitle>
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '2rem 1rem',
+              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              borderRadius: '15px',
+              color: 'white'
+            }}>
+              <div style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+                🎯 나만의 맞춤 여행지를 받아보세요!
+              </div>
+              <div style={{ fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '1.5rem' }}>
+                마케팅 정보 수신에 동의하시면<br/>
+                거주지역 기반 맞춤 여행지 2곳을 추천해드립니다.
+              </div>
+              <button 
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  border: '2px solid white',
+                  borderRadius: '25px',
+                  padding: '0.75rem 1.5rem',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onClick={onRestart}
+              >
+                📱 다시 테스트하고 추천받기
+              </button>
+            </div>
+          </RecommendationSection>
+        )}
         
         <ButtonGroup>
           {!isSharedView && (

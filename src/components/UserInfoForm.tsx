@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { UserInfo } from '../types';
-import { regionList } from '../data/regions';
+import { provinces, districts, convertRegionFormat } from '../data/regions';
 
 const Container = styled.div`
   display: flex;
@@ -238,6 +238,9 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
     privacyConsent: false
   });
 
+  const [selectedProvince, setSelectedProvince] = useState<string>('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+
   const [errors, setErrors] = useState<Partial<UserInfo>>({});
 
   const validateForm = (): boolean => {
@@ -265,6 +268,20 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleProvinceChange = (province: string) => {
+    setSelectedProvince(province);
+    setSelectedDistrict(''); // 시/도 변경 시 시/군/구 초기화
+    setFormData(prev => ({ ...prev, region: '' })); // 지역 초기화
+  };
+
+  const handleDistrictChange = (district: string) => {
+    setSelectedDistrict(district);
+    if (selectedProvince && district) {
+      const regionString = convertRegionFormat(selectedProvince, district);
+      setFormData(prev => ({ ...prev, region: regionString }));
     }
   };
 
@@ -351,17 +368,34 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
         <FormGroup>
           <Label>거주 지역</Label>
           <Select
-            value={formData.region}
-            onChange={(e) => handleInputChange('region', e.target.value)}
+            value={selectedProvince}
+            onChange={(e) => handleProvinceChange(e.target.value)}
           >
-            <option value="">선택해주세요</option>
-            {regionList.map((region) => (
-              <option key={region} value={region}>
-                {region}
+            <option value="">시/도 선택</option>
+            {provinces.map((province) => (
+              <option key={province} value={province}>
+                {province}
               </option>
             ))}
           </Select>
         </FormGroup>
+
+        {selectedProvince && (
+          <FormGroup>
+            <Label>시/군/구</Label>
+            <Select
+              value={selectedDistrict}
+              onChange={(e) => handleDistrictChange(e.target.value)}
+            >
+              <option value="">시/군/구 선택</option>
+              {districts[selectedProvince]?.map((district) => (
+                <option key={district} value={district}>
+                  {district}
+                </option>
+              ))}
+            </Select>
+          </FormGroup>
+        )}
 
         <CheckboxGroup>
           <CheckboxItem>
