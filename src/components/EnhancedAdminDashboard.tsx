@@ -68,9 +68,24 @@ const Title = styled.h1`
 const Subtitle = styled.p`
   font-size: 1.2rem;
   opacity: 0.9;
+  line-height: 1.6;
+  
+  .mobile-break {
+    display: none;
+  }
   
   @media (max-width: 768px) {
     font-size: 1rem;
+    line-height: 1.5;
+    
+    .mobile-break {
+      display: block;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    line-height: 1.4;
   }
 `;
 
@@ -661,7 +676,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
         </ChartCard>
 
         <ChartCard whileHover={{ scale: 1.01 }}>
-          <ChartTitle>🧳 여행 유형별 분포</ChartTitle>
+          <ChartTitle>🧳 8가지 여행 유형별 분포</ChartTitle>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData.typeChartData} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -1195,8 +1210,8 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
     <Container>
       <Header>
         <HeaderContent>
-          <Title>🚀 Family Travel Analytics</Title>
-          <Subtitle>실시간 사용자 응답 및 분석 데이터 대시보드</Subtitle>
+          <Title>🚀 NeStory 여행 분석</Title>
+          <Subtitle>8가지 가족여행 유형 테스트<br className="mobile-break"/>실시간 사용자 데이터 대시보드</Subtitle>
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 

@@ -248,7 +248,7 @@ const AllTypesRoute: React.FC = () => {
   const navigate = useNavigate();
   
   const handleBack = () => {
-    navigate('/');
+    navigate(-1); // 이전 페이지로 되돌아가기 (결과창)
   };
   
   const handleSelectType = (typeCode: string) => {

@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Question } from '../types';
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   align-items: center;
-  justify-content: center;
+  justify-items: center;
   min-height: 100vh;
   min-height: -webkit-fill-available;
   height: 100vh;
@@ -16,28 +16,53 @@ const Container = styled.div`
   max-height: -webkit-fill-available;
   padding: 1rem;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  overflow-y: auto;
-  position: relative;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
   
   /* iOS Safari 및 Chrome 모바일 주소창 대응 */
   @supports (-webkit-touch-callout: none) {
     height: 100vh;
     height: -webkit-fill-available;
     min-height: -webkit-fill-available;
+    max-height: -webkit-fill-available;
   }
   
-  @media (max-width: 768px) {
-    padding: 1rem 0.75rem;
-    justify-content: space-around;
+  /* 모바일 브라우저별 정밀 대응 */
+  @media screen and (max-width: 768px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.5rem;
+    grid-template-rows: 60px 1fr 60px;
+    gap: 0.5rem;
     height: 100vh;
     height: -webkit-fill-available;
     max-height: 100vh;
     max-height: -webkit-fill-available;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow: hidden;
   }
   
-  @media (max-width: 375px) {
-    padding: 0.75rem 0.5rem;
-    justify-content: space-around;
+  @media screen and (max-width: 375px) {
+    padding: 0.25rem;
+    grid-template-rows: 50px 1fr 50px;
+    gap: 0.25rem;
+  }
+  
+  /* iOS Safari 특화 */
+  @media screen and (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) {
+    height: 100vh;
+    height: -webkit-fill-available;
+    max-height: 100vh;
+    max-height: -webkit-fill-available;
   }
 `;
 
@@ -49,6 +74,17 @@ const ProgressBar = styled.div`
   border-radius: 4px;
   margin-bottom: 2rem;
   overflow: hidden;
+  align-self: center;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 0;
+    height: 6px;
+    max-width: 100%;
+  }
+  
+  @media (max-width: 375px) {
+    height: 4px;
+  }
 `;
 
 const Progress = styled(motion.div)`
@@ -65,16 +101,33 @@ const Card = styled(motion.div)`
   max-width: 600px;
   width: 100%;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   
   @media (max-width: 768px) {
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 15px;
     max-width: 100%;
+    width: 100%;
+    margin: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.8rem;
+    border-radius: 12px;
   }
   
   @media (max-width: 375px) {
-    padding: 1.25rem;
-    border-radius: 12px;
+    padding: 0.6rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
   }
 `;
 
@@ -117,7 +170,21 @@ const QuestionText = styled.h2`
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 0.8rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    line-height: 1.3;
+    margin-bottom: 0.6rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 0.95rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
   }
 `;
 
@@ -132,8 +199,24 @@ const QuestionDescription = styled.p`
   border-left: 4px solid #667eea;
   
   @media (max-width: 768px) {
-    font-size: 0.9rem;
-    padding: 0.8rem;
+    font-size: 0.85rem;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 0.75rem;
+    padding: 0.4rem;
+    margin-bottom: 0.6rem;
+    line-height: 1.2;
   }
 `;
 
@@ -192,11 +275,18 @@ const ButtonGroup = styled.div`
   margin-top: 2rem;
   
   @media (max-width: 768px) {
-    margin-top: 1.5rem;
+    margin-top: 0.8rem;
+    gap: 0.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    margin-top: 0.6rem;
+    gap: 0.4rem;
   }
   
   @media (max-width: 375px) {
-    margin-top: 1.25rem;
+    margin-top: 0.5rem;
+    gap: 0.3rem;
   }
 `;
 
