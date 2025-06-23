@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { UserInfo } from '../types';
+import { regionList } from '../data/regions';
 
 const Container = styled.div`
   display: flex;
@@ -9,9 +10,21 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem;
+  min-height: -webkit-fill-available;
+  padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  
+  @media (max-width: 768px) {
+    padding: 1rem 0.75rem;
+    justify-content: flex-start;
+    padding-top: 1.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.75rem 0.5rem;
+    padding-top: 1rem;
+  }
 `;
 
 const FormCard = styled(motion.div)`
@@ -24,8 +37,14 @@ const FormCard = styled(motion.div)`
   color: #2d3748;
   
   @media (max-width: 768px) {
-    padding: 2rem;
-    border-radius: 20px;
+    padding: 1.5rem;
+    border-radius: 15px;
+    max-width: 100%;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 1.25rem;
+    border-radius: 12px;
   }
 `;
 
@@ -66,8 +85,9 @@ const Input = styled.input`
   padding: 0.75rem 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 16px; /* 모바일 줌 방지 */
   transition: border-color 0.3s ease;
+  min-height: 48px; /* 터치 접근성 */
   
   &:focus {
     outline: none;
@@ -78,6 +98,11 @@ const Input = styled.input`
   &::placeholder {
     color: #a0aec0;
   }
+  
+  @media (max-width: 375px) {
+    padding: 0.7rem 0.9rem;
+    min-height: 44px;
+  }
 `;
 
 const Select = styled.select`
@@ -85,14 +110,20 @@ const Select = styled.select`
   padding: 0.75rem 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 16px; /* 모바일 줌 방지 */
   background: white;
   transition: border-color 0.3s ease;
+  min-height: 48px; /* 터치 접근성 */
   
   &:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.7rem 0.9rem;
+    min-height: 44px;
   }
 `;
 
@@ -163,10 +194,22 @@ const Button = styled(motion.button)<{ variant?: 'primary' | 'secondary'; disabl
   font-weight: 600;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   opacity: ${props => props.disabled ? 0.7 : 1};
+  min-height: 50px;
+  width: 100%;
+  max-width: 200px;
   
   @media (max-width: 768px) {
-    padding: 0.8rem 1.5rem;
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+    max-width: 180px;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.9rem 1.25rem;
     font-size: 0.9rem;
+    min-height: 44px;
+    max-width: 160px;
   }
 `;
 
@@ -183,8 +226,7 @@ interface UserInfoFormProps {
 const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
   const [formData, setFormData] = useState<UserInfo>({
     name: '',
-    phone: '',
-    email: '',
+    instagram: '',
     age: '',
     gender: '',
     familySize: 1,
@@ -199,20 +241,11 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
     const newErrors: Partial<UserInfo> = {};
 
     if (!formData.name.trim()) newErrors.name = '이름을 입력해주세요.';
-    if (!formData.phone.trim()) newErrors.phone = '전화번호를 입력해주세요.';
-    if (!formData.email.trim()) newErrors.email = '이메일을 입력해주세요.';
     if (!formData.privacyConsent) newErrors.privacyConsent = true;
 
-    // 이메일 형식 검증
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      newErrors.email = '올바른 이메일 형식을 입력해주세요.';
-    }
-
-    // 전화번호 형식 검증
-    const phoneRegex = /^01[0-9]-?[0-9]{4}-?[0-9]{4}$/;
-    if (formData.phone && !phoneRegex.test(formData.phone.replace(/-/g, ''))) {
-      newErrors.phone = '올바른 전화번호 형식을 입력해주세요. (010-1234-5678)';
+    // 인스타그램 계정 형식 검증 (선택적)
+    if (formData.instagram && !formData.instagram.startsWith('@')) {
+      newErrors.instagram = '인스타그램 계정은 @로 시작해야 합니다.';
     }
 
     setErrors(newErrors);
@@ -232,7 +265,8 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
     }
   };
 
-  const isFormValid = formData.name && formData.phone && formData.email && formData.privacyConsent;
+  const isFormValid = formData.name && formData.privacyConsent;
+  const canGetRecommendations = isFormValid && formData.marketingConsent;
 
   return (
     <Container>
@@ -244,7 +278,7 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
         <Title>🎁 맞춤 여행지 추천 받기</Title>
         <Subtitle>
           회원님의 여행 유형에 맞는 특별한 여행지 정보를 
-          이메일과 문자로 보내드려요!
+          인스타그램 DM으로 보내드려요!
         </Subtitle>
 
         <FormGroup>
@@ -259,25 +293,14 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
         </FormGroup>
 
         <FormGroup>
-          <Label>전화번호<Required>*</Required></Label>
+          <Label>인스타그램 계정</Label>
           <Input
-            type="tel"
-            placeholder="010-1234-5678"
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
+            type="text"
+            placeholder="@instagram"
+            value={formData.instagram}
+            onChange={(e) => handleInputChange('instagram', e.target.value)}
           />
-          {errors.phone && <div style={{ color: '#e53e3e', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.phone}</div>}
-        </FormGroup>
-
-        <FormGroup>
-          <Label>이메일<Required>*</Required></Label>
-          <Input
-            type="email"
-            placeholder="example@email.com"
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-          />
-          {errors.email && <div style={{ color: '#e53e3e', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.email}</div>}
+          {errors.instagram && <div style={{ color: '#e53e3e', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.instagram}</div>}
         </FormGroup>
 
         <FormGroup>
@@ -329,23 +352,11 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
             onChange={(e) => handleInputChange('region', e.target.value)}
           >
             <option value="">선택해주세요</option>
-            <option value="서울">서울</option>
-            <option value="경기">경기</option>
-            <option value="인천">인천</option>
-            <option value="부산">부산</option>
-            <option value="대구">대구</option>
-            <option value="광주">광주</option>
-            <option value="대전">대전</option>
-            <option value="울산">울산</option>
-            <option value="세종">세종</option>
-            <option value="강원">강원</option>
-            <option value="충북">충북</option>
-            <option value="충남">충남</option>
-            <option value="전북">전북</option>
-            <option value="전남">전남</option>
-            <option value="경북">경북</option>
-            <option value="경남">경남</option>
-            <option value="제주">제주</option>
+            {regionList.map((region) => (
+              <option key={region} value={region}>
+                {region}
+              </option>
+            ))}
           </Select>
         </FormGroup>
 
@@ -368,9 +379,9 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
           <PrivacyText>
             <strong>개인정보 수집 및 이용 동의</strong><br/>
             • <strong>수집목적:</strong> 맞춤 여행지 추천, 서비스 개선, 고객 상담<br/>
-            • <strong>수집항목:</strong> 이름, 전화번호, 이메일, 연령대, 성별, 가족구성원수, 거주지역, 설문응답결과<br/>
+            • <strong>수집항목:</strong> 이름, 인스타그램 계정, 연령대, 성별, 가족구성원수, 거주지역, 설문응답결과<br/>
             • <strong>보유기간:</strong> 서비스 이용 종료 후 3년<br/>
-            • <strong>위탁업체:</strong> 문자발송업체(KT, SKT, LG U+), 이메일발송업체<br/>
+            • <strong>위탁업체:</strong> 소셜미디어 서비스 제공업체(Meta)<br/>
             귀하는 개인정보 수집 및 이용을 거부할 권리가 있으나, 거부 시 서비스 이용이 제한될 수 있습니다.
           </PrivacyText>
 
@@ -381,6 +392,10 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
             />
             <CheckboxLabel>
               (선택) 마케팅 정보 수신에 동의합니다 (이벤트, 프로모션 안내)
+              <br/>
+              <span style={{ color: '#667eea', fontSize: '0.8rem', fontWeight: '600' }}>
+                ℹ️ 맞춤 여행지 추천을 받으려면 마케팅 동의가 필요합니다.
+              </span>
             </CheckboxLabel>
           </CheckboxItem>
         </CheckboxGroup>
@@ -388,11 +403,11 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
         <ButtonGroup>
           <Button
             onClick={handleSubmit}
-            disabled={!isFormValid}
-            whileHover={{ scale: isFormValid ? 1.05 : 1 }}
-            whileTap={{ scale: isFormValid ? 0.95 : 1 }}
+            disabled={!canGetRecommendations}
+            whileHover={{ scale: canGetRecommendations ? 1.05 : 1 }}
+            whileTap={{ scale: canGetRecommendations ? 0.95 : 1 }}
           >
-            📧 추천 받기
+            📱 추천 받기
           </Button>
           <Button
             variant="secondary"

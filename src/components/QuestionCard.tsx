@@ -9,8 +9,20 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem;
+  min-height: -webkit-fill-available;
+  padding: 1rem;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  
+  @media (max-width: 768px) {
+    padding: 1rem 0.75rem;
+    justify-content: flex-start;
+    padding-top: 1.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.75rem 0.5rem;
+    padding-top: 1rem;
+  }
 `;
 
 const ProgressBar = styled.div`
@@ -39,8 +51,14 @@ const Card = styled(motion.div)`
   text-align: center;
   
   @media (max-width: 768px) {
-    padding: 2rem;
-    border-radius: 20px;
+    padding: 1.5rem;
+    border-radius: 15px;
+    max-width: 100%;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 1.25rem;
+    border-radius: 12px;
   }
 `;
 
@@ -56,10 +74,26 @@ const QuestionText = styled.h2`
   font-size: 1.4rem;
   font-weight: 600;
   line-height: 1.5;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   
   @media (max-width: 768px) {
     font-size: 1.2rem;
+  }
+`;
+
+const QuestionDescription = styled.p`
+  color: #4a5568;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 1rem;
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.8rem;
   }
 `;
 
@@ -81,6 +115,9 @@ const OptionButton = styled(motion.button)<{ selected: boolean }>`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-height: 50px; /* 터치 인터페이스를 위한 최소 높이 */
+  width: 100%;
+  text-align: center;
   
   &:hover {
     transform: translateY(-2px);
@@ -88,8 +125,33 @@ const OptionButton = styled(motion.button)<{ selected: boolean }>`
   }
   
   @media (max-width: 768px) {
-    padding: 0.8rem 1.2rem;
+    padding: 1rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+    border-radius: 12px;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.9rem;
     font-size: 0.9rem;
+    min-height: 44px;
+    border-radius: 10px;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  
+  @media (max-width: 768px) {
+    margin-top: 1.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    margin-top: 1.25rem;
   }
 `;
 
@@ -102,7 +164,9 @@ const NextButton = styled(motion.button)`
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 2rem;
+  min-height: 50px;
+  flex: 1;
+  max-width: 200px;
   
   &:disabled {
     opacity: 0.5;
@@ -110,8 +174,45 @@ const NextButton = styled(motion.button)`
   }
   
   @media (max-width: 768px) {
-    padding: 0.8rem 1.5rem;
+    padding: 1rem 1.5rem;
     font-size: 1rem;
+    min-height: 48px;
+    max-width: 180px;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.9rem 1.25rem;
+    font-size: 0.95rem;
+    min-height: 44px;
+    max-width: 160px;
+  }
+`;
+
+const BackButton = styled(motion.button)`
+  background: linear-gradient(45deg, #6c757d, #495057);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 50px;
+  flex: 1;
+  max-width: 200px;
+  
+  @media (max-width: 768px) {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    min-height: 48px;
+    max-width: 180px;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.9rem 1.25rem;
+    font-size: 0.95rem;
+    min-height: 44px;
+    max-width: 160px;
   }
 `;
 
@@ -121,6 +222,7 @@ interface QuestionCardProps {
   currentQuestion: number;
   totalQuestions: number;
   onAnswer: (score: number, timeSpent: number) => void;
+  onBack?: () => void;
 }
 
 const options = [
@@ -135,7 +237,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
   currentQuestion,
   totalQuestions,
-  onAnswer
+  onAnswer,
+  onBack
 }) => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const [startTime, setStartTime] = useState<number>(Date.now());
@@ -189,6 +292,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           
           <QuestionText>{question.text}</QuestionText>
           
+          {question.description && (
+            <QuestionDescription>
+              {question.description}
+            </QuestionDescription>
+          )}
+          
           <OptionsContainer>
             {options.map((option) => (
               <OptionButton
@@ -203,14 +312,25 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             ))}
           </OptionsContainer>
           
-          <NextButton
-            disabled={selectedScore === null}
-            onClick={handleAnswer}
-            whileHover={{ scale: selectedScore !== null ? 1.05 : 1 }}
-            whileTap={{ scale: selectedScore !== null ? 0.95 : 1 }}
-          >
-            {currentQuestion === totalQuestions ? '결과 보기' : '다음'}
-          </NextButton>
+          <ButtonGroup>
+            {currentQuestion > 1 && onBack && (
+              <BackButton
+                onClick={onBack}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                ← 이전
+              </BackButton>
+            )}
+            <NextButton
+              disabled={selectedScore === null}
+              onClick={handleAnswer}
+              whileHover={{ scale: selectedScore !== null ? 1.05 : 1 }}
+              whileTap={{ scale: selectedScore !== null ? 0.95 : 1 }}
+            >
+              {currentQuestion === totalQuestions ? '결과 보기' : '다음 →'}
+            </NextButton>
+          </ButtonGroup>
         </Card>
       </AnimatePresence>
     </Container>

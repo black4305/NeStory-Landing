@@ -8,6 +8,7 @@ import UserInfoForm from './components/UserInfoForm';
 import ThankYouScreen from './components/ThankYouScreen';
 import AdminLogin from './components/AdminLogin';
 import EnhancedAdminDashboard from './components/EnhancedAdminDashboard';
+import AllTypesScreen from './components/AllTypesScreen';
 import { questions } from './data/questions';
 import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
@@ -20,6 +21,13 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  html {
+    scroll-behavior: smooth;
+    /* 모바일 브라우저의 주소창 고려 */
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -27,16 +35,38 @@ const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    height: 100%;
+    height: -webkit-fill-available;
+    /* 모바일 터치 최적화 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
-
+  /* 모바일 우선 스타일링 */
   @media (max-width: 768px) {
     body {
-      font-size: 14px;
+      font-size: 16px; /* 모바일에서 줌 방지를 위해 16px 이상 */
     }
+    
+    /* 입력 필드 줌 방지 */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* 매우 작은 화면 (iPhone SE 등) */
+  @media (max-width: 375px) {
+    body {
+      font-size: 15px;
+    }
+  }
+
+  /* 터치 기기용 스크롤바 숨기기 */
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
   }
 `;
 
@@ -133,6 +163,15 @@ const SurveyApp: React.FC = () => {
     }
   };
 
+  const handleBack = () => {
+    if (currentQuestionIndex > 0) {
+      // 이전 답변 제거
+      const newAnswers = answers.slice(0, -1);
+      setAnswers(newAnswers);
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
   const handleUserInfoSubmit = (info: UserInfo) => {
     setUserInfo(info);
     if (result) {
@@ -172,6 +211,7 @@ const SurveyApp: React.FC = () => {
           currentQuestion={currentQuestionIndex + 1}
           totalQuestions={questions.length}
           onAnswer={handleAnswer}
+          onBack={handleBack}
         />
       )}
       
@@ -202,12 +242,110 @@ const SurveyApp: React.FC = () => {
   );
 };
 
+// 모든 유형 보기 컴포넌트
+const AllTypesRoute: React.FC = () => {
+  const navigate = useNavigate();
+  
+  const handleBack = () => {
+    navigate('/');
+  };
+  
+  const handleSelectType = (typeCode: string) => {
+    // 선택한 유형으로 결과 페이지 이동
+    const userData = '';
+    navigate(`/result?type=${typeCode}${userData ? `&user=${userData}` : ''}`);
+  };
+  
+  return (
+    <AllTypesScreen 
+      onBack={handleBack} 
+      onSelectType={handleSelectType}
+    />
+  );
+};
+
+// 공유된 결과 표시 컴포넌트
+const SharedResult: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [sharedData, setSharedData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const typeCode = urlParams.get('type');
+    const userDataString = urlParams.get('user');
+    
+    if (typeCode) {
+      // 기본적인 결과 데이터 구성
+      const basicResult = {
+        typeCode,
+        axisScores: getAxisScoresFromType(typeCode),
+        analytics: {
+          totalTime: 0,
+          averageResponseTime: 0,
+          completionRate: 100
+        }
+      };
+
+      // 사용자 정보가 있으면 파싱
+      let userInfo = null;
+      if (userDataString) {
+        try {
+          userInfo = JSON.parse(decodeURIComponent(userDataString));
+        } catch (e) {
+          console.warn('Failed to parse user data:', e);
+        }
+      }
+
+      setSharedData({ result: basicResult, userInfo });
+    }
+    setLoading(false);
+  }, [location]);
+
+  // TypeCode로부터 AxisScores 역산하는 함수 (10개 문항 기준)
+  const getAxisScoresFromType = (typeCode: string) => {
+    return {
+      A: typeCode[0] === 'A' ? 8 : 4,   // Active vs Relaxing (2문항 × 4점 = 8점)
+      C: typeCode[1] === 'C' ? 8 : 4,   // Culture vs Nature  
+      F: typeCode[2] === 'F' ? 8 : 4,   // Foodie vs Experience
+      B: typeCode[3] === 'B' ? 4 : 8,   // Budget vs Luxury (B는 역방향)
+      K: typeCode[4] === 'K' ? 8 : 4    // Kid-led vs Parent-led
+    };
+  };
+
+  const handleStartNewTest = () => {
+    navigate('/');
+  };
+
+  if (loading) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>로딩 중...</div>;
+  }
+
+  if (!sharedData) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>잘못된 링크입니다.</div>;
+  }
+
+  return (
+    <ResultScreen
+      typeCode={sharedData.result.typeCode}
+      axisScores={sharedData.result.axisScores}
+      analytics={sharedData.result.analytics}
+      onRestart={handleStartNewTest}
+      userRegion={sharedData.userInfo?.region}
+      isSharedView={true}
+    />
+  );
+};
+
 function App() {
   return (
     <AppContainer>
       <GlobalStyle />
       <Routes>
         <Route path="/" element={<SurveyApp />} />
+        <Route path="/result" element={<SharedResult />} />
+        <Route path="/all-types" element={<AllTypesRoute />} />
         <Route path="/admin" element={<AdminRoute />} />
       </Routes>
     </AppContainer>

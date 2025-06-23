@@ -8,10 +8,22 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem;
+  min-height: -webkit-fill-available;
+  padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 1rem 0.75rem;
+    justify-content: flex-start;
+    padding-top: 2rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.75rem 0.5rem;
+    padding-top: 1.5rem;
+  }
 `;
 
 const Title = styled(motion.h1)`
@@ -20,7 +32,13 @@ const Title = styled(motion.h1)`
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
   }
 `;
 
@@ -41,9 +59,17 @@ const Description = styled(motion.div)`
   padding: 2rem;
   margin-bottom: 2rem;
   max-width: 500px;
+  width: 100%;
   
   @media (max-width: 768px) {
-    padding: 1.5rem;
+    padding: 1.25rem;
+    border-radius: 15px;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 1rem;
+    margin-bottom: 1rem;
   }
 `;
 
@@ -57,6 +83,9 @@ const StartButton = styled(motion.button)`
   color: white;
   cursor: pointer;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  min-height: 50px; /* 터치 인터페이스를 위한 최소 높이 */
+  width: 100%;
+  max-width: 280px;
   
   &:hover {
     transform: translateY(-2px);
@@ -64,8 +93,17 @@ const StartButton = styled(motion.button)`
   }
   
   @media (max-width: 768px) {
-    padding: 0.8rem 2rem;
+    padding: 1rem 2rem;
     font-size: 1.1rem;
+    min-height: 48px;
+    max-width: 250px;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    max-width: 220px;
+    min-height: 44px;
   }
 `;
 
@@ -122,8 +160,8 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         </p>
         
         <Features>
-          <Feature>⏱️ 2-3분 소요</Feature>
-          <Feature>📱 15개 문항</Feature>
+          <Feature>⏱️ 1-2분 소요</Feature>
+          <Feature>🎮 10개 밸런스게임</Feature>
           <Feature>🎯 맞춤 추천</Feature>
         </Features>
       </Description>

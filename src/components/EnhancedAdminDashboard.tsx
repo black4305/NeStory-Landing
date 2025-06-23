@@ -402,7 +402,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
     if (searchTerm) {
       filtered = filtered.filter(item => 
         item.userInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.userInfo?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.userInfo?.instagram?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.result?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -429,8 +429,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
     const rows = filteredData.map(item => [
       item.sessionId,
       item.userInfo?.name || '',
-      item.userInfo?.phone || '',
-      item.userInfo?.email || '',
+      item.userInfo?.instagram || '',
       item.userInfo?.age || '',
       item.userInfo?.gender || '',
       item.userInfo?.familySize || '',
@@ -709,10 +708,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
               </div>
             </div>
             <div>
-              <div style={{ color: '#4a5568' }}>{item.userInfo?.email || '-'}</div>
-              <div style={{ fontSize: '0.8rem', color: '#718096' }}>
-                {item.userInfo?.phone || '-'}
-              </div>
+              <div style={{ color: '#4a5568' }}>{item.userInfo?.instagram || '-'}</div>
             </div>
             <div>
               <strong style={{ color: '#667eea' }}>{item.result || '-'}</strong>
@@ -1246,7 +1242,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
             <div style={{ color: '#4a5568', lineHeight: '1.6' }}>
               <h3>👤 기본 정보</h3>
               <p><strong>이름:</strong> {selectedUser.userInfo?.name || '익명'}</p>
-              <p><strong>이메일:</strong> {selectedUser.userInfo?.email || '미입력'}</p>
+              <p><strong>인스타그램:</strong> {selectedUser.userInfo?.instagram || '미입력'}</p>
               <p><strong>여행유형:</strong> {selectedUser.result || '미완료'}</p>
               <p><strong>소요시간:</strong> {formatTime(selectedUser.totalTime)}</p>
               <p><strong>완료여부:</strong> {selectedUser.completed ? '완료' : '미완료'}</p>

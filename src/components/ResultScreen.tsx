@@ -15,9 +15,21 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem;
+  min-height: -webkit-fill-available;
+  padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  
+  @media (max-width: 768px) {
+    padding: 1rem 0.75rem;
+    justify-content: flex-start;
+    padding-top: 1.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.75rem 0.5rem;
+    padding-top: 1rem;
+  }
 `;
 
 const ResultCard = styled(motion.div)`
@@ -29,38 +41,58 @@ const ResultCard = styled(motion.div)`
   width: 100%;
   text-align: center;
   color: #2d3748;
+  margin-bottom: 1rem;
   
   @media (max-width: 768px) {
-    padding: 2rem;
-    border-radius: 20px;
+    padding: 1.5rem;
+    border-radius: 15px;
+    max-width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 1.25rem;
+    border-radius: 12px;
   }
 `;
 
 const TypeCode = styled.div`
   background: linear-gradient(45deg, #667eea, #764ba2);
   color: white;
-  padding: 1rem 2rem;
+  padding: 1.2rem 2.5rem;
   border-radius: 50px;
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 2.5rem;
+  font-weight: 900;
   margin-bottom: 1.5rem;
   display: inline-block;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   
   @media (max-width: 768px) {
-    font-size: 1.5rem;
-    padding: 0.8rem 1.5rem;
+    font-size: 1.8rem;
+    padding: 1rem 2rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 1.6rem;
+    padding: 0.9rem 1.8rem;
   }
 `;
 
 const Title = styled.h1`
-  font-size: 1.8rem;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.3;
   margin-bottom: 1rem;
   color: #2d3748;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   
   @media (max-width: 768px) {
-    font-size: 1.4rem;
+    font-size: 1.7rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 1.5rem;
   }
 `;
 
@@ -137,9 +169,18 @@ const AxisName = styled.div`
 `;
 
 const AxisResult = styled.div<{ isLeft: boolean }>`
-  font-weight: 700;
+  font-weight: 800;
   color: ${props => props.isLeft ? '#667eea' : '#764ba2'};
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 1rem;
+  }
 `;
 
 const AxisBar = styled.div`
@@ -180,13 +221,13 @@ const AxisIndicator = styled(motion.div)<{ position: number }>`
   top: 50%;
   left: ${props => props.position}%;
   transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   background: white;
-  border: 3px solid #2d3748;
+  border: 4px solid #2d3748;
   border-radius: 50%;
   z-index: 3;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
   
   &::after {
     content: '';
@@ -194,10 +235,22 @@ const AxisIndicator = styled(motion.div)<{ position: number }>`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     background: ${props => props.position < 50 ? '#667eea' : '#764ba2'};
     border-radius: 50%;
+  }
+  
+  /* 모바일에서 크기 조정 */
+  @media (max-width: 768px) {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #2d3748;
+    
+    &::after {
+      width: 12px;
+      height: 12px;
+    }
   }
 `;
 
@@ -242,11 +295,20 @@ const CharacterContainer = styled.div`
 `;
 
 const CharacterName = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 2.2rem;
+  font-weight: 900;
   margin-bottom: 0.5rem;
   position: relative;
   z-index: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  
+  @media (max-width: 768px) {
+    font-size: 1.8rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 1.6rem;
+  }
 `;
 
 const CharacterPersonality = styled.p`
@@ -336,10 +398,21 @@ const Button = styled(motion.button)<{ variant?: 'primary' | 'secondary'; disabl
   font-weight: 600;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   opacity: ${props => props.disabled ? 0.7 : 1};
+  min-height: 50px;
+  flex: 1;
+  max-width: 200px;
   
   @media (max-width: 768px) {
-    padding: 0.8rem 1.5rem;
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+    max-width: none;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.9rem 1.25rem;
     font-size: 0.9rem;
+    min-height: 44px;
   }
 `;
 
@@ -379,6 +452,7 @@ interface ResultScreenProps {
     completionRate: number;
   };
   userRegion?: string;
+  isSharedView?: boolean;
 }
 
 const axisConfig = {
@@ -414,7 +488,8 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
   axisScores,
   onRestart,
   analytics,
-  userRegion
+  userRegion,
+  isSharedView = false
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -436,7 +511,25 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     funFact: '남들과는 다른 특별한 여행을 즐기는 개성파!'
   };
 
-  const regionalInfo = userRegion ? regionalRecommendations[userRegion] : null;
+  // 지역 정보 매칭 - 정확한 매칭 또는 시도 단위 fallback
+  const getRegionalInfo = (region: string | undefined) => {
+    if (!region) return null;
+    
+    // 정확한 매칭 먼저 시도
+    if (regionalRecommendations[region]) {
+      return regionalRecommendations[region];
+    }
+    
+    // 시도 단위로 fallback 검색 (예: "충남 아산시" → "충남" 관련 정보)
+    const province = region.split(' ')[0];
+    const fallbackKey = Object.keys(regionalRecommendations).find(key => 
+      key.startsWith(province)
+    );
+    
+    return fallbackKey ? regionalRecommendations[fallbackKey] : null;
+  };
+
+  const regionalInfo = getRegionalInfo(userRegion);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
@@ -480,16 +573,22 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
   };
 
   const shareResult = () => {
-    const text = `나의 가족여행 유형: ${typeCode}\n${travelType.title}`;
+    // 공유용 URL 생성
+    const baseUrl = window.location.origin;
+    const userData = userRegion ? encodeURIComponent(JSON.stringify({ region: userRegion })) : '';
+    const shareUrl = `${baseUrl}/result?type=${typeCode}${userData ? `&user=${userData}` : ''}`;
+    
+    const text = `나의 가족여행 유형: ${typeCode} - ${travelType.title}`;
+    
     if (navigator.share) {
       navigator.share({
         title: '가족여행 유형 테스트 결과',
         text: text,
-        url: window.location.href
+        url: shareUrl
       });
     } else {
-      navigator.clipboard.writeText(text);
-      alert('결과가 복사되었습니다!');
+      navigator.clipboard.writeText(`${text}\n${shareUrl}`);
+      alert('결과와 링크가 복사되었습니다!');
     }
   };
 
@@ -526,6 +625,14 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
             ⭐ 비슷한 연예인 가족: <strong>{character.celebrity}</strong>
           </CelebrityMatch>
           
+          <CelebrityMatch>
+            {character.specialItem && `🎒 필수 아이템: ${character.specialItem}`}
+          </CelebrityMatch>
+          
+          <CelebrityMatch>
+            {character.trait && `✨ 특징: ${character.trait}`}
+          </CelebrityMatch>
+          
           <FunFact>
             💡 {character.funFact}
           </FunFact>
@@ -536,9 +643,13 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           {Object.entries(axisScores).map(([axisKey, score]) => {
             const axis = axisKey as keyof typeof axisConfig;
             const config = axisConfig[axis];
-            const percentage = ((score - 3) / 12) * 100; // 3-15를 0-100%로 변환
-            const position = Math.max(5, Math.min(95, percentage)); // 5-95% 범위로 제한
-            const isRight = score >= 9;
+            // 10점 만점 기준으로 위치 계산
+            const normalizedScore = (score - 2) / 8; // 0~1 사이 값 (2점~10점 범위)
+            const enhancedPosition = normalizedScore < 0.5 
+              ? normalizedScore * 0.8 * 100 + 10  // 왼쪽: 10~50% 범위
+              : (normalizedScore - 0.5) * 0.8 * 100 + 50; // 오른쪽: 50~90% 범위
+            const position = Math.max(10, Math.min(90, enhancedPosition));
+            const isRight = score >= 6; // 10점 만점 기준 6점 이상
             const resultType = isRight ? config.right : config.left;
             
             return (
@@ -546,7 +657,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 <AxisLabel>
                   <AxisName>{config.name}</AxisName>
                   <AxisResult isLeft={!isRight}>
-                    {resultType.korean} ({score}/15)
+                    {resultType.korean} ({score}/10)
                   </AxisResult>
                 </AxisLabel>
                 
@@ -594,39 +705,76 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
         )}
         
         <RecommendationSection>
-          <RecommendationTitle>🎯 추천 여행지</RecommendationTitle>
+          <RecommendationTitle>
+            {regionalInfo ? `🏡 ${regionalInfo.region} 지역 맞춤 추천` : '🎯 전국 추천 여행지'}
+          </RecommendationTitle>
           <RecommendationList>
-            {travelType.recommendations.map((rec, index) => (
-              <RecommendationItem key={index}>
-                🗺️ {rec}
-              </RecommendationItem>
-            ))}
+            {regionalInfo ? (
+              // 지역별 추천 여행지 우선 표시
+              [...regionalInfo.nearbyDestinations, ...travelType.recommendations.slice(0, 2)].map((dest, index) => (
+                <RecommendationItem key={index}>
+                  {index < regionalInfo.nearbyDestinations.length ? '🏡' : '🗺️'} {dest}
+                  {index >= regionalInfo.nearbyDestinations.length && ' (전국 추천)'}
+                </RecommendationItem>
+              ))
+            ) : (
+              // 지역 정보가 없을 때 전국 단위 추천
+              travelType.recommendations.map((rec, index) => (
+                <RecommendationItem key={index}>
+                  🗺️ {rec}
+                </RecommendationItem>
+              ))
+            )}
           </RecommendationList>
         </RecommendationSection>
         
         <ButtonGroup>
+          {!isSharedView && (
+            <>
+              <Button
+                onClick={downloadResult}
+                disabled={isDownloading}
+                whileHover={{ scale: isDownloading ? 1 : 1.05 }}
+                whileTap={{ scale: isDownloading ? 1 : 0.95 }}
+              >
+                {isDownloading ? '⏳ 생성 중...' : '📸 이미지 다운로드'}
+              </Button>
+              <Button
+                onClick={shareResult}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                📤 결과 공유하기
+              </Button>
+            </>
+          )}
           <Button
-            onClick={downloadResult}
-            disabled={isDownloading}
-            whileHover={{ scale: isDownloading ? 1 : 1.05 }}
-            whileTap={{ scale: isDownloading ? 1 : 0.95 }}
-          >
-            {isDownloading ? '⏳ 생성 중...' : '📸 이미지 다운로드'}
-          </Button>
-          <Button
-            onClick={shareResult}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            📤 결과 공유하기
-          </Button>
-          <Button
-            variant="secondary"
+            variant={isSharedView ? "primary" : "secondary"}
             onClick={onRestart}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            🔄 다시 테스트하기
+            {isSharedView ? '🚀 나도 테스트하기' : '🔄 다시 테스트하기'}
+          </Button>
+          {isSharedView && (
+            <Button
+              onClick={shareResult}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              📤 내 결과 공유하기
+            </Button>
+          )}
+        </ButtonGroup>
+
+        <ButtonGroup style={{ marginTop: '1rem' }}>
+          <Button
+            variant="secondary"
+            onClick={() => window.location.href = '/all-types'}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            🎭 32가지 유형 모두 보기
           </Button>
         </ButtonGroup>
       </ResultCard>

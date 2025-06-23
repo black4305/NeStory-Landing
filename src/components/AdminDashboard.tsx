@@ -205,7 +205,7 @@ const AdminDashboard: React.FC = () => {
     if (searchTerm) {
       filtered = filtered.filter(item => 
         item.userInfo?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.userInfo?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.userInfo?.instagram?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.result?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -231,8 +231,7 @@ const AdminDashboard: React.FC = () => {
     const rows = filteredData.map(item => [
       item.sessionId,
       item.userInfo?.name || '',
-      item.userInfo?.phone || '',
-      item.userInfo?.email || '',
+      item.userInfo?.instagram || '',
       item.userInfo?.age || '',
       item.userInfo?.gender || '',
       item.userInfo?.familySize || '',
@@ -338,10 +337,7 @@ const AdminDashboard: React.FC = () => {
                   <strong>이름:</strong> {selectedUser.userInfo?.name || '익명'}
                 </div>
                 <div>
-                  <strong>이메일:</strong> {selectedUser.userInfo?.email || '미입력'}
-                </div>
-                <div>
-                  <strong>전화번호:</strong> {selectedUser.userInfo?.phone || '미입력'}
+                  <strong>인스타그램:</strong> {selectedUser.userInfo?.instagram || '미입력'}
                 </div>
                 <div>
                   <strong>연령대:</strong> {selectedUser.userInfo?.age || '미입력'}
@@ -543,10 +539,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div>{item.userInfo?.email || '-'}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#718096' }}>
-                      {item.userInfo?.phone || '-'}
-                    </div>
+                    <div>{item.userInfo?.instagram || '-'}</div>
                   </TableCell>
                   <TableCell>
                     <strong>{item.result || '-'}</strong>

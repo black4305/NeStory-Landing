@@ -1,6 +1,7 @@
 export interface Question {
   id: number;
   text: string;
+  description?: string; // 밸런스 게임용 상세 설명
   axis: 'A' | 'C' | 'F' | 'B' | 'K';
   isReverse?: boolean;
 }
@@ -21,8 +22,7 @@ export interface TravelType {
 
 export interface UserInfo {
   name: string;
-  phone: string;
-  email: string;
+  instagram: string;
   age: string;
   gender: string;
   familySize: number;
