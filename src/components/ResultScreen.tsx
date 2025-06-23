@@ -218,38 +218,43 @@ const AxisProgress = styled.div`
 
 const AxisIndicator = styled(motion.div)<{ position: number }>`
   position: absolute;
-  top: 50%;
+  top: -20px;
   left: ${props => props.position}%;
-  transform: translate(-50%, -50%);
-  width: 32px;
-  height: 32px;
-  background: white;
-  border: 4px solid #2d3748;
-  border-radius: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 48px;
+  background: linear-gradient(to top, 
+    ${props => props.position < 50 ? '#667eea' : '#764ba2'} 0%, 
+    ${props => props.position < 50 ? '#4facfe' : '#f093fb'} 100%
+  );
+  border-radius: 3px 3px 0 0;
   z-index: 3;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
   
-  &::after {
+  &::before {
     content: '';
     position: absolute;
-    top: 50%;
+    bottom: -8px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 16px;
-    height: 16px;
-    background: ${props => props.position < 50 ? '#667eea' : '#764ba2'};
-    border-radius: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid ${props => props.position < 50 ? '#667eea' : '#764ba2'};
   }
   
   /* 모바일에서 크기 조정 */
   @media (max-width: 768px) {
-    width: 28px;
-    height: 28px;
-    border: 3px solid #2d3748;
+    width: 5px;
+    height: 40px;
+    top: -16px;
     
-    &::after {
-      width: 14px;
-      height: 14px;
+    &::before {
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid ${props => props.position < 50 ? '#667eea' : '#764ba2'};
+      bottom: -6px;
     }
   }
 `;

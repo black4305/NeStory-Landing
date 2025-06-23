@@ -897,4 +897,107 @@ npm run build
 - ✅ 빠른 로딩 및 부드러운 애니메이션
 - ✅ 사용자 친화적 UX/UI
 
+## 🎨 UI/UX 개선 및 추천 시스템 재설계 (2025-06-23)
+
+### 📱 모바일 반응형 완전 개선
+**문제**: 설문 페이지 세로 높이가 디바이스 화면과 정확히 맞지 않음
+**해결**:
+- **정밀한 높이 제어**: `max-height: 100vh` 및 `max-height: -webkit-fill-available` 추가
+- **iOS Safari 대응**: `@supports (-webkit-touch-callout: none)` 미디어 쿼리 적용
+- **Chrome 모바일**: 주소창 높이 변화 완벽 대응
+- **Position 최적화**: `position: relative` 추가로 레이아웃 안정성 향상
+
+### 🎯 지역 추천 시스템 전면 개편
+**기존 문제점**: 모든 사용자에게 전국 단위 추천 제공으로 차별화 부족
+**새로운 정책**:
+
+#### 마케팅 동의 기반 추천 로직
+- ✅ **마케팅 동의 시**: 거주지역 기반 맞춤 여행지 **2곳만** 추천
+- ❌ **마케팅 미동의 시**: 지역 추천 없음, 재테스트 유도 CTA 표시
+- 🚫 **전국 단위 추천**: 완전 제거
+
+#### 구현된 변경사항
+```typescript
+// 마케팅 동의 여부에 따른 조건부 렌더링
+{regionalInfo && hasMarketingConsent && (
+  <RecommendationSection>
+    <RecommendationTitle>🏡 {regionalInfo.region} 지역 맞춤 추천 (2곳)</RecommendationTitle>
+    {regionalInfo.nearbyDestinations.slice(0, 2).map(...)}
+  </RecommendationSection>
+)}
+
+{!hasMarketingConsent && (
+  <RecommendationSection>
+    <RecommendationTitle>📍 맞춤 여행지 추천받기</RecommendationTitle>
+    // 재테스트 유도 CTA
+  </RecommendationSection>
+)}
+```
+
+### 🏘️ 2단계 지역 선택 시스템 구축
+**기존**: 단일 드롭다운 (`광주 북구` 형태)
+**개선**: 계층형 2단계 선택
+
+#### 1단계: 시/도 선택 (17개)
+```typescript
+'서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시',
+'대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원도',
+'충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주특별자치도'
+```
+
+#### 2단계: 시/군/구 선택 (동적 로딩)
+```typescript
+// 예시: 광주광역시 선택 시
+districts['광주광역시'] = ['광산구', '남구', '동구', '북구', '서구']
+```
+
+#### 기술적 구현
+- **동적 옵션 로딩**: 시/도 선택 시 해당 시/군/구 자동 표시
+- **백워드 호환성**: 기존 `convertRegionFormat()` 함수로 호환
+- **상태 관리**: `selectedProvince`, `selectedDistrict` 분리 관리
+- **데이터 무결성**: 2단계 모두 선택 완료 시에만 `formData.region` 업데이트
+
+### 🎨 사용자 경험 개선사항
+1. **명확한 혜택 안내**: 마케팅 동의 시 맞춤 추천 혜택 명시
+2. **시각적 차별화**: 동의/미동의 상태별 다른 UI 컴포넌트
+3. **재참여 유도**: 미동의 사용자 대상 명확한 CTA 버튼
+4. **단계별 안내**: 지역 선택 시 "시/도 선택" → "시/군/구 선택" 순서 안내
+
+### 📊 이번 업데이트에서 수정된 주요 컴포넌트
+1. **QuestionCard.tsx**: 모바일 높이 문제 완전 해결
+2. **ResultScreen.tsx**: 마케팅 동의 기반 추천 시스템
+3. **UserInfoForm.tsx**: 2단계 지역 선택 + 버튼 정렬 개선
+4. **App.tsx**: hasMarketingConsent prop 전달 시스템
+5. **data/regions.ts**: 계층형 지역 데이터 구조 재설계
+
+## 📈 결과창 유형 분석 표시 개선 완료
+
+### 🎯 원형 인디케이터 → 세로 막대 차트 변경 완료
+**구현 내용**:
+- **세로 막대 디자인**: 6px 너비의 그라데이션 막대
+- **위치 표시**: 가로 비율 막대 위쪽 20px에 배치
+- **화살표 포인터**: 막대 하단에 삼각형 포인터 추가
+- **그라데이션 색상**: 위치에 따라 좌측(#667eea→#4facfe) / 우측(#764ba2→#f093fb)
+- **모바일 최적화**: 768px 이하에서 5px 너비, 40px 높이로 조정
+
+#### 기술적 개선사항
+```css
+/* 세로 막대 스타일 */
+width: 6px;
+height: 48px;
+background: linear-gradient(to top, 색상1, 색상2);
+border-radius: 3px 3px 0 0;
+
+/* 하단 포인터 (CSS 삼각형) */
+&::before {
+  border-top: 8px solid 색상;
+  border-left/right: 6px solid transparent;
+}
+```
+
+**사용자 경험 향상**:
+- 더 직관적인 수치 위치 표시
+- 모바일에서 터치하기 쉬운 시각적 요소
+- 그라데이션으로 시각적 매력도 증가
+
 **이제 배포하고 마케팅을 시작할 준비가 완료되었습니다!** 🎉
