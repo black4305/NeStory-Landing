@@ -79,7 +79,10 @@ const LandingPage: React.FC = () => {
             </MainHeadline>
             <SubHeadline>
               1,542개 실후기 기반 AI가<br className="mobile-break" />
-              아이-부모-조부모 맞춤 코스를 단 3분 만에 추천합니다.
+              아이-부모-조부모 맞춤 코스를 단 3분 만에 추천합니다.<br />
+              <small style={{ fontSize: '0.85em', opacity: '0.8' }}>
+                * NeStoryTI = NeStory 여행 유형 테스트
+              </small>
             </SubHeadline>
             <CTAButton onClick={handleStartTest}>
               3배 더 행복해지기 →
@@ -91,7 +94,7 @@ const LandingPage: React.FC = () => {
         <StorySection>
           <StoryContent>
             <SectionTitle>
-              왜 <BrandText>NeStoryTI</BrandText>인가?
+              왜 <BrandText>NeStory</BrandText>인가?
             </SectionTitle>
 
             <StoryText>
