@@ -1018,19 +1018,26 @@ LandingPage.tsx (총 400+ 라인)
 - **네비게이션**: 스크롤 기반, 별도 메뉴 불필요
 
 ### 🎉 Git 배포 완료 (2025-06-24)
-**커밋**: `d07091b` - "NeStoryTI 랜딩페이지 및 브랜딩 시스템 구축 완료"
+**최종 커밋**: `7b93702` - "랜딩페이지를 메인 라우트(/)로 변경"
 
 **배포된 변경사항**:
 - ✅ **신규 파일 4개**: LandingPage.tsx, NeStoryTILogo.tsx, LandingAnalytics.tsx, nestoryti-favicon.svg
-- ✅ **수정된 파일 9개**: App.tsx, StartScreen.tsx, QuestionCard.tsx, index.html, manifest.json 등
-- ✅ **총 1,294줄 추가**: 바이럴 랜딩페이지 + 브랜딩 시스템 + 분석 대시보드
+- ✅ **수정된 파일 14개**: App.tsx, StartScreen.tsx, QuestionCard.tsx, index.html, manifest.json 등
+- ✅ **총 1,320줄 추가**: 바이럴 랜딩페이지 + 브랜딩 시스템 + 분석 대시보드
 - ✅ **GitHub 푸시**: https://github.com/black4305/NeStory-Landing
 
-### 🚀 Vercel 자동 배포 준비 완료
+### 🔄 라우팅 구조 최종 확정
+**변경사항**: 사용자 편의를 위해 랜딩페이지를 메인 경로로 이동
+- **랜딩페이지**: `/landing` → `/` (메인 도메인 접속 시 바로 표시)
+- **설문 테스트**: `/` → `/test` (명확한 기능 구분)
+- **결과 페이지**: `/result` (변경 없음)
+- **관리자**: `/admin` (변경 없음)
+
+### 🚀 Vercel 자동 배포 완료 준비
 - **main 브랜치 푸시**: Vercel에서 자동 감지 및 배포 시작
 - **빌드 성공**: `npm run build` 테스트 완료 (경고만 있고 오류 없음)
-- **예상 배포 URL**: `https://nestory-landing.vercel.app`
-- **랜딩페이지 접근**: `/landing` 경로
+- **배포 URL**: `https://nestory-landing.vercel.app`
+- **메인 페이지**: 도메인 접속 시 바로 랜딩페이지 표시
 
 ## 📝 추후 개발 가능 항목
 - [x] ~~다른 유형을 볼 수 있는 페이지 URL 추가~~ ✅ 완료 (2025-06-23)

@@ -200,6 +200,26 @@ const LandingContainer = styled.div`
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
+  
+  /* 배경 애니메이션 효과 */
+  &::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: sparkle 20s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  @keyframes sparkle {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-50px, -50px) rotate(360deg); }
+  }
 `;
 
 const VideoBackground = styled.video`
@@ -215,9 +235,34 @@ const VideoBackground = styled.video`
 
 const ContentOverlay = styled.div`
   position: relative;
-  z-index: 1;
-  background: rgba(17, 24, 39, 0.8);
+  z-index: 2;
+  background: linear-gradient(135deg, rgba(240, 147, 251, 0.95) 0%, rgba(245, 87, 108, 0.95) 50%, rgba(102, 126, 234, 0.95) 100%);
   color: white;
+  
+  /* 플로팅 요소들 */
+  &::after {
+    content: '✨ 🎉 💫 🌟 ⭐';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 2rem;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    pointer-events: none;
+    z-index: 1;
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-20px) rotate(90deg); }
+    50% { transform: translateY(-10px) rotate(180deg); }
+    75% { transform: translateY(-15px) rotate(270deg); }
+  }
 `;
 
 const HeroSection = styled.section`
@@ -228,6 +273,28 @@ const HeroSection = styled.section`
   padding: 6rem 1rem;
   min-height: 100vh;
   justify-content: center;
+  position: relative;
+  z-index: 3;
+  
+  /* 히어로 글로우 효과 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 3s ease-in-out infinite;
+    z-index: -1;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
+  }
 `;
 
 const HeroContent = styled.div`
@@ -240,15 +307,27 @@ const MainHeadline = styled.h1`
   font-weight: 800;
   margin-bottom: 1rem;
   line-height: 1.2;
+  animation: slideInUp 1s ease-out;
 
   @media (max-width: 768px) {
     font-size: 2rem;
+  }
+  
+  @keyframes slideInUp {
+    0% { transform: translateY(50px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
   }
 `;
 
 const HighlightText = styled.span`
   color: #fbbf24;
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+  animation: glow 2s ease-in-out infinite alternate;
+  
+  @keyframes glow {
+    0% { text-shadow: 0 0 20px rgba(251, 191, 36, 0.8); }
+    100% { text-shadow: 0 0 30px rgba(251, 191, 36, 1), 0 0 40px rgba(251, 191, 36, 0.6); }
+  }
 `;
 
 const SubHeadline = styled.p`
@@ -256,6 +335,7 @@ const SubHeadline = styled.p`
   margin-bottom: 2rem;
   line-height: 1.6;
   opacity: 0.9;
+  animation: slideInUp 1s ease-out 0.3s both;
 
   @media (max-width: 768px) {
     font-size: 1.1rem;
@@ -270,8 +350,10 @@ const SubHeadline = styled.p`
 `;
 
 const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
-  background: ${props => props.secondary ? '#4f46e5' : '#fbbf24'};
-  color: ${props => props.secondary ? 'white' : '#1f2937'};
+  background: ${props => props.secondary 
+    ? 'linear-gradient(45deg, #667eea, #764ba2)' 
+    : 'linear-gradient(45deg, #fbbf24, #f59e0b)'};
+  color: white;
   padding: ${props => props.large ? '1rem 2rem' : '0.75rem 1.5rem'};
   border-radius: 9999px;
   border: none;
@@ -280,14 +362,20 @@ const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   
   &:hover {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    filter: brightness(1.1);
   }
 
   ${props => !props.secondary && `
-    animation: bounce 2s infinite;
+    animation: bounce 2s infinite, slideInUp 1s ease-out 0.6s both;
+  `}
+  
+  ${props => props.secondary && `
+    animation: slideInUp 1s ease-out 0.9s both;
   `}
 
   @keyframes bounce {
@@ -305,7 +393,8 @@ const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
 
 const StorySection = styled.section`
   padding: 4rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 `;
 
 const StoryContent = styled.div`
@@ -326,8 +415,9 @@ const SectionTitle = styled.h2`
 `;
 
 const BrandText = styled.span`
-  color: #4f46e5;
+  color: #fbbf24;
   font-weight: 800;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
 `;
 
 const StoryText = styled.p`
@@ -354,10 +444,11 @@ const ComparisonGrid = styled.div`
 `;
 
 const ComparisonCard = styled.div<{ success?: boolean }>`
-  background: ${props => props.success ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)'};
-  border: 1px solid ${props => props.success ? 'rgba(16, 185, 129, 0.3)' : 'rgba(107, 114, 128, 0.3)'};
+  background: ${props => props.success ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.15)'};
+  border: 1px solid ${props => props.success ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.3)'};
   border-radius: 0.75rem;
   padding: 1.5rem;
+  backdrop-filter: blur(5px);
 `;
 
 const ComparisonTitle = styled.h3`
@@ -395,16 +486,41 @@ const FeatureCard = styled.div`
   padding: 2rem;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.8s ease-out;
   
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+  
+  &:nth-child(1) { animation-delay: 0.2s; }
+  &:nth-child(2) { animation-delay: 0.4s; }
+  &:nth-child(3) { animation-delay: 0.6s; }
+  
+  @keyframes fadeInUp {
+    0% { 
+      opacity: 0; 
+      transform: translateY(30px); 
+    }
+    100% { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
   }
 `;
 
 const FeatureIcon = styled.div`
   font-size: 3rem;
   margin-bottom: 1rem;
+  animation: iconFloat 3s ease-in-out infinite;
+  
+  @keyframes iconFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-5px) scale(1.1); }
+  }
 `;
 
 const FeatureTitle = styled.h3`
@@ -421,7 +537,8 @@ const FeatureDescription = styled.p`
 
 const TestimonialSection = styled.section`
   padding: 4rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 `;
 
 const TestimonialGrid = styled.div`
@@ -437,6 +554,34 @@ const TestimonialCard = styled.div`
   border-radius: 1rem;
   padding: 2rem;
   text-align: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  animation: slideInLeft 1s ease-out;
+  
+  &:hover {
+    transform: translateY(-5px) scale(1.02);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:nth-child(odd) {
+    animation: slideInLeft 1s ease-out;
+  }
+  
+  &:nth-child(even) {
+    animation: slideInRight 1s ease-out;
+  }
+  
+  @keyframes slideInLeft {
+    0% { transform: translateX(-50px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes slideInRight {
+    0% { transform: translateX(50px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
 `;
 
 const TestimonialText = styled.blockquote`
