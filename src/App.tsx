@@ -315,7 +315,7 @@ const SharedResult: React.FC = () => {
   };
 
   const handleStartNewTest = () => {
-    navigate('/');
+    navigate('/test');
   };
 
   if (loading) {
@@ -376,7 +376,7 @@ const UniqueSharedResult: React.FC = () => {
   }, [shareId]);
 
   const handleStartNewTest = () => {
-    navigate('/');
+    navigate('/test');
   };
 
   if (loading) {
@@ -448,8 +448,8 @@ function App() {
     <AppContainer>
       <GlobalStyle />
       <Routes>
-        <Route path="/landing" element={<LandingPage />} />
-        <Route path="/" element={<SurveyApp />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/test" element={<SurveyApp />} />
         <Route path="/result" element={<SharedResult />} />
         <Route path="/share/:shareId" element={<UniqueSharedResult />} />
         <Route path="/all-types" element={<AllTypesRoute />} />

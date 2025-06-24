@@ -1017,11 +1017,27 @@ LandingPage.tsx (총 400+ 라인)
 - **반응형 텍스트**: 화면 크기별 폰트 크기 자동 조정
 - **네비게이션**: 스크롤 기반, 별도 메뉴 불필요
 
+### 🎉 Git 배포 완료 (2025-06-24)
+**커밋**: `d07091b` - "NeStoryTI 랜딩페이지 및 브랜딩 시스템 구축 완료"
+
+**배포된 변경사항**:
+- ✅ **신규 파일 4개**: LandingPage.tsx, NeStoryTILogo.tsx, LandingAnalytics.tsx, nestoryti-favicon.svg
+- ✅ **수정된 파일 9개**: App.tsx, StartScreen.tsx, QuestionCard.tsx, index.html, manifest.json 등
+- ✅ **총 1,294줄 추가**: 바이럴 랜딩페이지 + 브랜딩 시스템 + 분석 대시보드
+- ✅ **GitHub 푸시**: https://github.com/black4305/NeStory-Landing
+
+### 🚀 Vercel 자동 배포 준비 완료
+- **main 브랜치 푸시**: Vercel에서 자동 감지 및 배포 시작
+- **빌드 성공**: `npm run build` 테스트 완료 (경고만 있고 오류 없음)
+- **예상 배포 URL**: `https://nestory-landing.vercel.app`
+- **랜딩페이지 접근**: `/landing` 경로
+
 ## 📝 추후 개발 가능 항목
 - [x] ~~다른 유형을 볼 수 있는 페이지 URL 추가~~ ✅ 완료 (2025-06-23)
 - [x] ~~Landing 페이지 구현~~ ✅ 완료 (2025-06-24)
+- [x] ~~React 로고 대신 커스텀 로고로 변경~~ ✅ 완료 (2025-06-24)
+- [x] ~~관리자 페이지에서 랜딩페이지 데이터 확인 기능~~ ✅ 완료 (2025-06-24)
 - [ ] 설문별 뒤로가기 기능 개선
-- [ ] React 로고 대신 커스텀 로고로 변경
 - [ ] 랜딩 페이지 비디오 파일 추가 (/public/video/family-travel.mp4)
 - [ ] 랜딩 페이지 방문자 트래킹 (Google Analytics)
 - [ ] A/B 테스트 시스템 (헤드라인 변형)

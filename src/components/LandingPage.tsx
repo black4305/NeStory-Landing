@@ -60,7 +60,7 @@ const LandingPage: React.FC = () => {
       localStorage.setItem('landingPageAnalytics', JSON.stringify(visits));
     }
 
-    navigate('/');
+    navigate('/test');
   };
 
   return (

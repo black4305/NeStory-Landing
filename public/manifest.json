@@ -27,7 +27,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/landing",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -55,7 +55,7 @@
       "name": "여행 테스트 시작",
       "short_name": "테스트",
       "description": "3분 만에 맞춤 여행 추천받기",
-      "url": "/",
+      "url": "/test",
       "icons": [
         {
           "src": "nestoryti-192.png",
@@ -67,7 +67,7 @@
       "name": "랜딩 페이지",
       "short_name": "홈",
       "description": "NeStoryTI 소개 페이지",
-      "url": "/landing",
+      "url": "/",
       "icons": [
         {
           "src": "nestoryti-192.png",
