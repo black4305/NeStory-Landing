@@ -9,6 +9,7 @@ import ThankYouScreen from './components/ThankYouScreen';
 import AdminLogin from './components/AdminLogin';
 import EnhancedAdminDashboard from './components/EnhancedAdminDashboard';
 import AllTypesScreen from './components/AllTypesScreen';
+import LandingPage from './components/LandingPage';
 import { questions } from './data/questions';
 import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
@@ -447,6 +448,7 @@ function App() {
     <AppContainer>
       <GlobalStyle />
       <Routes>
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/" element={<SurveyApp />} />
         <Route path="/result" element={<SharedResult />} />
         <Route path="/share/:shareId" element={<UniqueSharedResult />} />

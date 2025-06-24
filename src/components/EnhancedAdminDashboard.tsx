@@ -20,6 +20,7 @@ import { calculateReliabilityScore, getReliabilityScoreColor, getReliabilityScor
 import { questions } from '../data/questions';
 import { DataManager } from '../utils/dataManager';
 import { useFirebaseData, useFirebaseStatus } from '../hooks/useFirebaseData';
+import LandingAnalytics from './LandingAnalytics';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -1296,12 +1297,20 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
         >
           🔧 데이터 관리
         </Tab>
+        <Tab
+          active={activeTab === 'landing'}
+          onClick={() => setActiveTab('landing')}
+          whileHover={{ scale: 1.02 }}
+        >
+          🎯 랜딩 페이지
+        </Tab>
       </TabContainer>
 
       {activeTab === 'overview' && renderOverview()}
       {activeTab === 'users' && renderUserData()}
       {activeTab === 'process' && renderProcessAnalysis()}
       {activeTab === 'data' && renderDataManagement()}
+      {activeTab === 'landing' && <LandingAnalytics />}
 
       {selectedUser && (
         <UserDetailModal

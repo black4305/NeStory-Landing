@@ -1,7 +1,7 @@
 {
-  "short_name": "NeStory 여행테스트",
-  "name": "NeStory 가족여행 궁합 테스트",
-  "description": "우리 가족의 찰떡 여행 콤보를 1분 만에 찾아보세요!",
+  "short_name": "NeStoryTI",
+  "name": "NeStoryTI - 3세대 행복 여행 AI",
+  "description": "3시간 준비로 3세대 행복지수 3배 높이는 AI 여행 추천 서비스",
   "icons": [
     {
       "src": "favicon.ico",
@@ -9,24 +9,71 @@
       "type": "image/x-icon"
     },
     {
-      "src": "favicon.svg",
+      "src": "nestoryti-favicon.svg",
       "type": "image/svg+xml",
-      "sizes": "any"
+      "sizes": "any",
+      "purpose": "any"
     },
     {
-      "src": "logo192.png",
+      "src": "nestoryti-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
+      "src": "nestoryti-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/landing",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#667eea",
-  "background_color": "#667eea",
-  "categories": ["travel", "lifestyle", "education"]
+  "background_color": "#f8fafc",
+  "categories": ["travel", "lifestyle", "productivity", "utilities"],
+  "lang": "ko",
+  "dir": "ltr",
+  "screenshots": [
+    {
+      "src": "nestoryti-screenshot-mobile.png",
+      "type": "image/png",
+      "sizes": "390x844",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "nestoryti-screenshot-desktop.png", 
+      "type": "image/png",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "여행 테스트 시작",
+      "short_name": "테스트",
+      "description": "3분 만에 맞춤 여행 추천받기",
+      "url": "/",
+      "icons": [
+        {
+          "src": "nestoryti-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "랜딩 페이지",
+      "short_name": "홈",
+      "description": "NeStoryTI 소개 페이지",
+      "url": "/landing",
+      "icons": [
+        {
+          "src": "nestoryti-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }

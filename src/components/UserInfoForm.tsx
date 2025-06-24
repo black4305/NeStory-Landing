@@ -287,6 +287,16 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
 
   const isFormValid = formData.name && formData.privacyConsent;
   const canGetRecommendations = isFormValid && formData.marketingConsent;
+  
+  // 모든 항목이 작성되었는지 확인 (필수 항목 + 마케팅 동의)
+  const isAllFieldsComplete = formData.name.trim() && 
+                              formData.age && 
+                              formData.gender && 
+                              formData.region && 
+                              formData.privacyConsent;
+  
+  // 모든 항목이 작성되고 마케팅 동의까지 했으면 건너뛰기 비활성화
+  const shouldDisableSkip = Boolean(isAllFieldsComplete && formData.marketingConsent);
 
   return (
     <Container>
@@ -449,10 +459,15 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
           <Button
             variant="secondary"
             onClick={onSkip}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            disabled={shouldDisableSkip}
+            whileHover={{ scale: shouldDisableSkip ? 1 : 1.05 }}
+            whileTap={{ scale: shouldDisableSkip ? 1 : 0.95 }}
+            style={{ 
+              opacity: shouldDisableSkip ? 0.5 : 1,
+              cursor: shouldDisableSkip ? 'not-allowed' : 'pointer'
+            }}
           >
-            건너뛰기
+            {shouldDisableSkip ? '정보 입력 완료!' : '건너뛰기'}
           </Button>
         </ButtonGroup>
       </FormCard>

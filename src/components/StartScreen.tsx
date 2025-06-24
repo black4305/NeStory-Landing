@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import NeStoryTILogo from './NeStoryTILogo';
 
 const Container = styled.div`
   display: grid;
@@ -171,6 +172,17 @@ const Feature = styled.div`
   font-size: 0.9rem;
 `;
 
+const LogoSection = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    padding-bottom: 0.5rem;
+  }
+`;
+
 interface StartScreenProps {
   onStart: () => void;
 }
@@ -178,7 +190,15 @@ interface StartScreenProps {
 const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   return (
     <Container>
-      <div></div>
+      <LogoSection>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.1 }}
+        >
+          <NeStoryTILogo size={100} showText={true} color="#ffffff" />
+        </motion.div>
+      </LogoSection>
       <ContentWrapper>
         <Title
           initial={{ opacity: 0, y: -50 }}

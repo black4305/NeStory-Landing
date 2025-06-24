@@ -607,25 +607,34 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
         alert('고유한 결과 링크가 복사되었습니다!\n\n링크를 통해 다른 사람들도 당신의 결과와 추천 여행지를 볼 수 있습니다.');
       }
     } catch (error) {
-      console.error('공유 링크 생성 실패:', error);
+      console.error('Firebase 공유 링크 생성 실패:', error);
+      
+      // 사용자에게 명확한 에러 메시지 표시
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      alert(`Firebase 연결 실패: ${errorMessage}\n\n기본 공유 링크로 전환합니다.`);
       
       // Firebase 실패시 기존 방식으로 fallback
-      const baseUrl = window.location.origin;
-      const userData = userRegion && hasMarketingConsent ? 
-        encodeURIComponent(JSON.stringify({ region: userRegion, marketingConsent: hasMarketingConsent })) : '';
-      const fallbackUrl = `${baseUrl}/result?type=${typeCode}${userData ? `&user=${userData}` : ''}`;
-      
-      const text = `나의 가족여행 유형: ${typeCode} - ${travelType.title}`;
-      
-      if (navigator.share) {
-        await navigator.share({
-          title: '가족여행 유형 테스트 결과',
-          text: text,
-          url: fallbackUrl
-        });
-      } else {
-        await navigator.clipboard.writeText(`${text}\n${fallbackUrl}`);
-        alert('결과 링크가 복사되었습니다!');
+      try {
+        const baseUrl = window.location.origin;
+        const userData = userRegion && hasMarketingConsent ? 
+          encodeURIComponent(JSON.stringify({ region: userRegion, marketingConsent: hasMarketingConsent })) : '';
+        const fallbackUrl = `${baseUrl}/result?type=${typeCode}${userData ? `&user=${userData}` : ''}`;
+        
+        const text = `나의 가족여행 유형: ${typeCode} - ${travelType.title}`;
+        
+        if (navigator.share) {
+          await navigator.share({
+            title: '가족여행 유형 테스트 결과',
+            text: text,
+            url: fallbackUrl
+          });
+        } else {
+          await navigator.clipboard.writeText(`${text}\n${fallbackUrl}`);
+          alert('기본 결과 링크가 복사되었습니다!');
+        }
+      } catch (fallbackError) {
+        console.error('Fallback 공유도 실패:', fallbackError);
+        alert('공유 기능에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
       }
     } finally {
       setIsSharing(false);
@@ -722,27 +731,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           })}
         </AxisSection>
 
-        {regionalInfo && (
-          <RegionalSection>
-            <RegionalTitle>🗺️ {regionalInfo.region} 지역 맞춤 여행지</RegionalTitle>
-            <RegionalContent>
-              <div style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
-                <strong>🎯 {regionalInfo.signature}</strong>
-              </div>
-              <p style={{ marginBottom: '1rem', opacity: 0.9 }}>
-                {regionalInfo.description}
-              </p>
-              <div style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>
-                주변 추천 여행지:
-              </div>
-              <NearbyList>
-                {regionalInfo.nearbyDestinations.map((dest, index) => (
-                  <NearbyItem key={index}>{dest}</NearbyItem>
-                ))}
-              </NearbyList>
-            </RegionalContent>
-          </RegionalSection>
-        )}
         
         {regionalInfo && (
           <RecommendationSection>

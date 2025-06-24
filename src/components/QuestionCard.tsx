@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Question } from '../types';
+import NeStoryTILogo from './NeStoryTILogo';
 
 const Container = styled.div`
   display: grid;
@@ -160,6 +161,12 @@ const Logo = styled.div`
   color: white;
   font-size: 0.7rem;
   font-weight: 900;
+`;
+
+const LogoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const QuestionText = styled.h2`
@@ -434,7 +441,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           transition={{ duration: 0.5 }}
         >
           <BrandingHeader>
-            <Logo>N</Logo>
+            <LogoWrapper>
+              <NeStoryTILogo size={30} showText={false} color="#667eea" />
+            </LogoWrapper>
             NeStoryTI
           </BrandingHeader>
           
