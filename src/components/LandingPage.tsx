@@ -239,30 +239,6 @@ const ContentOverlay = styled.div`
   background: linear-gradient(135deg, rgba(240, 147, 251, 0.95) 0%, rgba(245, 87, 108, 0.95) 50%, rgba(102, 126, 234, 0.95) 100%);
   color: white;
   
-  /* 플로팅 요소들 */
-  &::after {
-    content: '✨ 🎉 💫 🌟 ⭐';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    font-size: 2rem;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    flex-wrap: wrap;
-    pointer-events: none;
-    z-index: 1;
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    25% { transform: translateY(-20px); }
-    50% { transform: translateY(-10px); }
-    75% { transform: translateY(-15px); }
-  }
 `;
 
 const HeroSection = styled.section`

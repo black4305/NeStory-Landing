@@ -585,49 +585,49 @@ const CharacterAvatar: React.FC<CharacterAvatarProps> = ({ typeCode }) => {
     const characterStyles: Record<string, any> = {
       // 8가지 간소화된 여행 유형 (완전히 다른 디자인)
       'ACF': { // 도시 미식 탐험가 🍜
-        skinTone: '#f4c2a1', hairColor: '#ff4757', hairStyle: 'curly', 
+        skinTone: '#fdbcb4', hairColor: '#ff4757', hairStyle: 'curly', 
         outfitColor: '#fd79a8', expression: 'excited', accessory: 'hat', accessoryColor: '#ff4757',
         itemType: 'phone', itemColor: '#ff4757'
       },
       'ACE': { // 문화 체험러 🎭
-        skinTone: '#f4c2a1', hairColor: '#2d3748', hairStyle: 'straight',
+        skinTone: '#fdbcb4', hairColor: '#2d3748', hairStyle: 'straight',
         outfitColor: '#3498db', expression: 'happy', accessory: 'glasses', accessoryColor: '#2d3748',
         itemType: 'book', itemColor: '#3498db'
       },
       'ANF': { // 자연 미식가 🏕️
-        skinTone: '#f4c2a1', hairColor: '#27ae60', hairStyle: 'wavy',
+        skinTone: '#fdbcb4', hairColor: '#27ae60', hairStyle: 'wavy',
         outfitColor: '#55a3ff', expression: 'happy', accessory: 'hat', accessoryColor: '#27ae60',
         itemType: 'backpack', itemColor: '#27ae60'
       },
       'ANE': { // 아웃도어 모험가 ⛰️
-        skinTone: '#f4c2a1', hairColor: '#e67e22', hairStyle: 'curly', 
+        skinTone: '#fdbcb4', hairColor: '#e67e22', hairStyle: 'curly', 
         outfitColor: '#d63031', expression: 'excited', accessory: 'glasses', accessoryColor: '#e67e22',
         itemType: 'compass', itemColor: '#e67e22'
       },
       'RCF': { // 도시 힐링 미식가 ☕
-        skinTone: '#f4c2a1', hairColor: '#6c5ce7', hairStyle: 'wavy',
+        skinTone: '#fdbcb4', hairColor: '#6c5ce7', hairStyle: 'wavy',
         outfitColor: '#fd79a8', expression: 'calm', accessory: 'glasses', accessoryColor: '#6c5ce7',
         itemType: 'coffee', itemColor: '#6c5ce7'
       },
       'RCE': { // 문화 감상러 🎨
-        skinTone: '#f4c2a1', hairColor: '#8e44ad', hairStyle: 'straight',
+        skinTone: '#fdbcb4', hairColor: '#8e44ad', hairStyle: 'straight',
         outfitColor: '#9b59b6', expression: 'calm', accessory: 'bowtie', accessoryColor: '#8e44ad',
         itemType: 'palette', itemColor: '#8e44ad'
       },
       'RNF': { // 전원 힐링 미식가 🌾
-        skinTone: '#f4c2a1', hairColor: '#00b894', hairStyle: 'curly',
+        skinTone: '#fdbcb4', hairColor: '#00b894', hairStyle: 'curly',
         outfitColor: '#2ed573', expression: 'happy', accessory: 'hat', accessoryColor: '#00b894',
         itemType: 'basket', itemColor: '#00b894'
       },
       'RNE': { // 자연 힐링 체험러 🌿
-        skinTone: '#f4c2a1', hairColor: '#81ecec', hairStyle: 'wavy',
+        skinTone: '#fdbcb4', hairColor: '#81ecec', hairStyle: 'wavy',
         outfitColor: '#00cec9', expression: 'calm', accessory: 'bowtie', accessoryColor: '#81ecec',
         itemType: 'camera', itemColor: '#81ecec'
       }
     };
 
     return characterStyles[code] || {
-      skinTone: '#f4c2a1', hairColor: '#8b4513', hairStyle: 'wavy',
+      skinTone: '#fdbcb4', hairColor: '#8b4513', hairStyle: 'wavy',
       outfitColor: '#667eea', expression: 'happy', accessory: 'glasses', accessoryColor: '#2d3748',
       itemType: 'phone', itemColor: '#667eea'
     };
