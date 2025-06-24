@@ -138,7 +138,7 @@ const LandingPage: React.FC = () => {
           <SectionTitle>3-Layer AI 분석 시스템</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
-              <FeatureIcon>👶</FeatureIcon>
+              <FeatureIcon>👶🏻</FeatureIcon>
               <FeatureTitle>아이 성향 분석</FeatureTitle>
               <FeatureDescription>
                 활동성, 호기심, 체력 수준을 고려한 맞춤형 여행 계획
@@ -152,7 +152,7 @@ const LandingPage: React.FC = () => {
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>👴</FeatureIcon>
+              <FeatureIcon>👴🏻</FeatureIcon>
               <FeatureTitle>조부모 편의성</FeatureTitle>
               <FeatureDescription>
                 건강 상태, 이동 편의성, 안전성을 최우선 고려
