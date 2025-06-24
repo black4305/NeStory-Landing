@@ -78,7 +78,7 @@ const LandingPage: React.FC = () => {
               행복지수 <HighlightText>3배</HighlightText> 높이기
             </MainHeadline>
             <SubHeadline>
-              1,542개 실후기 기반 AI가<br className="mobile-break" />
+              실후기 기반 AI가 <br className="mobile-break" />
               아이-부모-조부모 맞춤 코스를 단 3분 만에 추천합니다.<br />
               <small style={{ fontSize: '0.85em', opacity: '0.8' }}>
                 * NeStoryTI = NeStory 여행 유형 테스트
