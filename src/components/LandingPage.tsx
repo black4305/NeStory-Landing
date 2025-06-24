@@ -145,7 +145,7 @@ const LandingPage: React.FC = () => {
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>👨‍👩‍👧‍👦</FeatureIcon>
+              <FeatureIcon>👫</FeatureIcon>
               <FeatureTitle>부모 라이프스타일</FeatureTitle>
               <FeatureDescription>
                 예산, 휴식 선호도, 문화 관심사 기반 최적화
@@ -258,10 +258,10 @@ const ContentOverlay = styled.div`
   }
   
   @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    25% { transform: translateY(-20px) rotate(90deg); }
-    50% { transform: translateY(-10px) rotate(180deg); }
-    75% { transform: translateY(-15px) rotate(270deg); }
+    0%, 100% { transform: translateY(0px); }
+    25% { transform: translateY(-20px); }
+    50% { transform: translateY(-10px); }
+    75% { transform: translateY(-15px); }
   }
 `;
 
