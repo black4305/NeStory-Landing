@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
@@ -22,18 +22,18 @@ const LandingAnalytics: React.FC = () => {
     mobileRatio: 0
   });
 
-  useEffect(() => {
-    loadLandingData();
-  }, []);
-
-  const loadLandingData = () => {
+  const loadLandingData = useCallback(() => {
     // localStorage에서 랜딩 페이지 방문 데이터 로드
     const landingData = localStorage.getItem('landingPageAnalytics');
     const parsedData: LandingVisit[] = landingData ? JSON.parse(landingData) : [];
     
     setVisits(parsedData);
     calculateStats(parsedData);
-  };
+  }, []);
+
+  useEffect(() => {
+    loadLandingData();
+  }, [loadLandingData]);
 
   const calculateStats = (data: LandingVisit[]) => {
     const now = new Date();

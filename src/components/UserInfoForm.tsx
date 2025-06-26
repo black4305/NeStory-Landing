@@ -287,16 +287,6 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
 
   const isFormValid = formData.name && formData.privacyConsent;
   const canGetRecommendations = isFormValid && formData.marketingConsent;
-  
-  // 모든 항목이 작성되었는지 확인 (필수 항목 + 마케팅 동의)
-  const isAllFieldsComplete = formData.name.trim() && 
-                              formData.age && 
-                              formData.gender && 
-                              formData.region && 
-                              formData.privacyConsent;
-  
-  // 모든 항목이 작성되고 마케팅 동의까지 했으면 건너뛰기 비활성화
-  const shouldDisableSkip = Boolean(isAllFieldsComplete && formData.marketingConsent);
 
   return (
     <Container>
@@ -305,10 +295,11 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <Title>🎁 맞춤 여행지 추천 받기</Title>
+        <Title>🎁 우리 지역 맞춤 여행지 알아보기</Title>
         <Subtitle>
-          회원님의 여행 유형에 맞는 특별한 여행지 정보를 
-          인스타그램 DM으로 보내드려요!
+          <strong>마케팅 정보 수신 동의</strong> 시 거주지역 기반으로<br/>
+          <span style={{ color: '#667eea', fontWeight: '600' }}>
+            📍 딱 2곳의 맞춤 여행지</span>를 추천해드려요! 
         </Subtitle>
 
         <FormGroup>
@@ -438,11 +429,24 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
               onChange={(e) => handleInputChange('marketingConsent', e.target.checked)}
             />
             <CheckboxLabel>
-              (선택) 마케팅 정보 수신에 동의합니다 (이벤트, 프로모션 안내)
+              <strong>(선택) 마케팅 정보 수신 동의</strong> - 이벤트, 프로모션, 맞춤 여행지 정보
               <br/>
-              <span style={{ color: '#667eea', fontSize: '0.8rem', fontWeight: '600' }}>
-                ℹ️ 맞춤 여행지 추천을 받으려면 마케팅 동의가 필요합니다.
-              </span>
+              <div style={{ 
+                background: '#e8f4fd', 
+                borderRadius: '8px', 
+                padding: '0.75rem', 
+                marginTop: '0.5rem',
+                border: '1px solid #667eea'
+              }}>
+                <div style={{ color: '#667eea', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+                  ✨ 마케팅 동의 시 혜택
+                </div>
+                <div style={{ color: '#2d3748', fontSize: '0.8rem', lineHeight: '1.4' }}>
+                  • 거주지역 기반 맞춤 여행지 <strong>2곳 추천</strong><br/>
+                  • 우리 가족 성향에 딱 맞는 장소만 엄선<br/>
+                  • 새로운 여행 이벤트 및 할인 정보 우선 제공
+                </div>
+              </div>
             </CheckboxLabel>
           </CheckboxItem>
         </CheckboxGroup>
@@ -454,22 +458,32 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
             whileHover={{ scale: canGetRecommendations ? 1.05 : 1 }}
             whileTap={{ scale: canGetRecommendations ? 0.95 : 1 }}
           >
-            📱 추천 받기
+            {canGetRecommendations ? '🎯 맞춤 추천 받기' : '📋 마케팅 동의 필요'}
           </Button>
           <Button
             variant="secondary"
             onClick={onSkip}
-            disabled={shouldDisableSkip}
-            whileHover={{ scale: shouldDisableSkip ? 1 : 1.05 }}
-            whileTap={{ scale: shouldDisableSkip ? 1 : 0.95 }}
-            style={{ 
-              opacity: shouldDisableSkip ? 0.5 : 1,
-              cursor: shouldDisableSkip ? 'not-allowed' : 'pointer'
-            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            {shouldDisableSkip ? '정보 입력 완료!' : '건너뛰기'}
+            추천 없이 결과만 보기
           </Button>
         </ButtonGroup>
+        
+        {!formData.marketingConsent && (
+          <div style={{
+            textAlign: 'center',
+            marginTop: '1rem',
+            padding: '0.75rem',
+            background: '#fff3cd',
+            border: '1px solid #ffeaa7',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            color: '#856404'
+          }}>
+            💡 <strong>마케팅 정보 수신에 동의</strong>하시면 거주지역 기반 맞춤 여행지를 추천받을 수 있어요!
+          </div>
+        )}
       </FormCard>
     </Container>
   );

@@ -8,7 +8,6 @@ import { travelTypes } from '../data/travelTypes';
 import { characters } from '../data/characters';
 import { regionalRecommendations } from '../data/regions';
 import CharacterAvatar from './CharacterAvatar';
-import { FirebaseService } from '../services/firebase';
 
 const Container = styled.div`
   display: flex;
@@ -346,38 +345,6 @@ const FunFact = styled.div`
   z-index: 1;
 `;
 
-const RegionalSection = styled.div`
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 20px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  color: white;
-`;
-
-const RegionalTitle = styled.h3`
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  text-align: center;
-`;
-
-const RegionalContent = styled.div`
-  text-align: center;
-`;
-
-const NearbyList = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.5rem;
-  margin: 1rem 0;
-`;
-
-const NearbyItem = styled.div`
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-`;
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -422,31 +389,6 @@ const Button = styled(motion.button)<{ variant?: 'primary' | 'secondary'; disabl
   }
 `;
 
-const AnalyticsSection = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  backdrop-filter: blur(10px);
-`;
-
-const AnalyticsTitle = styled.h4`
-  margin-bottom: 1rem;
-  color: white;
-`;
-
-const AnalyticsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1rem;
-  text-align: center;
-`;
-
-const AnalyticsItem = styled.div`
-  background: rgba(255, 255, 255, 0.2);
-  padding: 1rem;
-  border-radius: 10px;
-`;
 
 interface ResultScreenProps {
   typeCode: string;
@@ -491,8 +433,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
-  const [shareUrl, setShareUrl] = useState<string>('');
   const resultCardRef = useRef<HTMLDivElement>(null);
   
   const travelType = travelTypes[typeCode] || {
@@ -536,11 +476,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes}분 ${seconds % 60}초`;
-  };
 
   const downloadResult = async () => {
     if (!resultCardRef.current) return;
@@ -572,74 +507,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     }
   };
 
-  const shareResult = async () => {
-    if (isSharing) return;
-    
-    setIsSharing(true);
-    try {
-      // Firebase에 고유한 공유 결과 저장
-      const shareData = {
-        typeCode,
-        axisScores,
-        analytics,
-        userInfo: hasMarketingConsent ? { 
-          region: userRegion,
-          marketingConsent: hasMarketingConsent 
-        } : undefined
-      };
-      
-      const shareId = await FirebaseService.saveSharedResult(shareData);
-      const baseUrl = window.location.origin;
-      const uniqueShareUrl = `${baseUrl}/share/${shareId}`;
-      
-      setShareUrl(uniqueShareUrl);
-      
-      const text = `나의 가족여행 유형: ${typeCode} - ${travelType.title}`;
-      
-      if (navigator.share) {
-        await navigator.share({
-          title: '가족여행 유형 테스트 결과',
-          text: text,
-          url: uniqueShareUrl
-        });
-      } else {
-        await navigator.clipboard.writeText(`${text}\n${uniqueShareUrl}`);
-        alert('고유한 결과 링크가 복사되었습니다!\n\n링크를 통해 다른 사람들도 당신의 결과와 추천 여행지를 볼 수 있습니다.');
-      }
-    } catch (error) {
-      console.error('Firebase 공유 링크 생성 실패:', error);
-      
-      // 사용자에게 명확한 에러 메시지 표시
-      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
-      alert(`Firebase 연결 실패: ${errorMessage}\n\n기본 공유 링크로 전환합니다.`);
-      
-      // Firebase 실패시 기존 방식으로 fallback
-      try {
-        const baseUrl = window.location.origin;
-        const userData = userRegion && hasMarketingConsent ? 
-          encodeURIComponent(JSON.stringify({ region: userRegion, marketingConsent: hasMarketingConsent })) : '';
-        const fallbackUrl = `${baseUrl}/result?type=${typeCode}${userData ? `&user=${userData}` : ''}`;
-        
-        const text = `나의 가족여행 유형: ${typeCode} - ${travelType.title}`;
-        
-        if (navigator.share) {
-          await navigator.share({
-            title: '가족여행 유형 테스트 결과',
-            text: text,
-            url: fallbackUrl
-          });
-        } else {
-          await navigator.clipboard.writeText(`${text}\n${fallbackUrl}`);
-          alert('기본 결과 링크가 복사되었습니다!');
-        }
-      } catch (fallbackError) {
-        console.error('Fallback 공유도 실패:', fallbackError);
-        alert('공유 기능에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
-      }
-    } finally {
-      setIsSharing(false);
-    }
-  };
 
   return (
     <Container>
@@ -807,14 +674,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
               >
                 {isDownloading ? '⏳ 생성 중...' : '📸 이미지 다운로드'}
               </Button>
-              <Button
-                onClick={shareResult}
-                disabled={isSharing}
-                whileHover={{ scale: isSharing ? 1 : 1.05 }}
-                whileTap={{ scale: isSharing ? 1 : 0.95 }}
-              >
-                {isSharing ? '⏳ 공유 링크 생성 중...' : '📤 결과 공유하기'}
-              </Button>
             </>
           )}
           <Button
@@ -825,15 +684,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           >
             {isSharedView ? '🚀 나도 테스트하기' : '🔄 다시 테스트하기'}
           </Button>
-          {isSharedView && (
-            <Button
-              onClick={shareResult}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              📤 내 결과 공유하기
-            </Button>
-          )}
         </ButtonGroup>
 
         <ButtonGroup style={{ marginTop: '1rem' }}>

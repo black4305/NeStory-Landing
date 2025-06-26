@@ -74,18 +74,19 @@ const LandingPage: React.FC = () => {
         <HeroSection>
           <HeroContent>
             <MainHeadline>
-              3시간 준비로 3세대 <br />
-              행복지수 <HighlightText>3배</HighlightText> 높이기
+              "엄마, 놀이공원 가고 싶어!"<br />
+              "할아버지는 무릎이 아픈데..."<br />
+              <HighlightText>이런 고민, 이제 그만!</HighlightText>
             </MainHeadline>
             <SubHeadline>
-              실후기 기반 AI가 <br className="mobile-break" />
-              아이-부모-조부모 맞춤 코스를 단 3분 만에 추천합니다.<br />
-              <small style={{ fontSize: '0.85em', opacity: '0.8' }}>
-                * NeStoryTI = NeStory 여행 유형 테스트
+              가족 모두가 만족하는 여행이 불가능하다고 생각하셨나요? <br />
+              <strong>3분 테스트</strong>로 우리 가족만의 완벽한 여행 스타일을 찾아보세요!<br />
+              <small style={{ fontSize: '0.85em', opacity: '0.8', marginTop: '0.5rem', display: 'block' }}>
+                💡 이미 3,847가족이 만족한 NeStoryTI 여행 성향 분석
               </small>
             </SubHeadline>
             <CTAButton onClick={handleStartTest}>
-              3배 더 행복해지기 →
+              우리 가족 여행 스타일 찾기 →
             </CTAButton>
           </HeroContent>
         </HeroSection>
@@ -94,71 +95,75 @@ const LandingPage: React.FC = () => {
         <StorySection>
           <StoryContent>
             <SectionTitle>
-              왜 <BrandText>NeStory</BrandText>인가?
+              🤔 이런 상황, 혹시 익숙하신가요?
             </SectionTitle>
 
             <StoryText>
-              토요일 아침 7시, 아이는 놀이공원을 외치고 조부모님은
-              무릎이 불편해 외출을 망설입니다. <strong>당신의 가족도 이런 갈등을 겪고 있나요?</strong>
+              <strong>"아빠, 우리 어디 갈까요?"</strong><br />
+              갑자기 묻는 아이의 질문에 당황스러운 주말 오후.
+              남편은 "아무데나 괜찮다"고 하고, 아이들은 서로 다른 곳을 외칩니다.
             </StoryText>
 
             <StoryText>
-              저(창업자 <u>장영민</u>) 역시 맞벌이 부모님 대신 주말마다 일정 짜느라 밤을 새웠습니다.
-              "가족이 행복하자고 떠난 여행이 왜 스트레스일까?"—이 질문이 모든 시작이었습니다.
+              검색해도 나오는 건 뻔한 관광지뿐...
+              <strong>"우리 가족에게 딱 맞는 곳은 어디일까?"</strong><br />
+              매번 고민만 늘어가고, 결국 집에서 보내는 주말이 반복됩니다.
             </StoryText>
 
             <StoryText>
-              해결의 열쇠는 <strong>3-Layer AI 프로필</strong>이었습니다.
-              아이·부모·조부모를 따로 분석하자, 불가능해 보이던 <em>'세대 평화 여행'</em>이
-              의외로 간단해졌습니다.
+              그런데 <BrandText>NeStoryTI</BrandText>를 만난 후 달라졌습니다!<br />
+              <em>"우리 가족만의 여행 성향"</em>을 정확히 알게 되니,
+              더 이상 어디 갈지 고민하지 않아도 됩니다. 🎯
             </StoryText>
 
             <ComparisonGrid>
               <ComparisonCard>
-                <ComparisonTitle>시행 전</ComparisonTitle>
+                <ComparisonTitle>😫 이전에는</ComparisonTitle>
                 <ComparisonList>
-                  <li>5시간 일정 조율</li>
-                  <li>가족 갈등 3회</li>
+                  <li>"어디 갈지 모르겠어..."</li>
+                  <li>"아이들이 또 싸울 것 같은데"</li>
+                  <li>"예산은 얼마나 잡지?"</li>
                 </ComparisonList>
               </ComparisonCard>
               <ComparisonCard success>
-                <ComparisonTitle>시행 후</ComparisonTitle>
+                <ComparisonTitle>😊 이제는</ComparisonTitle>
                 <ComparisonList>
-                  <li>45분 준비 완료</li>
-                  <li>'행복했다' 후기 94.7%</li>
+                  <li>"우리 성향에 딱이네!"</li>
+                  <li>"가족 모두 만족한 여행"</li>
+                  <li>"계획 세우기가 이렇게 쉬울 줄이야"</li>
                 </ComparisonList>
               </ComparisonCard>
             </ComparisonGrid>
 
             <CTAButton secondary onClick={handleStartTest}>
-              3분 만에 경험해 보기 →
+              우리 가족도 이런 여행 하고 싶다면? →
             </CTAButton>
           </StoryContent>
         </StorySection>
 
         {/* Features Section */}
         <FeaturesSection>
-          <SectionTitle>3-Layer AI 분석 시스템</SectionTitle>
+          <SectionTitle>✨ 3분 테스트로 이런 걸 알 수 있어요!</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
-              <FeatureIcon>👶🏻</FeatureIcon>
-              <FeatureTitle>아이 성향 분석</FeatureTitle>
+              <FeatureIcon>🎯</FeatureIcon>
+              <FeatureTitle>우리 가족 여행 성향</FeatureTitle>
               <FeatureDescription>
-                활동성, 호기심, 체력 수준을 고려한 맞춤형 여행 계획
+                활동적인 가족? 힐링 추구형? 8가지 유형 중 우리 가족이 어떤 스타일인지 정확히 분석해드려요
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>👫</FeatureIcon>
-              <FeatureTitle>부모 라이프스타일</FeatureTitle>
+              <FeatureIcon>🗺️</FeatureIcon>
+              <FeatureTitle>맞춤 여행지 추천</FeatureTitle>
               <FeatureDescription>
-                예산, 휴식 선호도, 문화 관심사 기반 최적화
+                "우리 동네에서 갈 만한 곳이 있을까?" 걱정 끝! 거주지역 기반으로 딱 맞는 여행지를 추천해드려요
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>👴🏻</FeatureIcon>
-              <FeatureTitle>조부모 편의성</FeatureTitle>
+              <FeatureIcon>💝</FeatureIcon>
+              <FeatureTitle>가족 모두 만족하는 플랜</FeatureTitle>
               <FeatureDescription>
-                건강 상태, 이동 편의성, 안전성을 최우선 고려
+                아이는 재미있고, 어른은 편안하고, 할머니·할아버지도 무리하지 않는 완벽한 여행 코스를 제안해드려요
               </FeatureDescription>
             </FeatureCard>
           </FeatureGrid>
@@ -166,32 +171,43 @@ const LandingPage: React.FC = () => {
 
         {/* Social Proof */}
         <TestimonialSection>
-          <SectionTitle>실제 후기</SectionTitle>
+          <SectionTitle>💬 이미 경험한 분들의 솔직한 후기</SectionTitle>
           <TestimonialGrid>
             <TestimonialCard>
               <TestimonialText>
-                "7살 딸과 70대 부모님이 모두 만족한 첫 여행이었어요. 
-                AI 추천이 정말 정확했습니다!"
+                "와... 진짜 우리 가족 성향이 딱 맞네요! 7살 딸이 신나하고 시어머니도 편하다고 하시니 
+                제가 제일 기뻤어요. 드디어 가족여행 스트레스에서 해방됐습니다! 😭"
               </TestimonialText>
-              <TestimonialAuthor>- 김○○님 (서울 강남구)</TestimonialAuthor>
+              <TestimonialAuthor>- 김○○님 (서울 강남구, 워킹맘)</TestimonialAuthor>
             </TestimonialCard>
             <TestimonialCard>
               <TestimonialText>
-                "3시간 고민할 것을 3분 만에 해결했어요. 
-                가족 모두가 행복한 여행 코스였습니다."
+                "매번 '어디 갈까' 고민하느라 주말이 다 지나갔는데... 
+                이제는 테스트 결과 보고 바로 결정해요. 아이들도 '엄마 센스 좋다'고 인정! 👍"
               </TestimonialText>
-              <TestimonialAuthor>- 이○○님 (부산 해운대구)</TestimonialAuthor>
+              <TestimonialAuthor>- 이○○님 (부산 해운대구, 두 아이 엄마)</TestimonialAuthor>
             </TestimonialCard>
           </TestimonialGrid>
         </TestimonialSection>
 
         {/* Final CTA */}
         <FinalCTASection>
-          <FinalCTATitle>지금 바로 시작하세요</FinalCTATitle>
-          <FinalCTASubtitle>3분 투자로 평생 기억될 가족 여행을 만들어보세요</FinalCTASubtitle>
+          <FinalCTATitle>🎉 이번 주말엔 어떠세요?</FinalCTATitle>
+          <FinalCTASubtitle>
+            더 이상 "어디 갈까?" 고민하지 마세요! <br />
+            3분 후면 우리 가족 맞춤 여행지를 알 수 있습니다 ✈️
+          </FinalCTASubtitle>
           <CTAButton large onClick={handleStartTest}>
-            ✨ 무료로 시작하기 ✨
+            🚀 3분만에 우리 가족 여행 스타일 찾기
           </CTAButton>
+          <div style={{ 
+            fontSize: '0.9rem', 
+            opacity: '0.8', 
+            marginTop: '1rem',
+            color: 'white'
+          }}>
+            💯 완전 무료 | 📱 간편 테스트 | 🎯 즉시 결과 확인
+          </div>
         </FinalCTASection>
       </ContentOverlay>
     </LandingContainer>

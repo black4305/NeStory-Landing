@@ -4,42 +4,42 @@ export const questions: Question[] = [
   // A축: Active vs Relaxing (2문항)
   {
     id: 1,
-    text: "🏃‍♂️ vs 🛌 여행에서 선택한다면?",
-    description: "아침 6시에 일어나서 하루 종일 놀기 vs 늦잠 자고 여유롭게 브런치",
+    text: "🌅 vs 🛌 가족여행 첫날 아침!",
+    description: "7시에 일어나서 알찬 하루 시작하기 vs 10시까지 늘어지게 자고 여유로운 브런치",
     axis: 'A'
   },
   {
     id: 2,
-    text: "🎢 vs ☕ 테마파크에서 선택한다면?",
-    description: "하루 종일 롤러코스터 10개 타기 vs 벤치에 앉아서 사람 구경하며 커피",
+    text: "🎢 vs ☕ 놀이공원에서 4시간!",
+    description: "스릴 넘치는 놀이기구 최대한 많이 타기 vs 그늘진 카페에서 아이들 구경하며 휴식",
     axis: 'A'
   },
   
   // C축: Culture vs Nature (2문항)  
   {
     id: 3,
-    text: "🏛️ vs 🌲 휴가지에서 선택한다면?",
-    description: "박물관에서 역사 공부하기 vs 산속에서 새소리 들으며 명상",
+    text: "🏛️ vs 🌊 가족 데이트 코스는?",
+    description: "아이들과 함께 박물관이나 전시관 관람 vs 바다나 호수에서 자연 속 힐링",
     axis: 'C'
   },
   {
     id: 4,
-    text: "🎭 vs 🦋 주말에 선택한다면?",
-    description: "시내 갤러리 도슨트 투어 vs 숲속 곤충채집과 자연관찰",
+    text: "📸 vs 🦆 인스타 사진 찍기 좋은 곳은?",
+    description: "예쁜 카페나 감성적인 거리에서 사진 vs 공원이나 산책로에서 자연 배경 사진",
     axis: 'C'
   },
   
   // F축: Foodie vs Experience (2문항)
   {
     id: 5,
-    text: "🍽️ vs 🎪 여행 예산 배분한다면?",
-    description: "미슐랭 레스토랑에서 특별한 디너 vs 번지점프나 패러글라이딩 체험",
+    text: "💰 vs 🎪 10만원 더 있다면?",
+    description: "유명한 맛집에서 특별한 식사 한 번 vs 아이들과 체험 프로그램이나 액티비티",
     axis: 'F'
   },
   {
     id: 6,
-    text: "📍 vs 🎯 여행 계획 세울 때?",
-    description: "현지 맛집 리스트 20곳 정리 vs 액티비티와 체험 프로그램 예약",
+    text: "📱 vs 🎯 여행 준비할 때?",
+    description: "맛집 블로그 검색하고 맛있다는 곳들 리스트업 vs 재미있는 체험활동이나 놀거리 찾기",
     axis: 'F'
   }
 ];

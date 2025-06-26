@@ -376,8 +376,8 @@ interface EnhancedAdminDashboardProps {}
 
 const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
   // Firebase 데이터 hooks 사용
-  const { data: firebaseData, loading, error, statistics, refreshData } = useFirebaseData();
-  const { isConnected, checkConnection } = useFirebaseStatus();
+  const { data: firebaseData, loading, error, refreshData } = useFirebaseData();
+  const { isConnected } = useFirebaseStatus();
   
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
   const [filteredData, setFilteredData] = useState<AnalyticsData[]>([]);

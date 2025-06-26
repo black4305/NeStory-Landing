@@ -205,7 +205,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          휴가 궁합 테스트❤️
+          👨‍👩‍👧‍👦 우리 가족 여행 스타일은?
         </Title>
         
         <Subtitle
@@ -213,7 +213,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          우리 가족의 찰떡 여행 콤보를 1분 만에!
+          "어디 갈까?" 고민 끝! 3분 테스트로 완벽한 답을 찾아보세요
         </Subtitle>
         
         <Description
@@ -221,16 +221,26 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <h3 style={{ marginTop: 0 }}>📊 3가지 축으로 분석</h3>
-          <p style={{ fontSize: '0.9rem', lineHeight: 1.6 }}>
-            활동성, 선호지역, 여행목적을 기준으로 
-            총 8가지 유형 중 하나로 분류해드립니다.
+          <h3 style={{ marginTop: 0 }}>🤔 혹시 이런 고민 있으셨나요?</h3>
+          <p style={{ fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1rem' }}>
+            "아이들은 놀이공원, 어른들은 카페... 모두 만족할 곳이 있을까?"<br />
+            <strong>딱 6개 질문</strong>으로 우리 가족 성향을 알아보세요!
           </p>
           
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.2)', 
+            borderRadius: '10px', 
+            padding: '0.75rem', 
+            marginBottom: '1rem',
+            fontSize: '0.85rem'
+          }}>
+            🎯 <strong>테스트 완료 후</strong>: 맞춤 여행지 + 우리 지역 추천 장소까지!
+          </div>
+          
           <Features>
-            <Feature>⏱️ 1분 소요</Feature>
-            <Feature>🎮 6개 밸런스게임</Feature>
-            <Feature>🎯 맞춤 추천</Feature>
+            <Feature>⏱️ 3분 완성</Feature>
+            <Feature>🎮 재미있는 밸런스게임</Feature>
+            <Feature>📍 지역별 맞춤 추천</Feature>
           </Features>
         </Description>
         
@@ -242,7 +252,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
           whileTap={{ scale: 0.98 }}
           onClick={onStart}
         >
-          테스트 시작하기 🚀
+          🤔 우리 가족은 어떤 스타일일까?
         </StartButton>
       </ContentWrapper>
       <div></div>

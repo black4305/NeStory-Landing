@@ -150,18 +150,6 @@ const BrandingHeader = styled.div`
   font-size: 0.9rem;
 `;
 
-const Logo = styled.div`
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 900;
-`;
 
 const LogoWrapper = styled.div`
   display: flex;
@@ -172,26 +160,30 @@ const LogoWrapper = styled.div`
 const QuestionText = styled.h2`
   color: #2d3748;
   font-size: 1.4rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.5;
   margin-bottom: 1rem;
+  text-align: center;
   
   @media (max-width: 768px) {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     line-height: 1.4;
-    margin-bottom: 0.8rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
   }
   
   @media (max-width: 480px) {
-    font-size: 1rem;
-    line-height: 1.3;
-    margin-bottom: 0.6rem;
+    font-size: 1.2rem;
+    line-height: 1.4;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
   }
   
   @media (max-width: 375px) {
-    font-size: 0.95rem;
-    line-height: 1.2;
-    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    line-height: 1.3;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
   }
 `;
 
@@ -204,26 +196,31 @@ const QuestionDescription = styled.p`
   padding: 1rem;
   border-radius: 12px;
   border-left: 4px solid #667eea;
+  text-align: center;
+  font-weight: 500;
   
   @media (max-width: 768px) {
-    font-size: 0.85rem;
-    padding: 0.6rem;
-    margin-bottom: 1rem;
-    line-height: 1.4;
+    font-size: 0.95rem;
+    padding: 0.8rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+    font-weight: 500;
   }
   
   @media (max-width: 480px) {
-    font-size: 0.8rem;
-    padding: 0.5rem;
-    margin-bottom: 0.8rem;
-    line-height: 1.3;
+    font-size: 0.9rem;
+    padding: 0.7rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    font-weight: 500;
   }
   
   @media (max-width: 375px) {
-    font-size: 0.75rem;
-    padding: 0.4rem;
-    margin-bottom: 0.6rem;
-    line-height: 1.2;
+    font-size: 0.85rem;
+    padding: 0.6rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.4;
+    font-weight: 500;
   }
 `;
 
@@ -242,35 +239,50 @@ const OptionButton = styled(motion.button)<{ selected: boolean }>`
     ? 'linear-gradient(45deg, #667eea, #764ba2)' 
     : 'linear-gradient(45deg, #f8f9fa, #e9ecef)'};
   color: ${props => props.selected ? 'white' : '#495057'};
-  border: 2px solid ${props => props.selected ? '#667eea' : 'transparent'};
+  border: 2px solid ${props => props.selected ? '#667eea' : '#e9ecef'};
   border-radius: 15px;
   padding: 1.5rem 1rem;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   min-height: 80px;
   flex: 1;
   text-align: center;
   line-height: 1.4;
+  word-break: keep-all;
   
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
   }
   
   @media (max-width: 768px) {
-    padding: 1rem;
-    font-size: 0.95rem;
-    min-height: 48px;
+    padding: 1.2rem 0.8rem;
+    font-size: 1rem;
+    min-height: 60px;
     border-radius: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem 0.7rem;
+    font-size: 0.95rem;
+    min-height: 56px;
+    border-radius: 12px;
+    font-weight: 600;
+    line-height: 1.3;
   }
   
   @media (max-width: 375px) {
-    padding: 0.9rem;
+    padding: 1rem 0.6rem;
     font-size: 0.9rem;
-    min-height: 44px;
+    min-height: 52px;
     border-radius: 10px;
+    font-weight: 600;
+    line-height: 1.2;
   }
 `;
 
@@ -395,21 +407,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
   const [startTime, setStartTime] = useState<number>(Date.now());
-  const [timeSpent, setTimeSpent] = useState<number>(0);
 
   useEffect(() => {
     setStartTime(Date.now());
     setSelectedScore(null);
-    setTimeSpent(0);
   }, [question.id]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeSpent(Math.floor((Date.now() - startTime) / 1000));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [startTime]);
 
   const handleAnswer = () => {
     if (selectedScore !== null) {
