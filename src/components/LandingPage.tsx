@@ -88,12 +88,21 @@ const LandingPage: React.FC = () => {
             <CTAButton onClick={handleStartTest}>
               우리 가족 여행 스타일 찾기 →
             </CTAButton>
+            
+            <ScrollHint>
+              <ScrollText>더 많은 정보가 궁금하다면?</ScrollText>
+              <ScrollIcon>👇</ScrollIcon>
+              <ScrollArrow />
+            </ScrollHint>
           </HeroContent>
         </HeroSection>
 
         {/* Story Section */}
         <StorySection>
           <StoryContent>
+            <HookingBadge>
+              👀 잠깐! 이 이야기는 실화입니다
+            </HookingBadge>
             <SectionTitle>
               🤔 이런 상황, 혹시 익숙하신가요?
             </SectionTitle>
@@ -143,6 +152,9 @@ const LandingPage: React.FC = () => {
 
         {/* Features Section */}
         <FeaturesSection>
+          <CuriosityHook>
+            😲 "진짜 3분만에 이런 게 가능해?"
+          </CuriosityHook>
           <SectionTitle>✨ 3분 테스트로 이런 걸 알 수 있어요!</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
@@ -171,6 +183,9 @@ const LandingPage: React.FC = () => {
 
         {/* Social Proof */}
         <TestimonialSection>
+          <TrustBadge>
+            🔥 실제 사용자 3,847명이 증명!
+          </TrustBadge>
           <SectionTitle>💬 이미 경험한 분들의 솔직한 후기</SectionTitle>
           <TestimonialGrid>
             <TestimonialCard>
@@ -192,6 +207,9 @@ const LandingPage: React.FC = () => {
 
         {/* Final CTA */}
         <FinalCTASection>
+          <UrgencyBadge>
+            ⏰ 마지막 기회! 무료 테스트는 지금만
+          </UrgencyBadge>
           <FinalCTATitle>🎉 이번 주말엔 어떠세요?</FinalCTATitle>
           <FinalCTASubtitle>
             더 이상 "어디 갈까?" 고민하지 마세요! <br />
@@ -305,7 +323,11 @@ const MainHeadline = styled.h1`
   animation: slideInUp 1s ease-out;
 
   @media (max-width: 768px) {
-    font-size: 2rem;
+    font-size: 2.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 2.2rem;
   }
   
   @keyframes slideInUp {
@@ -333,7 +355,11 @@ const SubHeadline = styled.p`
   animation: slideInUp 1s ease-out 0.3s both;
 
   @media (max-width: 768px) {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.2rem;
   }
 
   .mobile-break {
@@ -358,6 +384,16 @@ const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
   transition: all 0.3s ease;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  
+  @media (max-width: 768px) {
+    padding: ${props => props.large ? '1.2rem 2.5rem' : '1rem 2rem'};
+    font-size: ${props => props.large ? '1.4rem' : '1.2rem'};
+  }
+  
+  @media (max-width: 480px) {
+    padding: ${props => props.large ? '1.1rem 2.2rem' : '0.9rem 1.8rem'};
+    font-size: ${props => props.large ? '1.3rem' : '1.1rem'};
+  }
   
   &:hover {
     transform: translateY(-2px) scale(1.05);
@@ -405,7 +441,11 @@ const SectionTitle = styled.h2`
   text-align: center;
 
   @media (max-width: 768px) {
-    font-size: 1.75rem;
+    font-size: 1.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
   }
 `;
 
@@ -422,8 +462,12 @@ const StoryText = styled.p`
   text-align: left;
   
   @media (max-width: 768px) {
-    font-size: 1rem;
+    font-size: 1.15rem;
     text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
   }
 `;
 
@@ -516,18 +560,42 @@ const FeatureIcon = styled.div`
     0%, 100% { transform: translateY(0) scale(1); }
     50% { transform: translateY(-5px) scale(1.1); }
   }
+  
+  @media (max-width: 768px) {
+    font-size: 3.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 3.2rem;
+  }
 `;
 
 const FeatureTitle = styled.h3`
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.25rem;
+  }
 `;
 
 const FeatureDescription = styled.p`
   font-size: 0.95rem;
   line-height: 1.6;
   opacity: 0.9;
+  
+  @media (max-width: 768px) {
+    font-size: 1.05rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const TestimonialSection = styled.section`
@@ -584,11 +652,27 @@ const TestimonialText = styled.blockquote`
   line-height: 1.6;
   margin-bottom: 1rem;
   font-style: italic;
+  
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.15rem;
+  }
 `;
 
 const TestimonialAuthor = styled.cite`
   font-size: 0.9rem;
   opacity: 0.8;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+  }
 `;
 
 const FinalCTASection = styled.section`
@@ -602,6 +686,10 @@ const FinalCTATitle = styled.h2`
   margin-bottom: 1rem;
   
   @media (max-width: 768px) {
+    font-size: 2.2rem;
+  }
+  
+  @media (max-width: 480px) {
     font-size: 2rem;
   }
 `;
@@ -612,7 +700,177 @@ const FinalCTASubtitle = styled.p`
   opacity: 0.9;
   
   @media (max-width: 768px) {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.2rem;
+  }
+`;
+
+const ScrollHint = styled.div`
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  animation: bounce 2s infinite;
+  
+  @media (max-width: 768px) {
+    bottom: 1.5rem;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    40% {
+      transform: translateX(-50%) translateY(-10px);
+    }
+    60% {
+      transform: translateX(-50%) translateY(-5px);
+    }
+  }
+`;
+
+const ScrollText = styled.div`
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.25rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+`;
+
+const ScrollIcon = styled.div`
+  font-size: 1.5rem;
+  animation: wiggle 1s ease-in-out infinite;
+  
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+`;
+
+const ScrollArrow = styled.div`
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid rgba(255, 255, 255, 0.8);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.8);
+  transform: rotate(45deg);
+  animation: fadeInOut 2s infinite;
+  
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  
+  @media (max-width: 768px) {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
+const HookingBadge = styled.div`
+  background: linear-gradient(45deg, #ff6b6b, #ffa500);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  animation: pulse 2s infinite;
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+`;
+
+const CuriosityHook = styled.div`
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  animation: wobble 3s infinite;
+  
+  @keyframes wobble {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-2deg); }
+    75% { transform: rotate(2deg); }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+  }
+`;
+
+const TrustBadge = styled.div`
+  background: linear-gradient(45deg, #28a745, #20c997);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: inline-block;
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+  animation: glow 2s ease-in-out infinite alternate;
+  
+  @keyframes glow {
+    from { box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3); }
+    to { box-shadow: 0 6px 25px rgba(40, 167, 69, 0.6); }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+`;
+
+const UrgencyBadge = styled.div`
+  background: linear-gradient(45deg, #dc3545, #fd7e14);
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+  animation: urgentBlink 1.5s infinite;
+  
+  @keyframes urgentBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; transform: scale(1.02); }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
   }
 `;
 
