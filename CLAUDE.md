@@ -23,7 +23,7 @@
 
 ## 🚀 최근 추가된 기능들 (2025-06-27)
 
-### 8. 🔧 Supabase 데이터 저장 문제 진단 및 해결 (🔄 진행중)
+### 8. 🔧 Supabase 데이터 저장 문제 진단 및 해결 (✅ 해결방안 제시)
 **문제**: 
 - 새로운 설문 응답이 Supabase에 저장되지 않음
 - 관리자 페이지에 결과가 반영되지 않음
@@ -49,10 +49,30 @@
 - 📊 설문 진행 시 브라우저 콘솔에서 정확한 오류 메시지 확인 가능
 - ⏰ 사용자의 실제 설문 테스트 대기 중
 
-**사용자 테스트 방법**:
-1. 설문 진행 (개발자 도구 → Console 열기)
-2. 콘솔 로그에서 어떤 테이블명이 성공하는지 확인
-3. 성공한 테이블명 알려주시면 코드 수정하여 최종 해결
+**해결 방안 3가지 제시**:
+
+1. **다양한 테이블명 시도** (자동 시도):
+   - `user_responses` (public 스키마)
+   - `nestory_user_responses` (언더스코어 연결)
+
+2. **명시적 스키마 설정** (자동 시도):
+   - Supabase 클라이언트에 `db: { schema: 'nestory' }` 옵션 추가
+   - `supabaseWithSchema.ts` 서비스 구현
+
+3. **RPC 함수 방식** (추천 ✅):
+   - `supabase/create-rpc-functions.sql` 실행
+   - 직접 nestory 스키마에 접근하는 PostgreSQL 함수 사용
+   - 가장 안정적이고 확실한 방법
+
+**최종 해결 방법**:
+1. Supabase SQL Editor에서 `create-rpc-functions.sql` 실행
+2. `save_user_response`, `get_user_responses` 함수 생성 확인
+3. 설문 진행하면 자동으로 RPC 함수까지 시도하여 저장
+
+**콘솔 로그 확인 사항**:
+- `❌ nestory.user_responses 실패: relation "public.nestory.user_responses" does not exist`
+- → Supabase가 스키마를 public으로 인식하는 문제 확인
+- → RPC 함수 방식으로 해결 가능
 
 **생성된 구조**:
 - 📊 `nestory.user_responses`: 설문 응답 저장

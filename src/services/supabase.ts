@@ -14,7 +14,7 @@ export class SupabaseService {
     
     try {
       // 여러 테이블명으로 시도해보기
-      const tablesToTry = ['nestory.user_responses', 'user_responses', 'nestory_user_responses'];
+      const tablesToTry = ['user_responses', 'nestory_user_responses'];
       
       for (const tableName of tablesToTry) {
         console.log(`📊 ${tableName} 테이블에 저장 시도...`);
@@ -60,7 +60,7 @@ export class SupabaseService {
     console.log('🔍 Supabase getAllUserData 시작...');
     
     try {
-      const tablesToTry = ['nestory.user_responses', 'user_responses', 'nestory_user_responses'];
+      const tablesToTry = ['user_responses', 'nestory_user_responses'];
       
       for (const tableName of tablesToTry) {
         console.log(`📊 ${tableName} 테이블에서 조회 시도...`);
