@@ -23,6 +23,35 @@
 
 ## 🚀 최근 추가된 기능들 (2025-06-27)
 
+### 8. 🔧 Supabase 데이터 저장 문제 진단 및 해결 (✅ 완료)
+**문제**: 
+- 새로운 설문 응답이 Supabase에 저장되지 않음
+- 관리자 페이지에 결과가 반영되지 않음
+
+**원인 발견**:
+- ❌ Supabase에 테이블이 전혀 존재하지 않음 (`nestory.user_responses` 등)
+- ❌ `nestory-landing-setup.sql` 파일이 실행되지 않았음
+- ❌ 설문 응답 데이터가 저장될 위치가 없어 데이터 유실
+
+**해결 과정**:
+- ✅ **직접 연결 테스트**: Node.js로 Supabase 연결 상태 확인
+- ✅ **테이블 존재 여부 확인**: 모든 테이블이 존재하지 않음 확인
+- ✅ **SQL 설정 파일 재생성**: `supabase/nestory-landing-setup.sql` 완전한 파일 생성
+- ✅ **스키마 구조 정리**: `nestory` 스키마 + 4개 테이블 + 3개 뷰 + RLS 정책
+
+**사용자 해야 할 작업**:
+1. Supabase 대시보드 → SQL Editor 열기
+2. `supabase/nestory-landing-setup.sql` 파일 내용 전체 복사 & 실행
+3. 성공 메시지 확인 후 설문 재진행
+
+**생성된 구조**:
+- 📊 `nestory.user_responses`: 설문 응답 저장
+- 📊 `nestory.landing_analytics`: 랜딩 페이지 분석
+- 📊 `nestory.active_users`: 실시간 사용자 추적  
+- 📊 `nestory.ab_test_results`: A/B 테스트 결과
+- 🔒 RLS 정책 설정 완료
+- 🚀 인덱스 최적화 완료
+
 ### 7. 🎯 마케팅 동의별 자연스러운 서베이 퍼널 연결 플로우 구현 (✅ 완료)
 **요구사항**: 
 - 마케팅 동의 시 여행지 2곳만 간단히 추천

@@ -14,6 +14,7 @@ import LandingPage from './components/LandingPage';
 import { questions } from './data/questions';
 import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
+import { testSupabaseConnection, checkStoredData } from './utils/supabaseTest';
 import { Answer, UserInfo } from './types';
 
 const GlobalStyle = createGlobalStyle`
@@ -112,6 +113,21 @@ const SurveyApp: React.FC = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
+    // Supabase 연결 테스트
+    const runSupabaseTest = async () => {
+      console.log('🔍 Supabase 연결 상태 확인 중...');
+      const connectionResult = await testSupabaseConnection();
+      if (connectionResult) {
+        console.log('✅ Supabase 연결 정상');
+        // 현재 저장된 데이터 확인
+        await checkStoredData();
+      } else {
+        console.error('❌ Supabase 연결 문제 발견');
+      }
+    };
+    
+    runSupabaseTest();
+
     // 페이지 이탈 시 분석 데이터 전송
     const handleBeforeUnload = async () => {
       if (appState === 'survey' && answers.length > 0) {
