@@ -78,6 +78,7 @@ export const useSupabaseData = () => {
 
   const deleteData = async (sessionId: string) => {
     try {
+      const { SupabaseService } = await import('../services/supabase');
       const success = await SupabaseService.deleteUserData(sessionId);
       if (success) {
         // 로컬 데이터에서도 제거
@@ -115,6 +116,7 @@ export const useSupabaseStatus = () => {
 
   const checkConnection = async () => {
     try {
+      const { SupabaseService } = await import('../services/supabase');
       const connected = await SupabaseService.initializeDatabase();
       setIsConnected(connected);
       setLastChecked(new Date());
