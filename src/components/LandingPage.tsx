@@ -191,7 +191,7 @@ const LandingPage: React.FC = () => {
               </ComparisonCard>
             </ComparisonGrid>
 
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <CenteredButtonContainer>
               <CTAButton secondary onClick={() => {
                 const featuresSection = document.querySelector('[data-section="features"]');
                 if (featuresSection) {
@@ -200,7 +200,7 @@ const LandingPage: React.FC = () => {
               }}>
                 더 자세히 알아보기 →
               </CTAButton>
-            </div>
+            </CenteredButtonContainer>
           </StoryContent>
         </StorySection>
 
@@ -272,14 +272,9 @@ const LandingPage: React.FC = () => {
           <CTAButton large onClick={handleFinalStartTest}>
             🚀 지금 바로 우리 가족 타입 확인하기!
           </CTAButton>
-          <div style={{ 
-            fontSize: '0.9rem', 
-            opacity: '0.8', 
-            marginTop: '1rem',
-            color: 'white'
-          }}>
+          <FinalCTASubInfo>
             💯 완전 무료 | 📱 간편 테스트 | 🎯 즉시 결과 확인
-          </div>
+          </FinalCTASubInfo>
         </FinalCTASection>
       </ContentOverlay>
     </LandingContainer>
@@ -643,6 +638,31 @@ const SubText = styled.p`
   }
 `;
 
+const CenteredButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 2rem 0;
+  text-align: center;
+`;
+
+const FinalCTASubInfo = styled.div`
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-top: 1rem;
+  color: white;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
+`;
+
 
 const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
   background: ${props => props.secondary 
@@ -713,6 +733,15 @@ const StoryContent = styled.div`
   max-width: 48rem;
   margin: 0 auto;
   text-align: center;
+  padding: 0 1rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0 1rem;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -800,6 +829,7 @@ const ComparisonList = styled.ul`
 const FeaturesSection = styled.section`
   padding: 4rem 1rem;
   background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  text-align: center;
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
