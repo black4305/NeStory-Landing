@@ -10,71 +10,96 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 export class SupabaseService {
   // 사용자 데이터 저장
   static async saveUserData(data: AnalyticsData) {
+    console.log('🔍 Supabase saveUserData 시작:', data.sessionId);
+    
     try {
-      const { error } = await supabase
-        .from('nestory.user_responses')
-        .insert([{
-          session_id: data.sessionId,
-          start_time: new Date(data.startTime),
-          answers: data.answers,
-          total_time: data.totalTime,
-          click_count: data.clickCount,
-          scroll_depth: data.scrollDepth,
-          device_type: data.deviceType,
-          user_agent: data.userAgent,
-          completed: data.completed,
-          result: data.result,
-          user_info: data.userInfo,
-          submitted_at: data.submittedAt ? new Date(data.submittedAt) : new Date(),
-          reliability_score: data.reliabilityScore,
-          response_pattern: data.responsePattern
-        }]);
+      // 여러 테이블명으로 시도해보기
+      const tablesToTry = ['nestory.user_responses', 'user_responses', 'nestory_user_responses'];
+      
+      for (const tableName of tablesToTry) {
+        console.log(`📊 ${tableName} 테이블에 저장 시도...`);
+        
+        const { error } = await supabase
+          .from(tableName)
+          .insert([{
+            session_id: data.sessionId,
+            start_time: new Date(data.startTime),
+            answers: data.answers,
+            total_time: data.totalTime,
+            click_count: data.clickCount,
+            scroll_depth: data.scrollDepth,
+            device_type: data.deviceType,
+            user_agent: data.userAgent,
+            completed: data.completed,
+            result: data.result,
+            user_info: data.userInfo,
+            submitted_at: data.submittedAt ? new Date(data.submittedAt) : new Date(),
+            reliability_score: data.reliabilityScore,
+            response_pattern: data.responsePattern
+          }]);
 
-      if (error) {
-        console.error('Supabase 저장 오류:', error);
-        return false;
+        if (!error) {
+          console.log(`✅ ${tableName} 테이블에 저장 성공!`);
+          return true;
+        } else {
+          console.log(`❌ ${tableName} 실패:`, error.message);
+        }
       }
       
-      return true;
+      console.error('❌ 모든 테이블 시도 실패');
+      return false;
+      
     } catch (error) {
-      console.error('데이터 저장 실패:', error);
+      console.error('💥 데이터 저장 실패:', error);
       return false;
     }
   }
 
   // 모든 사용자 데이터 가져오기
   static async getAllUserData(): Promise<AnalyticsData[]> {
+    console.log('🔍 Supabase getAllUserData 시작...');
+    
     try {
-      const { data, error } = await supabase
-        .from('nestory.user_responses')
-        .select('*')
-        .order('submitted_at', { ascending: false });
+      const tablesToTry = ['nestory.user_responses', 'user_responses', 'nestory_user_responses'];
+      
+      for (const tableName of tablesToTry) {
+        console.log(`📊 ${tableName} 테이블에서 조회 시도...`);
+        
+        const { data, error } = await supabase
+          .from(tableName)
+          .select('*')
+          .order('submitted_at', { ascending: false });
 
-      if (error) {
-        console.error('Supabase 조회 오류:', error);
-        return [];
+        if (!error && data) {
+          console.log(`✅ ${tableName} 테이블에서 ${data.length}개 데이터 조회 성공!`);
+          
+          // Supabase 데이터를 AnalyticsData 형식으로 변환
+          return data.map(item => ({
+            sessionId: item.session_id,
+            startTime: new Date(item.start_time).getTime(),
+            answers: item.answers,
+            totalTime: item.total_time,
+            clickCount: item.click_count,
+            scrollDepth: item.scroll_depth,
+            deviceType: item.device_type,
+            userAgent: item.user_agent,
+            completed: item.completed,
+            result: item.result,
+            userInfo: item.user_info,
+            submittedAt: item.submitted_at ? new Date(item.submitted_at).getTime() : Date.now(),
+            reliabilityScore: item.reliability_score,
+            questionProgress: item.question_progress,
+            responsePattern: item.response_pattern
+          }));
+        } else {
+          console.log(`❌ ${tableName} 조회 실패:`, error?.message || 'No data');
+        }
       }
-
-      // Supabase 데이터를 AnalyticsData 형식으로 변환
-      return data.map(item => ({
-        sessionId: item.session_id,
-        startTime: new Date(item.start_time).getTime(),
-        answers: item.answers,
-        totalTime: item.total_time,
-        clickCount: item.click_count,
-        scrollDepth: item.scroll_depth,
-        deviceType: item.device_type,
-        userAgent: item.user_agent,
-        completed: item.completed,
-        result: item.result,
-        userInfo: item.user_info,
-        submittedAt: item.submitted_at ? new Date(item.submitted_at).getTime() : Date.now(),
-        reliabilityScore: item.reliability_score,
-        questionProgress: item.question_progress,
-        responsePattern: item.response_pattern
-      }));
+      
+      console.error('❌ 모든 테이블에서 조회 실패');
+      return [];
     } catch (error) {
-      console.error('데이터 조회 실패:', error);
+      console.error('💥 데이터 조회 실패:', error);
       return [];
     }
   }

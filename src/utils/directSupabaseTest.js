@@ -10,12 +10,25 @@ async function testConnection() {
   console.log('🔍 Supabase 직접 연결 테스트 시작...');
   
   try {
-    // 1. 테이블 존재 확인 (nestory 스키마)
+    // 1. 테이블 존재 확인 (소문자 nestory 스키마)
     console.log('📊 nestory.user_responses 테이블 확인 중...');
-    const { data, error } = await supabase
-      .from('nestory.user_responses')
+    
+    // 먼저 스키마 없이 시도
+    let { data, error } = await supabase
+      .from('user_responses')
       .select('session_id')
       .limit(1);
+    
+    if (error) {
+      console.log('❌ user_responses (스키마 없음):', error.message);
+      // 스키마 포함해서 시도
+      ({ data, error } = await supabase
+        .from('nestory.user_responses')
+        .select('session_id')
+        .limit(1));
+    } else {
+      console.log('✅ user_responses 테이블 발견 (public 스키마)');
+    }
     
     if (error) {
       console.error('❌ 테이블 확인 실패:', error);
