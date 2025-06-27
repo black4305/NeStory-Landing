@@ -21,6 +21,16 @@ const Container = styled.div`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4); }
+    50% { transform: scale(1.02); box-shadow: 0 12px 35px rgba(40, 167, 69, 0.6); }
+  }
+  
   @media (max-width: 768px) {
     padding: 1rem 0.75rem;
     justify-content: flex-start;
@@ -741,6 +751,117 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
             {isSharedView ? '🚀 나도 테스트하기' : '🔄 다시 테스트하기'}
           </Button>
         </ButtonGroup>
+
+        {/* 맞춤 여행 계획 제작 후킹 섹션 */}
+        <RecommendationSection style={{ 
+          background: 'linear-gradient(135deg, #ff6b6b, #feca57)', 
+          marginTop: '2rem',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-20%',
+            width: '100px',
+            height: '100px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '50%',
+            animation: 'float 3s ease-in-out infinite'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '-30%',
+            left: '-10%',
+            width: '80px',
+            height: '80px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '50%',
+            animation: 'float 4s ease-in-out infinite reverse'
+          }} />
+          
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <RecommendationTitle style={{ color: 'white', fontSize: '1.5rem', marginBottom: '1.5rem' }}>
+              ✨ {typeCode} 유형만을 위한 특별 혜택! ✨
+            </RecommendationTitle>
+            
+            <div style={{ 
+              textAlign: 'center', 
+              color: 'white',
+              marginBottom: '2rem'
+            }}>
+              <div style={{ 
+                fontSize: '1.3rem', 
+                fontWeight: 'bold', 
+                marginBottom: '1rem',
+                textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+              }}>
+                🎯 당신 가족만을 위한<br/>
+                <span style={{ fontSize: '1.5rem', color: '#fff3cd' }}>개인 맞춤 여행 계획</span>을 제작해드립니다!
+              </div>
+              
+              <div style={{ 
+                fontSize: '1rem', 
+                lineHeight: '1.6', 
+                marginBottom: '1.5rem',
+                opacity: '0.95'
+              }}>
+                💫 일반적인 추천이 아닌, <strong>오직 당신 가족만</strong>을 위한<br/>
+                세상에 단 하나뿐인 맞춤형 여행 일정을 만들어드려요!
+              </div>
+              
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '15px',
+                padding: '1.5rem',
+                marginBottom: '2rem',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)'
+              }}>
+                <div style={{ fontSize: '0.95rem', marginBottom: '1rem', fontWeight: '600' }}>
+                  🎁 지금 신청하면 무료로 받을 수 있어요!
+                </div>
+                <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
+                  ✅ {typeCode} 유형 특화 명소 추천<br/>
+                  ✅ 가족 구성원별 맞춤 액티비티<br/>
+                  ✅ 실제 여행 경로 및 일정표<br/>
+                  ✅ 숨은 맛집 & 포토스팟 정보
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ textAlign: 'center' }}>
+              <Button
+                style={{ 
+                  background: 'linear-gradient(45deg, #28a745, #20c997)',
+                  fontSize: '1.1rem',
+                  fontWeight: '700',
+                  padding: '1.2rem 2.5rem',
+                  boxShadow: '0 8px 25px rgba(40, 167, 69, 0.4)',
+                  border: 'none',
+                  borderRadius: '50px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  animation: 'pulse 2s ease-in-out infinite'
+                }}
+                onClick={() => window.open('https://nestory-survey.vercel.app', '_blank')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                🌟 나만의 여행 계획 무료로 받기 🌟
+              </Button>
+              
+              <div style={{ 
+                fontSize: '0.8rem', 
+                marginTop: '1rem', 
+                opacity: '0.9',
+                fontStyle: 'italic'
+              }}>
+                ⏰ 선착순 100명 한정! 지금 바로 신청하세요
+              </div>
+            </div>
+          </div>
+        </RecommendationSection>
 
         <ButtonGroup style={{ marginTop: '1rem' }}>
           <Button
