@@ -88,26 +88,12 @@ class Analytics {
 
   private async sendAnalytics(data: AnalyticsData): Promise<void> {
     try {
-      // 먼저 기본 Supabase 서비스로 시도
-      const { SupabaseService } = await import('../services/supabase');
-      let success = await SupabaseService.saveUserData(data);
-      
-      if (!success) {
-        console.log('🔄 nestory 스키마로 재시도...');
-        // nestory 스키마 명시적 설정으로 재시도
-        const { SupabaseServiceWithSchema } = await import('../services/supabaseWithSchema');
-        success = await SupabaseServiceWithSchema.saveUserData(data);
-        
-        if (!success) {
-          console.log('🔄 RPC 함수로 재시도...');
-          // RPC 함수로 재시도
-          const { SupabaseRPCService } = await import('../services/supabaseRPC');
-          success = await SupabaseRPCService.saveUserData(data);
-        }
-      }
+      // public 스키마 직접 사용
+      const { SupabasePublicService } = await import('../services/supabasePublic');
+      const success = await SupabasePublicService.saveUserData(data);
       
       if (success) {
-        console.log('✅ Supabase에 분석 데이터 저장 완료');
+        console.log('✅ Supabase public.user_responses에 분석 데이터 저장 완료');
       } else {
         throw new Error('Supabase 저장 실패');
       }

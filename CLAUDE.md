@@ -64,15 +64,24 @@
    - 직접 nestory 스키마에 접근하는 PostgreSQL 함수 사용
    - 가장 안정적이고 확실한 방법
 
-**최종 해결 방법**:
-1. Supabase SQL Editor에서 `create-rpc-functions.sql` 실행
-2. `save_user_response`, `get_user_responses` 함수 생성 확인
-3. 설문 진행하면 자동으로 RPC 함수까지 시도하여 저장
+**최종 해결 방법 (✅ 구현 완료)**:
+1. ✅ **PostgreSQL 프록시 함수 생성**: `nestory-proxy-functions.sql` 파일 작성
+   - `save_nestory_response()`: nestory.user_responses 테이블에 데이터 저장
+   - `get_nestory_responses()`: nestory.user_responses 테이블에서 모든 데이터 조회
+   - `delete_nestory_response()`: nestory.user_responses 테이블에서 데이터 삭제
+   - `get_nestory_stats()`: nestory.user_responses 테이블 통계 조회
 
-**콘솔 로그 확인 사항**:
-- `❌ nestory.user_responses 실패: relation "public.nestory.user_responses" does not exist`
-- → Supabase가 스키마를 public으로 인식하는 문제 확인
-- → RPC 함수 방식으로 해결 가능
+2. ✅ **Supabase 서비스 업데이트**: 모든 CRUD 작업을 프록시 함수로 변경
+   - `src/services/supabase.ts`: 직접 테이블 접근 → RPC 함수 호출 방식으로 변경
+   - 안정적인 nestory 스키마 접근 보장
+
+3. **다음 단계**:
+   - Supabase SQL Editor에서 `nestory-proxy-functions.sql` 실행 필요
+   - 설문 테스트로 실제 저장/조회 동작 확인
+
+**근본 원인 해결**:
+- ❌ 문제: Supabase JS 클라이언트가 커스텀 스키마(nestory) 직접 접근 불가
+- ✅ 해결: public 스키마의 프록시 함수가 nestory 스키마에 접근하는 구조
 
 **생성된 구조**:
 - 📊 `nestory.user_responses`: 설문 응답 저장

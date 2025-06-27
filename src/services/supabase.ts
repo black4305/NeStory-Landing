@@ -8,98 +8,76 @@ const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-anon-key';
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export class SupabaseService {
-  // 사용자 데이터 저장
+  // nestory 스키마 프록시 함수 사용
   static async saveUserData(data: AnalyticsData) {
-    console.log('🔍 Supabase saveUserData 시작:', data.sessionId);
+    console.log('🔍 nestory 스키마로 Supabase 저장 시작:', data.sessionId);
     
     try {
-      // 여러 테이블명으로 시도해보기
-      const tablesToTry = ['user_responses', 'nestory_user_responses'];
-      
-      for (const tableName of tablesToTry) {
-        console.log(`📊 ${tableName} 테이블에 저장 시도...`);
-        
-        const { error } = await supabase
-          .from(tableName)
-          .insert([{
-            session_id: data.sessionId,
-            start_time: new Date(data.startTime),
-            answers: data.answers,
-            total_time: data.totalTime,
-            click_count: data.clickCount,
-            scroll_depth: data.scrollDepth,
-            device_type: data.deviceType,
-            user_agent: data.userAgent,
-            completed: data.completed,
-            result: data.result,
-            user_info: data.userInfo,
-            submitted_at: data.submittedAt ? new Date(data.submittedAt) : new Date(),
-            reliability_score: data.reliabilityScore,
-            response_pattern: data.responsePattern
-          }]);
+      // nestory 스키마 프록시 함수 호출
+      const { data: result, error } = await supabase.rpc('save_nestory_response', {
+        p_session_id: data.sessionId,
+        p_start_time: new Date(data.startTime).toISOString(),
+        p_answers: data.answers,
+        p_total_time: data.totalTime,
+        p_click_count: data.clickCount,
+        p_scroll_depth: data.scrollDepth,
+        p_device_type: data.deviceType,
+        p_user_agent: data.userAgent,
+        p_completed: data.completed,
+        p_result: data.result,
+        p_user_info: data.userInfo,
+        p_reliability_score: data.reliabilityScore,
+        p_response_pattern: data.responsePattern
+      });
 
-        if (!error) {
-          console.log(`✅ ${tableName} 테이블에 저장 성공!`);
-          return true;
-        } else {
-          console.log(`❌ ${tableName} 실패:`, error.message);
-        }
+      if (!error && result) {
+        console.log('✅ nestory.user_responses 테이블에 저장 성공!');
+        return true;
+      } else {
+        console.log('❌ nestory 프록시 함수 저장 실패:', error?.message || 'Unknown error');
+        return false;
       }
-      
-      console.error('❌ 모든 테이블 시도 실패');
-      return false;
-      
     } catch (error) {
-      console.error('💥 데이터 저장 실패:', error);
+      console.error('💥 nestory 스키마 저장 오류:', error);
       return false;
     }
   }
 
-  // 모든 사용자 데이터 가져오기
+  // nestory 스키마 프록시 함수로 모든 사용자 데이터 가져오기
   static async getAllUserData(): Promise<AnalyticsData[]> {
-    console.log('🔍 Supabase getAllUserData 시작...');
+    console.log('🔍 nestory 스키마에서 Supabase 조회 시작...');
     
     try {
-      const tablesToTry = ['user_responses', 'nestory_user_responses'];
-      
-      for (const tableName of tablesToTry) {
-        console.log(`📊 ${tableName} 테이블에서 조회 시도...`);
-        
-        const { data, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .order('submitted_at', { ascending: false });
+      // nestory 스키마 프록시 함수 호출
+      const { data, error } = await supabase.rpc('get_nestory_responses');
 
-        if (!error && data) {
-          console.log(`✅ ${tableName} 테이블에서 ${data.length}개 데이터 조회 성공!`);
-          
-          // Supabase 데이터를 AnalyticsData 형식으로 변환
-          return data.map(item => ({
-            sessionId: item.session_id,
-            startTime: new Date(item.start_time).getTime(),
-            answers: item.answers,
-            totalTime: item.total_time,
-            clickCount: item.click_count,
-            scrollDepth: item.scroll_depth,
-            deviceType: item.device_type,
-            userAgent: item.user_agent,
-            completed: item.completed,
-            result: item.result,
-            userInfo: item.user_info,
-            submittedAt: item.submitted_at ? new Date(item.submitted_at).getTime() : Date.now(),
-            reliabilityScore: item.reliability_score,
-            questionProgress: item.question_progress,
-            responsePattern: item.response_pattern
-          }));
-        } else {
-          console.log(`❌ ${tableName} 조회 실패:`, error?.message || 'No data');
-        }
+      if (!error && data) {
+        console.log(`✅ nestory.user_responses 테이블에서 ${data.length}개 데이터 조회 성공!`);
+        
+        // Supabase 데이터를 AnalyticsData 형식으로 변환
+        return data.map((item: any) => ({
+          sessionId: item.session_id,
+          startTime: new Date(item.start_time).getTime(),
+          answers: item.answers,
+          totalTime: item.total_time,
+          clickCount: item.click_count,
+          scrollDepth: item.scroll_depth,
+          deviceType: item.device_type,
+          userAgent: item.user_agent,
+          completed: item.completed,
+          result: item.result,
+          userInfo: item.user_info,
+          submittedAt: item.submitted_at ? new Date(item.submitted_at).getTime() : Date.now(),
+          reliabilityScore: item.reliability_score,
+          questionProgress: item.question_progress,
+          responsePattern: item.response_pattern
+        }));
+      } else {
+        console.log('❌ nestory 프록시 함수 조회 실패:', error?.message || 'No data');
+        return [];
       }
-      
-      console.error('❌ 모든 테이블에서 조회 실패');
-      return [];
     } catch (error) {
-      console.error('💥 데이터 조회 실패:', error);
+      console.error('💥 nestory 스키마 데이터 조회 실패:', error);
       return [];
     }
   }
@@ -123,22 +101,22 @@ export class SupabaseService {
     }
   }
 
-  // 데이터 삭제
+  // nestory 스키마 프록시 함수로 데이터 삭제
   static async deleteUserData(sessionId: string) {
     try {
-      const { error } = await supabase
-        .from('nestory.user_responses')
-        .delete()
-        .eq('session_id', sessionId);
+      const { data: result, error } = await supabase.rpc('delete_nestory_response', {
+        p_session_id: sessionId
+      });
 
-      if (error) {
-        console.error('삭제 오류:', error);
+      if (!error && result) {
+        console.log('✅ nestory.user_responses에서 데이터 삭제 성공');
+        return true;
+      } else {
+        console.error('❌ nestory 삭제 오류:', error?.message || 'Unknown error');
         return false;
       }
-
-      return true;
     } catch (error) {
-      console.error('데이터 삭제 실패:', error);
+      console.error('💥 nestory 데이터 삭제 실패:', error);
       return false;
     }
   }

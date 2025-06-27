@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnalyticsData } from '../types';
-import { SupabaseService } from '../services/supabase';
+import { SupabasePublicService } from '../services/supabasePublic';
 
 export const useSupabaseData = () => {
   const [data, setData] = useState<AnalyticsData[]>([]);
@@ -38,7 +38,7 @@ export const useSupabaseData = () => {
       setError(null);
       
       // Supabase에서 데이터 로드
-      const surveyData = await SupabaseService.getAllUserData();
+      const surveyData = await SupabasePublicService.getAllUserData();
       setData(surveyData);
       setStatistics(calculateStatistics(surveyData));
       
