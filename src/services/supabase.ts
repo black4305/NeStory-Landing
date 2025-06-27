@@ -12,7 +12,7 @@ export class SupabaseService {
   static async saveUserData(data: AnalyticsData) {
     try {
       const { error } = await supabase
-        .from('user_responses')
+        .from('nestory.user_responses')
         .insert([{
           session_id: data.sessionId,
           start_time: new Date(data.startTime),
@@ -46,7 +46,7 @@ export class SupabaseService {
   static async getAllUserData(): Promise<AnalyticsData[]> {
     try {
       const { data, error } = await supabase
-        .from('user_responses')
+        .from('nestory.user_responses')
         .select('*')
         .order('submitted_at', { ascending: false });
 
@@ -83,7 +83,7 @@ export class SupabaseService {
   static async getStatsData() {
     try {
       const { data, error } = await supabase
-        .from('user_responses')
+        .from('nestory.user_responses')
         .select('result, device_type, submitted_at, completed, reliability_score, response_pattern');
 
       if (error) {
@@ -102,7 +102,7 @@ export class SupabaseService {
   static async deleteUserData(sessionId: string) {
     try {
       const { error } = await supabase
-        .from('user_responses')
+        .from('nestory.user_responses')
         .delete()
         .eq('session_id', sessionId);
 
@@ -123,15 +123,16 @@ export class SupabaseService {
     try {
       // 먼저 테이블 존재 여부 확인
       const { data, error } = await supabase
-        .from('user_responses')
+        .from('nestory.user_responses')
         .select('session_id')
         .limit(1);
 
       if (error && error.code === 'PGRST116') {
         // 테이블이 없으면 생성하라고 안내
-        console.log('Supabase에서 다음 SQL을 실행하여 테이블을 생성하세요:');
+        console.log('Supabase에서 nestory-landing-setup.sql 파일을 실행하세요.');
+        console.log('또는 다음 SQL을 실행하여 테이블을 생성하세요:');
         console.log(`
-          CREATE TABLE user_responses (
+          CREATE TABLE nestory.user_responses (
             id SERIAL PRIMARY KEY,
             session_id TEXT UNIQUE NOT NULL,
             start_time TIMESTAMP,

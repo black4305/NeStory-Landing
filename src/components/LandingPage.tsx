@@ -2,46 +2,68 @@ import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import RealtimeStats from './RealtimeStats';
+import { supabaseAdvanced } from '../services/supabaseAdvanced';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
+    const visitId = Date.now().toString();
+    const sessionId = `landing-${visitId}`;
+    sessionStorage.setItem('visitId', visitId);
+    
     // 랜딩 페이지 방문 데이터 수집
     const visit: any = {
-      id: Date.now().toString(),
+      id: visitId,
       timestamp: Date.now(),
       userAgent: navigator.userAgent,
       referrer: document.referrer,
       deviceType: getDeviceType()
     };
 
-    // 기존 데이터에 추가
-    const existingData = localStorage.getItem('landingPageAnalytics');
-    const visits = existingData ? JSON.parse(existingData) : [];
-    visits.unshift(visit); // 최신 방문을 앞에 추가
-    
-    // 최대 500개 기록만 유지
-    if (visits.length > 500) {
-      visits.splice(500);
-    }
-    
-    localStorage.setItem('landingPageAnalytics', JSON.stringify(visits));
+    // Supabase에 방문 데이터 저장
+    supabaseAdvanced.trackLandingAnalytics({
+      visitId,
+      timestamp: visit.timestamp,
+      userAgent: visit.userAgent,
+      referrer: visit.referrer,
+      deviceType: visit.deviceType
+    });
 
-    // 페이지 이탈 시 체류 시간 기록
+    // 실시간 활성 사용자 추적
+    supabaseAdvanced.trackActiveUser(sessionId, 'landing');
+
+    // 스크롤 깊이 추적
+    let maxScrollDepth = 0;
+    const trackScrollDepth = () => {
+      const scrollPercentage = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100;
+      maxScrollDepth = Math.max(maxScrollDepth, scrollPercentage);
+    };
+    window.addEventListener('scroll', trackScrollDepth);
+
+    // 페이지 이탈 시 데이터 업데이트
     const startTime = Date.now();
-    
     const handleBeforeUnload = () => {
       const sessionDuration = (Date.now() - startTime) / 1000;
-      if (sessionDuration > 1) { // 1초 이상 체류한 경우만 기록
-        visit.sessionDuration = sessionDuration;
-        const updatedVisits = visits.map((v: any) => v.id === visit.id ? visit : v);
-        localStorage.setItem('landingPageAnalytics', JSON.stringify(updatedVisits));
+      if (sessionDuration > 1) {
+        supabaseAdvanced.trackLandingAnalytics({
+          visitId,
+          timestamp: visit.timestamp,
+          userAgent: visit.userAgent,
+          referrer: visit.referrer,
+          deviceType: visit.deviceType,
+          sessionDuration,
+          scrollDepth: maxScrollDepth
+        });
       }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('scroll', trackScrollDepth);
+    };
   }, []);
 
   const getDeviceType = (): 'mobile' | 'tablet' | 'desktop' => {
@@ -53,13 +75,15 @@ const LandingPage: React.FC = () => {
 
   const handleStartTest = () => {
     // CTA 클릭 이벤트 기록
-    const existingData = localStorage.getItem('landingPageAnalytics');
-    const visits = existingData ? JSON.parse(existingData) : [];
-    
-    if (visits.length > 0) {
-      visits[0].ctaClicked = true; // 최신 방문에 CTA 클릭 기록
-      localStorage.setItem('landingPageAnalytics', JSON.stringify(visits));
-    }
+    const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
+    supabaseAdvanced.trackLandingAnalytics({
+      visitId,
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent,
+      referrer: document.referrer,
+      deviceType: getDeviceType(),
+      ctaClicked: true
+    });
 
     // 스크롤로 다음 섹션으로 이동
     const storySection = document.querySelector('[data-section="story"]');
@@ -77,6 +101,9 @@ const LandingPage: React.FC = () => {
       <VideoBackground autoPlay muted loop playsInline>
         <source src="/video/family-travel.mp4" type="video/mp4" />
       </VideoBackground>
+      
+      {/* 실시간 통계 위젯 */}
+      <RealtimeStats show={true} />
       
       <ContentOverlay>
         {/* Hero Section */}
@@ -136,7 +163,8 @@ const LandingPage: React.FC = () => {
             
             <ScrollHint>
               <ScrollText>😱 실제 후기가 더 궁금하다면?</ScrollText>
-              <ScrollIcon>👇</ScrollIcon>
+              <ScrollIcon>👇👇👇</ScrollIcon>
+              <PulsatingScrollText>아래로 스크롤하세요!</PulsatingScrollText>
               <ScrollArrow />
             </ScrollHint>
           </HeroContent>
@@ -201,6 +229,11 @@ const LandingPage: React.FC = () => {
                 더 자세히 알아보기 →
               </CTAButton>
             </CenteredButtonContainer>
+            
+            <MobileScrollHint>
+              <MobileScrollText>👆 아직도 더 있어요! 👆</MobileScrollText>
+              <MobileScrollSubtext>밑으로 계속 스크롤하세요</MobileScrollSubtext>
+            </MobileScrollHint>
           </StoryContent>
         </StorySection>
 
@@ -233,6 +266,11 @@ const LandingPage: React.FC = () => {
               </FeatureDescription>
             </FeatureCard>
           </FeatureGrid>
+          
+          <MobileScrollHint>
+            <MobileScrollText>🎉 후기도 보시고 테스트도 해보세요! 🎉</MobileScrollText>
+            <MobileScrollSubtext>밑으로 더 스크롤하세요</MobileScrollSubtext>
+          </MobileScrollHint>
         </FeaturesSection>
 
         {/* Social Proof */}
@@ -461,10 +499,19 @@ const BenefitItem = styled.div`
 `;
 
 const BenefitEmoji = styled.div`
-  font-size: 2rem;
+  font-size: 3.5rem;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.3) rotate(-5deg);
+  }
   
   @media (max-width: 768px) {
-    font-size: 1.8rem;
+    font-size: 3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 2.5rem;
   }
 `;
 
@@ -661,6 +708,69 @@ const FinalCTASubInfo = styled.div`
   @media (max-width: 480px) {
     font-size: 0.8rem;
   }
+`;
+
+const PulsatingScrollText = styled.div`
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ff6b6b;
+  animation: pulse 2s infinite;
+  margin-top: 0.5rem;
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(1.05);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+`;
+
+const MobileScrollHint = styled.div`
+  display: block;
+  text-align: center;
+  margin: 3rem 0 2rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+  
+  @media (min-width: 769px) {
+    display: none;
+  }
+`;
+
+const MobileScrollText = styled.div`
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 0.5rem;
+  animation: bounce 2s infinite;
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+`;
+
+const MobileScrollSubtext = styled.div`
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
 `;
 
 
@@ -882,21 +992,27 @@ const FeatureCard = styled.div`
 `;
 
 const FeatureIcon = styled.div`
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
   animation: iconFloat 3s ease-in-out infinite;
+  transition: all 0.3s ease;
   
   @keyframes iconFloat {
     0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-5px) scale(1.1); }
+    50% { transform: translateY(-8px) scale(1.15); }
+  }
+  
+  &:hover {
+    transform: scale(1.2) rotate(10deg);
+    animation-play-state: paused;
   }
   
   @media (max-width: 768px) {
-    font-size: 3.5rem;
+    font-size: 4rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 3.2rem;
+    font-size: 3.5rem;
   }
 `;
 
@@ -931,6 +1047,11 @@ const FeatureDescription = styled.p`
 const TestimonialSection = styled.section`
   padding: 4rem 1rem;
   background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
