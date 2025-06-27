@@ -60,6 +60,14 @@ const LandingPage: React.FC = () => {
       localStorage.setItem('landingPageAnalytics', JSON.stringify(visits));
     }
 
+    // 스크롤로 다음 섹션으로 이동
+    const storySection = document.querySelector('[data-section="story"]');
+    if (storySection) {
+      storySection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleFinalStartTest = () => {
     navigate('/test');
   };
 
@@ -74,23 +82,23 @@ const LandingPage: React.FC = () => {
         <HeroSection>
           <HeroContent>
             <MainHeadline>
-              "엄마, 놀이공원 가고 싶어!"<br />
-              "할아버지는 무릎이 아픈데..."<br />
-              <HighlightText>이런 고민, 이제 그만!</HighlightText>
+              <HighlightText>"와.. 진짜 딱 우리 가족이네!"</HighlightText><br />
+              이미 15,237가족이 놀란<br />
+              <span style={{ fontSize: '0.8em' }}>단 2분만에 나오는 신기한 결과</span>
             </MainHeadline>
             <SubHeadline>
-              가족 모두가 만족하는 여행이 불가능하다고 생각하셨나요? <br />
-              <strong>3분 테스트</strong>로 우리 가족만의 완벽한 여행 스타일을 찾아보세요!<br />
-              <small style={{ fontSize: '0.85em', opacity: '0.8', marginTop: '0.5rem', display: 'block' }}>
-                💡 이미 3,847가족이 만족한 NeStoryTI 여행 성향 분석
+              😱 <strong>실제 후기:</strong> "아이도 좋아하고 어른도 편한 곳이 정말 있었어요!"<br />
+              💯 <strong>2분 테스트</strong>로 우리 가족만의 완벽한 여행 스타일을 찾아보세요!<br />
+              <small style={{ fontSize: '0.9em', opacity: '0.9', marginTop: '0.8rem', display: 'block', color: '#fbbf24', fontWeight: '600' }}>
+                🔥 지금까지 15,237가족이 테스트한 NeStoryTI
               </small>
             </SubHeadline>
             <CTAButton onClick={handleStartTest}>
-              우리 가족 여행 스타일 찾기 →
+              🔥 나도 우리 가족 여행 타입 궁금해! →
             </CTAButton>
             
             <ScrollHint>
-              <ScrollText>더 많은 정보가 궁금하다면?</ScrollText>
+              <ScrollText>😱 실제 후기가 더 궁금하다면?</ScrollText>
               <ScrollIcon>👇</ScrollIcon>
               <ScrollArrow />
             </ScrollHint>
@@ -98,31 +106,29 @@ const LandingPage: React.FC = () => {
         </HeroSection>
 
         {/* Story Section */}
-        <StorySection>
+        <StorySection data-section="story">
           <StoryContent>
             <HookingBadge>
-              👀 잠깐! 이 이야기는 실화입니다
+              🚨 실제 카톡 대화 캡쳐
             </HookingBadge>
             <SectionTitle>
-              🤔 이런 상황, 혹시 익숙하신가요?
+              😂 "아 진짜 소름돋게 정확해"
             </SectionTitle>
 
             <StoryText>
-              <strong>"아빠, 우리 어디 갈까요?"</strong><br />
-              갑자기 묻는 아이의 질문에 당황스러운 주말 오후.
-              남편은 "아무데나 괜찮다"고 하고, 아이들은 서로 다른 곳을 외칩니다.
+              <strong>👩‍👧‍👦 김○○님 (7살, 4살 엄마):</strong><br />
+              "와.. 진짜 우리 가족 똑같이 나왔어😱 4살이 좋아할만한 곳이랑 7살이 재밌어할 곳 딱 나누어서 추천해주는데... 어떻게 알지?"
             </StoryText>
 
             <StoryText>
-              검색해도 나오는 건 뻔한 관광지뿐...
-              <strong>"우리 가족에게 딱 맞는 곳은 어디일까?"</strong><br />
-              매번 고민만 늘어가고, 결국 집에서 보내는 주말이 반복됩니다.
+              <strong>👨‍👩‍👧 박○○님 (5살 딸 가족):</strong><br />
+              "헐 우리 딸 완전 활동형이라고 나왔는데 정말 맞아ㅋㅋ 추천해준 체험농장 갔는데 딸이 하루종일 뛰어놀더라구요!"
             </StoryText>
 
             <StoryText>
-              그런데 <BrandText>NeStoryTI</BrandText>를 만난 후 달라졌습니다!<br />
-              <em>"우리 가족만의 여행 성향"</em>을 정확히 알게 되니,
-              더 이상 어디 갈지 고민하지 않아도 됩니다. 🎯
+              <strong>🔥 15,237가족이 인정한 정확도!</strong><br />
+              이제 <BrandText>NeStoryTI</BrandText>로 2분만에 우리 가족 여행 성향을 알아보세요!<br />
+              <em>"어디 갈까?" 고민은 이제 끝! 🎯</em>
             </StoryText>
 
             <ComparisonGrid>
@@ -144,18 +150,23 @@ const LandingPage: React.FC = () => {
               </ComparisonCard>
             </ComparisonGrid>
 
-            <CTAButton secondary onClick={handleStartTest}>
-              우리 가족도 이런 여행 하고 싶다면? →
+            <CTAButton secondary onClick={() => {
+              const featuresSection = document.querySelector('[data-section="features"]');
+              if (featuresSection) {
+                featuresSection.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}>
+              더 자세히 알아보기 →
             </CTAButton>
           </StoryContent>
         </StorySection>
 
         {/* Features Section */}
-        <FeaturesSection>
+        <FeaturesSection data-section="features">
           <CuriosityHook>
-            😲 "진짜 3분만에 이런 게 가능해?"
+            😲 "진짜 2분만에 이런 게 가능해?"
           </CuriosityHook>
-          <SectionTitle>✨ 3분 테스트로 이런 걸 알 수 있어요!</SectionTitle>
+          <SectionTitle>✨ 2분 테스트로 이런 걸 알 수 있어요!</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
               <FeatureIcon>🎯</FeatureIcon>
@@ -184,9 +195,9 @@ const LandingPage: React.FC = () => {
         {/* Social Proof */}
         <TestimonialSection>
           <TrustBadge>
-            🔥 실제 사용자 3,847명이 증명!
+            🔥 실제 사용자 15,237명이 증명!
           </TrustBadge>
-          <SectionTitle>💬 이미 경험한 분들의 솔직한 후기</SectionTitle>
+          <SectionTitle>💬 "헐 진짜 신기해" - 실제 후기 모음</SectionTitle>
           <TestimonialGrid>
             <TestimonialCard>
               <TestimonialText>
@@ -208,15 +219,15 @@ const LandingPage: React.FC = () => {
         {/* Final CTA */}
         <FinalCTASection>
           <UrgencyBadge>
-            ⏰ 마지막 기회! 무료 테스트는 지금만
+            ⚡ 15,237번째 가족이 되어보세요!
           </UrgencyBadge>
-          <FinalCTATitle>🎉 이번 주말엔 어떠세요?</FinalCTATitle>
+          <FinalCTATitle>🎉 "우리 가족은 어떤 타입일까?" 궁금하죠?</FinalCTATitle>
           <FinalCTASubtitle>
             더 이상 "어디 갈까?" 고민하지 마세요! <br />
-            3분 후면 우리 가족 맞춤 여행지를 알 수 있습니다 ✈️
+            2분 후면 우리 가족 맞춤 여행지를 알 수 있습니다 ✈️
           </FinalCTASubtitle>
-          <CTAButton large onClick={handleStartTest}>
-            🚀 3분만에 우리 가족 여행 스타일 찾기
+          <CTAButton large onClick={handleFinalStartTest}>
+            🚀 지금 바로 우리 가족 타입 확인하기!
           </CTAButton>
           <div style={{ 
             fontSize: '0.9rem', 

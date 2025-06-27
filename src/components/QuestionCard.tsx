@@ -225,12 +225,13 @@ const QuestionDescription = styled.p`
 `;
 
 const OptionsContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
   
   @media (max-width: 768px) {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
   }
 `;
 
@@ -240,21 +241,25 @@ const OptionButton = styled(motion.button)<{ selected: boolean }>`
     : 'linear-gradient(45deg, #f8f9fa, #e9ecef)'};
   color: ${props => props.selected ? 'white' : '#495057'};
   border: 2px solid ${props => props.selected ? '#667eea' : '#e9ecef'};
-  border-radius: 15px;
-  padding: 1.5rem 1rem;
-  font-size: 1rem;
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 80px;
-  flex: 1;
+  min-height: 70px;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.3;
   word-break: keep-all;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     border-color: #667eea;
   }
   
@@ -265,6 +270,8 @@ const OptionButton = styled(motion.button)<{ selected: boolean }>`
     border-radius: 12px;
     font-weight: 600;
     line-height: 1.3;
+    flex-direction: row;
+    gap: 0.5rem;
   }
   
   @media (max-width: 480px) {
@@ -379,22 +386,13 @@ interface QuestionCardProps {
   onBack?: () => void;
 }
 
-const getBinaryOptions = (question: Question) => {
-  // description에서 "vs" 기준으로 나누어 두 옵션 생성
-  if (question.description) {
-    const parts = question.description.split(' vs ');
-    if (parts.length === 2) {
-      return [
-        { value: 1, label: parts[0].trim() },
-        { value: 5, label: parts[1].trim() }
-      ];
-    }
-  }
-  
-  // fallback 옵션
+const getLikertOptions = () => {
   return [
-    { value: 1, label: '첫 번째 선택' },
-    { value: 5, label: '두 번째 선택' }
+    { value: 1, label: '전혀 그렇지 않다', emoji: '😟' },
+    { value: 2, label: '그렇지 않다', emoji: '😐' },
+    { value: 3, label: '보통이다', emoji: '😊' },
+    { value: 4, label: '그렇다', emoji: '😍' },
+    { value: 5, label: '매우 그렇다', emoji: '🤩' }
   ];
 };
 
@@ -421,7 +419,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   const progress = (currentQuestion / totalQuestions) * 100;
-  const options = getBinaryOptions(question);
+  const options = getLikertOptions();
 
   return (
     <Container>
@@ -470,7 +468,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {option.label}
+                <span style={{ fontSize: '1.2rem' }}>{option.emoji}</span>
+                <span>{option.label}</span>
               </OptionButton>
             ))}
           </OptionsContainer>

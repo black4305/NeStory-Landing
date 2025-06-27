@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 import StartScreen from './components/StartScreen';
+import PreTestPage from './components/PreTestPage';
 import QuestionCard from './components/QuestionCard';
 import ResultScreen from './components/ResultScreen';
 import UserInfoForm from './components/UserInfoForm';
@@ -76,7 +77,7 @@ const AppContainer = styled.div`
   min-height: 100vh;
 `;
 
-type AppState = 'start' | 'survey' | 'userInfo' | 'thankYou' | 'result';
+type AppState = 'start' | 'pretest' | 'survey' | 'userInfo' | 'thankYou' | 'result';
 
 // 관리자 인증 상태 관리
 const AdminRoute: React.FC = () => {
@@ -100,7 +101,7 @@ const AdminRoute: React.FC = () => {
 
 // 메인 설문 컴포넌트
 const SurveyApp: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>('start');
+  const [appState, setAppState] = useState<AppState>('pretest');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [result, setResult] = useState<{
@@ -126,6 +127,10 @@ const SurveyApp: React.FC = () => {
     setAppState('survey');
     setCurrentQuestionIndex(0);
     setAnswers([]);
+  };
+
+  const handlePreTestStart = () => {
+    setAppState('start');
   };
 
   const handleAnswer = (score: number, timeSpent: number) => {
@@ -193,7 +198,7 @@ const SurveyApp: React.FC = () => {
   };
 
   const handleRestart = () => {
-    setAppState('start');
+    setAppState('pretest');
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setResult(null);
@@ -202,6 +207,10 @@ const SurveyApp: React.FC = () => {
 
   return (
     <>
+      {appState === 'pretest' && (
+        <PreTestPage onStart={handlePreTestStart} />
+      )}
+      
       {appState === 'start' && (
         <StartScreen onStart={handleStart} />
       )}

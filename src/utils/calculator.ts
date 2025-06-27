@@ -21,11 +21,11 @@ export const calculateTravelType = (answers: Answer[]): string => {
     axisScores[question.axis] += score;
   });
 
-  // 각 축별 유형 결정 (2문항, 1점 또는 5점, 기준점 6점)
+  // 각 축별 유형 결정 (A축 4문항, C/F축 3문항, 5점 척도)
   const typeCode = 
-    (axisScores.A >= 6 ? 'A' : 'R') +
-    (axisScores.C >= 6 ? 'C' : 'N') +
-    (axisScores.F >= 6 ? 'F' : 'E');
+    (axisScores.A >= 10 ? 'A' : 'R') +  // 4문항 기준점: 10점 (4*2.5)
+    (axisScores.C >= 7.5 ? 'C' : 'N') + // 3문항 기준점: 7.5점 (3*2.5)
+    (axisScores.F >= 7.5 ? 'F' : 'E');  // 3문항 기준점: 7.5점 (3*2.5)
 
   return typeCode;
 };
