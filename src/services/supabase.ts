@@ -13,21 +13,63 @@ export class SupabaseService {
     console.log('🔍 nestory 스키마로 Supabase 저장 시작:', data.sessionId);
     
     try {
-      // nestory 스키마 프록시 함수 호출
-      const { data: result, error } = await supabase.rpc('save_nestory_response', {
+      // userInfo에서 필요한 정보 추출
+      const userInfo = data.userInfo || {};
+      
+      // 설문 답변에서 여행 빈도 추출 (예시 로직)
+      const travelFrequency = data.answers?.length > 0 ? '정기적' : '가끔';
+      
+      // 나이 정보 배열 생성
+      const ages = userInfo.age ? [userInfo.age] : [];
+      
+      // 관심사 추출 (설문 결과 기반)
+      const interests = {
+        travelType: data.result,
+        preferences: data.answers?.slice(0, 3) || []
+      };
+
+      // 모든 컬럼 값 준비
+      const currentIndex = data.answers?.length || 0;
+      const sharedUrl = data.completed ? `${window.location.origin}/result/${data.sessionId}` : null;
+      const referrer = document.referrer || 'direct';
+
+      // 마케팅 관련 정보 분리
+      const marketingConsent = userInfo.marketingConsent || false;
+      const privacyConsent = userInfo.privacyConsent || false;
+      const contactInfo = marketingConsent ? {
+        name: userInfo.name,
+        instagram: userInfo.instagram,
+        region: userInfo.region
+      } : null;
+
+      // nestory 스키마 프록시 함수 호출 (모든 컬럼 완전 활용)
+      const { data: result, error } = await supabase.rpc('save_nestory_response_complete', {
         p_session_id: data.sessionId,
-        p_start_time: new Date(data.startTime).toISOString(),
+        p_user_id: null, // 익명 사용자
+        p_start_time: data.startTime,
         p_answers: data.answers,
         p_total_time: data.totalTime,
-        p_click_count: data.clickCount,
-        p_scroll_depth: data.scrollDepth,
-        p_device_type: data.deviceType,
-        p_user_agent: data.userAgent,
-        p_completed: data.completed,
         p_result: data.result,
-        p_user_info: data.userInfo,
-        p_reliability_score: data.reliabilityScore,
-        p_response_pattern: data.responsePattern
+        p_current_index: currentIndex,
+        p_completed: data.completed,
+        p_family_size: userInfo.familySize || null,
+        p_ages: ages.length > 0 ? ages : null,
+        p_travel_frequency: travelFrequency,
+        p_location: userInfo.region || null,
+        p_interests: interests,
+        p_result_details: {
+          clickCount: data.clickCount,
+          scrollDepth: data.scrollDepth,
+          reliabilityScore: data.reliabilityScore,
+          responsePattern: data.responsePattern
+        },
+        p_shared_url: sharedUrl,
+        p_user_agent: data.userAgent,
+        p_device_type: data.deviceType,
+        p_referrer: referrer,
+        p_marketing_consent: marketingConsent,
+        p_privacy_consent: privacyConsent,
+        p_contact_info: contactInfo
       });
 
       if (!error && result) {
@@ -57,20 +99,20 @@ export class SupabaseService {
         // Supabase 데이터를 AnalyticsData 형식으로 변환
         return data.map((item: any) => ({
           sessionId: item.session_id,
-          startTime: new Date(item.start_time).getTime(),
+          startTime: item.start_time, // 이미 bigint
           answers: item.answers,
           totalTime: item.total_time,
-          clickCount: item.click_count,
-          scrollDepth: item.scroll_depth,
+          clickCount: item.result_details?.clickCount || 0,
+          scrollDepth: item.result_details?.scrollDepth || 0,
           deviceType: item.device_type,
           userAgent: item.user_agent,
           completed: item.completed,
           result: item.result,
-          userInfo: item.user_info,
+          userInfo: item.result_details?.userInfo || null,
           submittedAt: item.submitted_at ? new Date(item.submitted_at).getTime() : Date.now(),
-          reliabilityScore: item.reliability_score,
-          questionProgress: item.question_progress,
-          responsePattern: item.response_pattern
+          reliabilityScore: item.result_details?.reliabilityScore || null,
+          questionProgress: item.current_index || 0,
+          responsePattern: item.result_details?.responsePattern || null
         }));
       } else {
         console.log('❌ nestory 프록시 함수 조회 실패:', error?.message || 'No data');

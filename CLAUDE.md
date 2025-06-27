@@ -23,6 +23,193 @@
 
 ## 🚀 최근 추가된 기능들 (2025-06-27)
 
+### 9. 🔍 Supabase nestory 스키마 상세 진단 및 파일 정리 (✅ 완료)
+**작업 내용**:
+- Supabase SQL Editor에서 실행할 쿼리 파일 생성
+- nestory 스키마의 테이블, 뷰, 함수, 트리거, RLS 정책 확인을 위한 SQL 쿼리 작성
+- 불필요한 임시 파일들 정리
+
+**생성된 주요 파일**:
+- `supabase/execute-remaining-queries.sql`: Supabase SQL Editor에서 실행할 진단 쿼리 모음
+  - PUBLIC 스키마에서 NESTORY를 참조하는 함수들 조회
+  - NESTORY 스키마의 뷰 정의 확인
+  - NESTORY 스키마의 인덱스 목록
+  - NESTORY 스키마의 제약조건 확인
+  - NESTORY 스키마의 RLS 정책 조회
+  - NESTORY 스키마의 권한 정보
+  - NESTORY 스키마 관련 시퀀스
+  - PUBLIC 스키마의 nestory 프록시 함수들
+
+**파일 정리**:
+- 삭제된 파일들:
+  - `add-marketing-columns.sql`
+  - `check-current-schema.sql`
+  - `check-nestory-details.sql`
+  - `check-nestory-tables-and-columns.sql`
+  - `execute-queries.js`
+  - `rename-schema-to-nestory-landing.sql`
+- 보존된 파일들:
+  - `README.md` (문서)
+  - `nestory-landing-setup.sql` (메인 설정 파일)
+
+### 11. 🔄 nestory → nestory-landing 스키마 마이그레이션 완료 (2025-06-27)
+**마이그레이션 결과**:
+- 기존 `nestory` 스키마 → `nestory_backup` 스키마로 백업
+- 새로운 `nestory-landing` 스키마 생성 완료
+- 모든 테이블명에 `nestory_landing_` 접두사 추가
+
+**새로운 스키마 및 테이블 구조**:
+- **스키마명**: `nestory-landing`
+- **테이블명 변경**:
+  - `user_responses` → `nestory_landing_user_responses`
+  - `landing_analytics` → `nestory_landing_analytics`
+  - `active_users` → `nestory_landing_active_users`
+  - `ab_test_results` → `nestory_landing_ab_test_results`
+- **뷰명 변경**:
+  - `active_users_live` → `nestory_landing_active_users_live`
+  - `result_leaderboard` → `nestory_landing_result_leaderboard`
+  - `stats_overview` → `nestory_landing_stats_overview`
+- **함수명 변경**:
+  - `cleanup_inactive_users` → `nestory_landing_cleanup_inactive_users`
+  - `update_updated_at_column` → `nestory_landing_update_updated_at_column`
+- **트리거명 변경**:
+  - `update_nestory_responses_updated_at` → `nestory_landing_update_responses_updated_at`
+- **RLS 정책명 변경**: 모든 정책명에 `nestory_landing_` 접두사 추가
+
+### 10. 📊 nestory 스키마 테이블 구조 확인 (2025-06-27)
+**nestory 스키마의 현재 테이블 구조**:
+
+#### BASE TABLE (4개):
+1. **ab_test_results** - A/B 테스트 결과
+2. **active_users** - 활성 사용자 추적
+3. **landing_analytics** - 랜딩 페이지 분석
+4. **user_responses** - 사용자 설문 응답
+
+#### VIEW (3개):
+1. **active_users_live** - 실시간 활성 사용자 뷰
+2. **result_leaderboard** - 결과 순위 뷰
+3. **stats_overview** - 통계 개요 뷰
+
+#### 각 테이블의 컬럼 구조:
+
+**1. ab_test_results (7개 컬럼)**:
+- `id` (uuid, PK)
+- `variant` (text, NOT NULL)
+- `session_id` (text, NOT NULL)
+- `conversion` (boolean, default: false)
+- `completion_rate` (numeric)
+- `time_spent` (integer)
+- `created_at` (timestamptz, default: now())
+
+**2. active_users (6개 컬럼)**:
+- `id` (uuid, PK)
+- `session_id` (text, NOT NULL)
+- `last_activity` (timestamptz, default: now())
+- `current_question` (integer, default: 0)
+- `status` (text)
+- `created_at` (timestamptz, default: now())
+
+**3. landing_analytics (10개 컬럼)**:
+- `id` (uuid, PK)
+- `visit_id` (text, NOT NULL)
+- `timestamp` (bigint, NOT NULL)
+- `user_agent` (text)
+- `referrer` (text)
+- `device_type` (text)
+- `session_duration` (numeric)
+- `cta_clicked` (boolean, default: false)
+- `scroll_depth` (numeric)
+- `created_at` (timestamptz, default: now())
+
+**4. user_responses (23개 컬럼)**:
+- `id` (uuid, PK)
+- `session_id` (text, NOT NULL)
+- `user_id` (uuid)
+- `start_time` (bigint, NOT NULL)
+- `answers` (jsonb, default: '{}')
+- `total_time` (integer)
+- `result` (text)
+- `current_index` (integer, default: 0)
+- `completed` (boolean, default: false)
+- `family_size` (integer)
+- `ages` (jsonb, default: '[]')
+- `travel_frequency` (text)
+- `location` (text)
+- `interests` (jsonb, default: '[]')
+- `result_details` (jsonb, default: '{}')
+- `shared_url` (text)
+- `ip_address` (inet)
+- `user_agent` (text)
+- `device_type` (text)
+- `referrer` (text)
+- `created_at` (timestamptz, default: now())
+- `submitted_at` (timestamptz)
+- `updated_at` (timestamptz, default: now())
+
+#### VIEW 구조:
+
+**1. active_users_live (6개 컬럼)**:
+- `id` (uuid)
+- `session_id` (text)
+- `last_activity` (timestamptz)
+- `current_question` (integer)
+- `status` (text)
+- `created_at` (timestamptz)
+
+**2. result_leaderboard (3개 컬럼)**:
+- `result` (text)
+- `count` (bigint)
+- `percentage` (numeric)
+
+**3. stats_overview (7개 컬럼)**:
+- `total_responses` (bigint)
+- `completed_responses` (bigint)
+- `total_visits` (bigint)
+- `cta_clicks` (bigint)
+- `active_users_now` (bigint)
+- `avg_completion_time` (integer)
+- `unique_results` (bigint)
+
+#### 새로운 함수 구조 (nestory-landing 스키마):
+
+**nestory-landing 스키마 함수 (2개)**:
+1. `nestory_landing_cleanup_inactive_users()` - 30분 이상 비활성 사용자 삭제
+2. `nestory_landing_update_updated_at_column()` - updated_at 컬럼 자동 업데이트 트리거 함수
+
+**public 스키마의 RPC 함수들은 마이그레이션 필요**
+
+#### 새로운 트리거:
+- `nestory_landing_update_responses_updated_at` - nestory_landing_user_responses 테이블의 UPDATE 시 updated_at 자동 갱신
+
+#### 새로운 RLS 정책:
+
+**nestory_landing_user_responses 테이블**:
+- `nestory_landing_users_can_insert` - INSERT 허용
+- `nestory_landing_users_can_read_own` - SELECT 허용 (현재 모두 허용)
+- `nestory_landing_users_can_update_own` - UPDATE 허용 (현재 모두 허용)
+
+**nestory_landing_analytics 테이블**:
+- `nestory_landing_anyone_can_insert_analytics` - 모든 사용자 INSERT 허용
+- `nestory_landing_admins_read_analytics` - SELECT 허용 (현재 모두 허용)
+
+**nestory_landing_active_users 테이블**:
+- `nestory_landing_anyone_manage_active_users` - 모든 작업 허용
+
+**nestory_landing_ab_test_results 테이블**:
+- `nestory_landing_anyone_insert_ab_tests` - INSERT 허용
+- `nestory_landing_admins_read_ab_tests` - SELECT 허용 (현재 모두 허용)
+
+#### 새로운 인덱스:
+- `nestory_landing_active_users_last_activity_idx` - nestory_landing_active_users.last_activity
+- `nestory_landing_analytics_timestamp_idx` - nestory_landing_analytics.timestamp
+- `nestory_landing_user_responses_created_at_idx` - nestory_landing_user_responses.created_at
+- `nestory_landing_user_responses_result_idx` - nestory_landing_user_responses.result
+- `nestory_landing_user_responses_session_id_idx` - nestory_landing_user_responses.session_id
+- 각 테이블의 primary key 및 unique 인덱스
+
+#### RLS 상태:
+- 모든 테이블에 RLS 활성화됨
+
 ### 8. 🔧 Supabase 데이터 저장 문제 진단 및 해결 (✅ 해결방안 제시)
 **문제**: 
 - 새로운 설문 응답이 Supabase에 저장되지 않음
@@ -449,6 +636,91 @@ FOR INSERT WITH CHECK (true);
 - ✅ Storage 설정 완료
 
 **프로젝트 완성도: 100%** 🚀
+
+## 📝 TODO: nestory-landing 마이그레이션 후 작업사항 (2025-06-27)
+
+### 1. 웹 애플리케이션 코드 수정
+**주의**: 아래 파일들을 모두 확인하고 수정해야 함
+
+#### 수정이 필요한 파일 목록:
+1. `src/services/supabase.ts` - 메인 Supabase 서비스
+2. `src/hooks/useSupabaseData.ts` - 관리자 대시보드 데이터 훅
+3. `src/utils/analytics.ts` - 분석 데이터 저장 유틸
+4. `src/components/EnhancedAdminDashboard.tsx` - 관리자 대시보드 컴포넌트
+5. `src/components/LandingPage.tsx` - 랜딩 페이지 (분석 데이터 수집)
+6. `src/components/ResultScreen.tsx` - 결과 화면 (데이터 저장)
+7. 기타 Supabase를 import하거나 사용하는 모든 파일
+
+#### 전체 프로젝트 검색 필요:
+- `nestory` → `nestory-landing` 스키마 변경
+- `user_responses` → `nestory_landing_user_responses`
+- `landing_analytics` → `nestory_landing_analytics`
+- `active_users` → `nestory_landing_active_users`
+- `ab_test_results` → `nestory_landing_ab_test_results`
+- `.rpc(` → 직접 테이블 접근으로 변경
+- 뷰 이름들도 모두 확인
+
+#### 변경사항:
+- **스키마 설정**: Supabase 클라이언트에 새 스키마 지정
+  ```typescript
+  const supabase = createClient(supabaseUrl, supabaseKey, {
+    db: { schema: 'nestory-landing' }
+  });
+  ```
+
+- **테이블명 변경**: 모든 테이블 참조를 새 이름으로 변경
+  - `user_responses` → `nestory_landing_user_responses`
+  - `landing_analytics` → `nestory_landing_analytics`
+  - `active_users` → `nestory_landing_active_users`
+  - `ab_test_results` → `nestory_landing_ab_test_results`
+
+- **RPC 함수 제거**: 모든 RPC 호출을 직접 테이블 접근으로 변경
+  ```typescript
+  // 기존 (제거)
+  await supabase.rpc('save_nestory_response', {...})
+  
+  // 새로운 방식
+  await supabase
+    .from('nestory_landing_user_responses')
+    .insert({...})
+  ```
+
+### 2. 관리자 대시보드 수정
+**파일**: `src/hooks/useSupabaseData.ts`
+- 테이블명 변경
+- RPC 함수 호출 제거
+
+### 3. 뷰 참조 수정
+- `active_users_live` → `nestory_landing_active_users_live`
+- `result_leaderboard` → `nestory_landing_result_leaderboard`
+- `stats_overview` → `nestory_landing_stats_overview`
+
+### 4. 정리 작업
+- [ ] 기존 public 스키마의 RPC 함수들 삭제
+  ```sql
+  DROP FUNCTION IF EXISTS public.save_nestory_response CASCADE;
+  DROP FUNCTION IF EXISTS public.get_nestory_responses CASCADE;
+  DROP FUNCTION IF EXISTS public.delete_nestory_response CASCADE;
+  -- 나머지 함수들도 동일하게 삭제
+  ```
+
+- [ ] 마이그레이션 확인 후 백업 스키마 삭제 (신중하게!)
+  ```sql
+  -- 모든 것이 정상 작동 확인 후 실행
+  DROP SCHEMA nestory_backup CASCADE;
+  ```
+
+### 5. 테스트 체크리스트
+- [ ] 설문 데이터 저장 테스트
+- [ ] 관리자 페이지 데이터 조회 테스트
+- [ ] 랜딩 페이지 분석 데이터 저장 테스트
+- [ ] 활성 사용자 추적 테스트
+- [ ] A/B 테스트 데이터 저장 테스트
+
+### 6. 주의사항
+- **스키마명에 하이픈 포함**: `"nestory-landing"` (따옴표 필요)
+- **테이블명은 언더스코어**: `nestory_landing_user_responses`
+- **RLS 정책 활성화 상태**: 모든 테이블에 RLS 활성화됨
 
 ## 🚀 최근 추가된 기능들 (2025-06-21)
 

@@ -11,6 +11,7 @@ class Analytics {
     this.sessionId = this.generateSessionId();
     this.startTime = Date.now();
     this.initializeTracking();
+    this.trackPageLoad(); // 페이지 로드 분석 추가
   }
 
   private generateSessionId(): string {
@@ -35,6 +36,13 @@ class Analytics {
       }
     });
   }
+
+  private trackPageLoad(): void {
+    // 페이지 로드 시 referrer 정보 수집
+    this.referrer = document.referrer || 'direct';
+  }
+
+  private referrer: string = '';
 
   private getDeviceType(): 'mobile' | 'tablet' | 'desktop' {
     const width = window.innerWidth;
