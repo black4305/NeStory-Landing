@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -82,22 +83,56 @@ const LandingPage: React.FC = () => {
         <HeroSection>
           <HeroContent>
             <MainHeadline>
-              <HighlightText>"와.. 진짜 딱 우리 가족이네!"</HighlightText>
-              <br className="desktop-only" />
-              <span className="mobile-inline">이미 15,237가족이 놀란</span>
-              <br className="desktop-only" />
-              <span style={{ fontSize: '0.8em' }}>단 2분만에 나오는 신기한 결과</span>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <EmotionalHook>"엄마... 이번 여행은 정말 재밌었어"</EmotionalHook>
+                <MainTitle>
+                  아이가 이렇게 말하는<br />
+                  <HighlightText>마법 같은 순간</HighlightText><br />
+                  우리 가족도 만들 수 있어요
+                </MainTitle>
+                <SubText>23,847가족이 이미 경험한 특별함을 2분에 발견하세요</SubText>
+              </motion.div>
             </MainHeadline>
-            <SubHeadline>
-              😱 <strong>실제 후기:</strong> "아이도 좋아하고 어른도 편한 곳이 정말 있었어요!"<br />
-              💯 <strong>2분 테스트</strong>로 우리 가족만의 완벽한 여행 스타일을 찾아보세요!<br />
-              <small style={{ fontSize: '0.9em', opacity: '0.9', marginTop: '0.8rem', display: 'block', color: '#fbbf24', fontWeight: '600' }}>
-                🔥 지금까지 15,237가족이 테스트한 NeStoryTI
-              </small>
-            </SubHeadline>
-            <CTAButton onClick={handleStartTest}>
-              🔥 나도 우리 가족 여행 타입 궁금해! →
-            </CTAButton>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              <EmotionalBenefits>
+                <BenefitItem>
+                  <BenefitEmoji>💖</BenefitEmoji>
+                  <BenefitText>"아이들이 싸우지 않는 여행"</BenefitText>
+                </BenefitItem>
+                <BenefitItem>
+                  <BenefitEmoji>😊</BenefitEmoji>
+                  <BenefitText>"어른도 아이도 모두 만족"</BenefitText>
+                </BenefitItem>
+                <BenefitItem>
+                  <BenefitEmoji>✨</BenefitEmoji>
+                  <BenefitText>"평생 기억에 남을 추억"</BenefitText>
+                </BenefitItem>
+              </EmotionalBenefits>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
+              <CTAButtonGroup>
+                <PrimaryCTAButton onClick={handleStartTest}>
+                  <ButtonText>우리 가족 행복 여행 만들기</ButtonText>
+                  <ButtonSubtext>2분이면 평생 추억이 바뀝니다</ButtonSubtext>
+                </PrimaryCTAButton>
+                <TrustIndicators>
+                  <TrustItem>💕 23,847가족이 선택한 이유</TrustItem>
+                  <TrustItem>🎯 "진짜 우리 가족 같아요!"</TrustItem>
+                </TrustIndicators>
+              </CTAButtonGroup>
+            </motion.div>
             
             <ScrollHint>
               <ScrollText>😱 실제 후기가 더 궁금하다면?</ScrollText>
@@ -114,8 +149,12 @@ const LandingPage: React.FC = () => {
               🚨 실제 카톡 대화 캡쳐
             </HookingBadge>
             <SectionTitle>
-              😂 "아 진짜 소름돋게 정확해"
+              💕 "우리 가족이 이렇게 행복할 수 있구나"
             </SectionTitle>
+            <EmotionalStory>
+              <StoryQuote>"처음으로 온 가족이 만족한 여행이었어요. 시어머니는 편하다고 하시고, 남편은 스트레스 안 받는다고 하고, 아이들은 또 가고 싶다고... 이런 기적 같은 일이 정말 가능하구나 싶었어요."</StoryQuote>
+              <StoryAuthor>- 실제 사용자 김○○님의 눈물 후기</StoryAuthor>
+            </EmotionalStory>
 
             <StoryText>
               <strong>👩‍👧‍👦 김○○님 (7살, 4살 엄마):</strong><br />
@@ -366,39 +405,244 @@ const MainHeadline = styled.h1`
   }
 `;
 
-const HighlightText = styled.span`
-  color: #e53e3e;
-  font-weight: 900;
-  text-shadow: none;
+const EmotionalHook = styled.div`
+  font-size: 1.8rem;
+  color: #7c3aed;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+  text-align: center;
+  opacity: 0.95;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.3rem;
+  }
 `;
 
-const SubHeadline = styled.p`
-  font-size: 1.25rem;
+const HighlightText = styled.span`
+  background: linear-gradient(135deg, #ff6b6b, #ffa500);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+`;
+
+const EmotionalBenefits = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   margin-bottom: 2rem;
-  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    gap: 0.8rem;
+  }
+`;
+
+const BenefitItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.5rem;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateX(10px);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.8rem 1.2rem;
+    gap: 0.8rem;
+  }
+`;
+
+const BenefitEmoji = styled.div`
+  font-size: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.8rem;
+  }
+`;
+
+const BenefitText = styled.div`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+`;
+
+const EmotionalStory = styled.div`
+  background: linear-gradient(135deg, #fff5f5, #fed7d7);
+  padding: 2rem;
+  border-radius: 20px;
+  margin: 2rem 0;
+  border-left: 5px solid #ff6b6b;
+  box-shadow: 0 10px 30px rgba(255, 107, 107, 0.1);
+`;
+
+const StoryQuote = styled.div`
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: #2d3748;
+  font-style: italic;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+`;
+
+const StoryAuthor = styled.div`
+  font-size: 0.9rem;
+  color: #7c3aed;
+  font-weight: 600;
+  text-align: right;
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+  }
+`;
+
+const CTAButtonGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+`;
+
+const PrimaryCTAButton = styled.button`
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+  color: white;
+  border: none;
+  padding: 1.5rem 3rem;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+  
+  &:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 25px 60px rgba(255, 107, 107, 0.5);
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 400px;
+    font-size: 1.2rem;
+    padding: 1.3rem 2rem;
+  }
+`;
+
+const ButtonText = styled.div`
+  display: block;
+  margin-bottom: 0.5rem;
+`;
+
+const ButtonSubtext = styled.div`
+  font-size: 0.85rem;
+  opacity: 0.9;
+  font-weight: 600;
+`;
+
+const TrustIndicators = styled.div`
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: center;
+  }
+`;
+
+const TrustItem = styled.div`
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+`;
+
+const MainTitle = styled.h1`
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  text-align: center;
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+    line-height: 1.3;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 2.2rem;
+    line-height: 1.4;
+  }
+`;
+
+const SubText = styled.p`
+  font-size: 1.3rem;
   color: #4a5568;
-  animation: slideInUp 1s ease-out 0.3s both;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 
   @media (max-width: 768px) {
     font-size: 1.2rem;
-    line-height: 1.5;
-    br {
-      display: none;
-    }
+    margin-bottom: 2rem;
   }
   
   @media (max-width: 480px) {
     font-size: 1.1rem;
-    line-height: 1.5;
-  }
-
-  .mobile-break {
-    display: none;
-    @media (max-width: 768px) {
-      display: block;
-    }
   }
 `;
+
 
 const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
   background: ${props => props.secondary 
