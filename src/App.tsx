@@ -15,6 +15,7 @@ import { questions } from './data/questions';
 import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
 import { Answer, UserInfo } from './types';
+import './utils/supabaseTest'; // Supabase 테스트 유틸리티 로드
 
 const GlobalStyle = createGlobalStyle`
   * {

@@ -19,7 +19,7 @@ import { AnalyticsData } from '../types';
 import { calculateReliabilityScore, getReliabilityScoreColor, getReliabilityScoreLabel } from '../utils/reliability';
 import { questions } from '../data/questions';
 import { DataManager } from '../utils/dataManager';
-import { useFirebaseData, useFirebaseStatus } from '../hooks/useFirebaseData';
+import { useSupabaseData, useSupabaseStatus } from '../hooks/useSupabaseData';
 import LandingAnalytics from './LandingAnalytics';
 
 const Container = styled.div`
@@ -260,7 +260,7 @@ const TableHeader = styled.div`
 
 const TableRow = styled(motion.div)`
   display: grid;
-  grid-template-columns: 2fr 2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr;
+  grid-template-columns: 2fr 2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr 1fr;
   gap: 1rem;
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #f7fafc;
@@ -280,7 +280,7 @@ const TableRow = styled(motion.div)`
 
 const TableHeaderRow = styled.div`
   display: grid;
-  grid-template-columns: 2fr 2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr;
+  grid-template-columns: 2fr 2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr 1fr;
   gap: 1rem;
   padding: 1rem 2rem;
   font-weight: 600;
@@ -375,9 +375,9 @@ const COLORS = ['#667eea', '#764ba2', '#48bb78', '#f56565', '#ed8936', '#38b2ac'
 interface EnhancedAdminDashboardProps {}
 
 const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
-  // Firebase 데이터 hooks 사용
-  const { data: firebaseData, loading, error, refreshData } = useFirebaseData();
-  const { isConnected } = useFirebaseStatus();
+  // Supabase 데이터 hooks 사용
+  const { data: supabaseData, loading, error, refreshData, deleteData } = useSupabaseData();
+  const { isConnected } = useSupabaseStatus();
   
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
   const [filteredData, setFilteredData] = useState<AnalyticsData[]>([]);
@@ -386,10 +386,25 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<AnalyticsData | null>(null);
 
-  // Firebase 데이터가 로드되면 신뢰도 점수 계산하여 업데이트
+  const handleDeleteUser = async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('이 사용자의 데이터를 삭제하시겠습니까?')) {
+      const success = await deleteData(sessionId);
+      if (success) {
+        // 로컬 상태에서도 제거
+        setAnalyticsData(prev => prev.filter(item => item.sessionId !== sessionId));
+        setFilteredData(prev => prev.filter(item => item.sessionId !== sessionId));
+        alert('✅ 데이터가 삭제되었습니다.');
+      } else {
+        alert('❌ 데이터 삭제에 실패했습니다.');
+      }
+    }
+  };
+
+  // Supabase 데이터가 로드되면 신뢰도 점수 계산하여 업데이트
   useEffect(() => {
-    if (firebaseData.length > 0) {
-      const processedData = firebaseData.map((item: AnalyticsData) => {
+    if (supabaseData.length > 0) {
+      const processedData = supabaseData.map((item: AnalyticsData) => {
         // 신뢰도 점수 계산
         if (item.answers && item.answers.length > 0) {
           const reliability = calculateReliabilityScore(item.answers);
@@ -405,10 +420,10 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
       setAnalyticsData(processedData);
       setFilteredData(processedData);
     } else if (!loading && error) {
-      // Firebase 실패 시 localStorage 백업 사용
+      // Supabase 실패 시 localStorage 백업 사용
       loadAnalyticsDataFromLocal();
     }
-  }, [firebaseData, loading, error]);
+  }, [supabaseData, loading, error]);
 
   const loadAnalyticsDataFromLocal = () => {
     // URL에서 데이터 가져오기 시도
@@ -732,6 +747,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
           <div>신뢰도</div>
           <div>디바이스</div>
           <div>제출일</div>
+          <div>작업</div>
         </TableHeaderRow>
         
         {filteredData.map((item) => (
@@ -775,6 +791,25 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
                 ? new Date(item.submittedAt).toLocaleDateString()
                 : '-'
               }
+            </div>
+            <div>
+              <button
+                onClick={(e) => handleDeleteUser(item.sessionId, e)}
+                style={{
+                  background: 'linear-gradient(45deg, #f56565, #e53e3e)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                🗑️ 삭제
+              </button>
             </div>
           </TableRow>
         ))}
@@ -1141,7 +1176,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
               <div style={{ marginBottom: '1.5rem' }}>
                 <h4 style={{ color: '#4a5568', marginBottom: '1rem' }}>새로고침 & 동기화</h4>
                 <ExportButton onClick={refreshData} whileHover={{ scale: 1.05 }}>
-                  🔄 Firebase 데이터 새로고침
+                  🔄 Supabase 데이터 새로고침
                 </ExportButton>
                 <ExportButton 
                   onClick={loadAnalyticsDataFromLocal} 
@@ -1151,7 +1186,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
                   📦 로컬 데이터 새로고침
                 </ExportButton>
                 <p style={{ fontSize: '0.9rem', color: '#718096', marginTop: '0.5rem' }}>
-                  Firebase에서 최신 데이터를 가져오거나 로컬 백업을 새로고침합니다.
+                  Supabase에서 최신 데이터를 가져오거나 로컬 백업을 새로고침합니다.
                 </p>
               </div>
 
@@ -1230,7 +1265,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
             }}>
               <span>{isConnected === true ? '🟢' : isConnected === false ? '🔴' : '🟡'}</span>
               <span>
-                Firebase: {
+                Supabase: {
                   isConnected === true ? '연결됨' : 
                   isConnected === false ? '연결 실패' : 
                   '연결 중...'

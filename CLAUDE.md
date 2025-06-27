@@ -66,6 +66,121 @@
 - **긴급성 요소**: FOMO 유발 메시지 추가
 - **스크롤 플로우**: 단계적 정보 노출로 전환율 향상
 
+### 2. 🎨 UI/UX 개선 및 가독성 향상
+**요구사항**:
+- 버튼들을 가운데 정렬로 시각적 균형 개선
+- 배경색 및 전체 컬러 스킴 가독성 향상
+- 모바일 화면 최적화 줄바꿈 구현
+
+**구현 내용**:
+- ✅ **버튼 중앙 정렬**: 모든 CTA 버튼 가운데 정렬로 시각적 안정감 향상
+- ✅ **색상 스킴 개선**: 어두운 그라데이션 → 밝은 화이트/그레이 계열로 변경
+- ✅ **텍스트 가독성 향상**: 고대비 색상 적용 (#2d3748, #4a5568, #e53e3e)
+- ✅ **모바일 줄바꿈 최적화**: 브레이크포인트별 텍스트 레이아웃 조정
+- ✅ **섹션별 배경 차별화**: 교대로 다른 배경색 적용하여 구분감 향상
+
+### 3. 🔄 Firebase → Supabase 마이그레이션 (완료)
+**요구사항**: 관리자 페이지 데이터를 Firebase에서 Supabase로 전환
+
+**진행 상황**:
+- ✅ **Supabase 패키지 설치**: @supabase/supabase-js 설치 완료
+- ✅ **SupabaseService 클래스 생성**: 데이터 저장/조회/삭제 기능 구현
+- ✅ **데이터베이스 스키마 설계**: user_responses 테이블 구조 정의
+- ✅ **관리자 페이지 연동**: EnhancedAdminDashboard에서 useSupabaseData 사용
+- ✅ **Analytics 업데이트**: analytics.ts에서 Supabase 사용하도록 변경
+- ✅ **환경변수 설정**: .env.example 파일 생성
+- ✅ **삭제 기능 추가**: 관리자 페이지에서 개별 데이터 삭제 가능
+- ⏳ **Supabase 프로젝트 생성 필요**: 아직 프로젝트 및 DB 미생성
+- ⏳ **Firebase 코드 제거**: 기존 Firebase 서비스 완전 제거 예정
+
+### 🔧 Supabase 설정 가이드
+
+#### 1. Supabase 프로젝트 생성
+1. https://supabase.com 접속 후 프로젝트 생성
+2. 프로젝트명: `family-travel-test` (또는 원하는 이름)
+3. 데이터베이스 비밀번호 설정
+
+#### 2. 환경변수 설정 (.env 파일)
+```bash
+# .env.example을 .env로 복사
+cp .env.example .env
+
+# .env 파일에 실제 Supabase 정보 입력
+REACT_APP_SUPABASE_URL=https://your-project-id.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=your-anon-key
+```
+
+#### 3. 데이터베이스 테이블 생성
+1. Supabase 대시보드 → **SQL Editor** 접속
+2. `supabase-setup.sql` 파일 내용을 복사하여 실행
+3. 성공 메시지 확인: "Supabase 데이터베이스 설정 완료!"
+
+#### 4. 연결 및 기능 테스트
+브라우저 개발자 도구 콘솔에서 테스트 실행:
+```javascript
+// 전체 테스트 실행
+window.SupabaseTest.runAllTests();
+
+// 개별 테스트
+window.SupabaseTest.testConnection();
+window.SupabaseTest.testDataInsertion();
+window.SupabaseTest.testDataRetrieval();
+
+// 테스트 데이터 정리
+window.SupabaseTest.cleanupTestData();
+```
+
+#### 5. 생성된 파일들
+- ✅ `supabase-setup.sql`: 데이터베이스 스키마 및 설정 SQL
+- ✅ `src/utils/supabaseTest.ts`: 연결 및 기능 테스트 유틸리티
+- ✅ `src/services/supabase.ts`: Supabase 서비스 클래스
+- ✅ `src/hooks/useSupabaseData.ts`: Supabase 데이터 관리 훅
+```
+REACT_APP_SUPABASE_URL=https://your-project-id.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=your-anon-key
+```
+
+#### 3. 데이터베이스 테이블 생성 SQL
+```sql
+CREATE TABLE user_responses (
+  id SERIAL PRIMARY KEY,
+  session_id TEXT UNIQUE NOT NULL,
+  start_time TIMESTAMP,
+  answers JSONB,
+  total_time INTEGER,
+  click_count INTEGER,
+  scroll_depth REAL,
+  device_type TEXT,
+  user_agent TEXT,
+  completed BOOLEAN DEFAULT false,
+  result TEXT,
+  user_info JSONB,
+  submitted_at TIMESTAMP DEFAULT NOW(),
+  reliability_score REAL,
+  question_progress JSONB,
+  response_pattern TEXT
+);
+
+-- 인덱스 생성 (성능 향상)
+CREATE INDEX idx_user_responses_submitted_at ON user_responses(submitted_at);
+CREATE INDEX idx_user_responses_completed ON user_responses(completed);
+CREATE INDEX idx_user_responses_result ON user_responses(result);
+```
+
+#### 4. Row Level Security (RLS) 설정
+```sql
+-- RLS 활성화
+ALTER TABLE user_responses ENABLE ROW LEVEL SECURITY;
+
+-- 읽기 정책 (모든 사용자 읽기 가능)
+CREATE POLICY "Allow read access for all users" ON user_responses
+FOR SELECT USING (true);
+
+-- 쓰기 정책 (모든 사용자 쓰기 가능)
+CREATE POLICY "Allow insert access for all users" ON user_responses
+FOR INSERT WITH CHECK (true);
+```
+
 ## 🚀 최근 추가된 기능들 (2025-06-21)
 
 ### 1. 관리자 페이지 개선

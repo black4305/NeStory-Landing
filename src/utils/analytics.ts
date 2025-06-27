@@ -88,14 +88,19 @@ class Analytics {
 
   private async sendAnalytics(data: AnalyticsData): Promise<void> {
     try {
-      // Firebase에 저장 시도
-      const { FirebaseService } = await import('../services/firebase');
-      await FirebaseService.saveSurveyResult(data);
-      console.log('✅ Firebase에 분석 데이터 저장 완료');
-    } catch (error) {
-      console.error('❌ Firebase 저장 실패, localStorage로 fallback:', error);
+      // Supabase에 저장 시도
+      const { SupabaseService } = await import('../services/supabase');
+      const success = await SupabaseService.saveUserData(data);
       
-      // Firebase 실패 시 localStorage 백업
+      if (success) {
+        console.log('✅ Supabase에 분석 데이터 저장 완료');
+      } else {
+        throw new Error('Supabase 저장 실패');
+      }
+    } catch (error) {
+      console.error('❌ Supabase 저장 실패, localStorage로 fallback:', error);
+      
+      // Supabase 실패 시 localStorage 백업
       const existingData = JSON.parse(localStorage.getItem('surveyAnalytics') || '[]');
       existingData.push(data);
       localStorage.setItem('surveyAnalytics', JSON.stringify(existingData));

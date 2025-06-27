@@ -82,8 +82,10 @@ const LandingPage: React.FC = () => {
         <HeroSection>
           <HeroContent>
             <MainHeadline>
-              <HighlightText>"와.. 진짜 딱 우리 가족이네!"</HighlightText><br />
-              이미 15,237가족이 놀란<br />
+              <HighlightText>"와.. 진짜 딱 우리 가족이네!"</HighlightText>
+              <br className="desktop-only" />
+              <span className="mobile-inline">이미 15,237가족이 놀란</span>
+              <br className="desktop-only" />
               <span style={{ fontSize: '0.8em' }}>단 2분만에 나오는 신기한 결과</span>
             </MainHeadline>
             <SubHeadline>
@@ -150,14 +152,16 @@ const LandingPage: React.FC = () => {
               </ComparisonCard>
             </ComparisonGrid>
 
-            <CTAButton secondary onClick={() => {
-              const featuresSection = document.querySelector('[data-section="features"]');
-              if (featuresSection) {
-                featuresSection.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}>
-              더 자세히 알아보기 →
-            </CTAButton>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <CTAButton secondary onClick={() => {
+                const featuresSection = document.querySelector('[data-section="features"]');
+                if (featuresSection) {
+                  featuresSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}>
+                더 자세히 알아보기 →
+              </CTAButton>
+            </div>
           </StoryContent>
         </StorySection>
 
@@ -284,8 +288,8 @@ const VideoBackground = styled.video`
 const ContentOverlay = styled.div`
   position: relative;
   z-index: 2;
-  background: linear-gradient(135deg, rgba(240, 147, 251, 0.95) 0%, rgba(245, 87, 108, 0.95) 50%, rgba(102, 126, 234, 0.95) 100%);
-  color: white;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 50%, rgba(241, 245, 249, 0.98) 100%);
+  color: #1a202c;
   
 `;
 
@@ -332,13 +336,28 @@ const MainHeadline = styled.h1`
   margin-bottom: 1rem;
   line-height: 1.2;
   animation: slideInUp 1s ease-out;
+  color: #2d3748;
+
+  .desktop-only {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .mobile-inline {
+    @media (max-width: 768px) {
+      display: inline;
+    }
+  }
 
   @media (max-width: 768px) {
-    font-size: 2.5rem;
+    font-size: 2.3rem;
+    line-height: 1.3;
   }
   
   @media (max-width: 480px) {
-    font-size: 2.2rem;
+    font-size: 2rem;
+    line-height: 1.4;
   }
   
   @keyframes slideInUp {
@@ -348,29 +367,29 @@ const MainHeadline = styled.h1`
 `;
 
 const HighlightText = styled.span`
-  color: #fbbf24;
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
-  animation: glow 2s ease-in-out infinite alternate;
-  
-  @keyframes glow {
-    0% { text-shadow: 0 0 20px rgba(251, 191, 36, 0.8); }
-    100% { text-shadow: 0 0 30px rgba(251, 191, 36, 1), 0 0 40px rgba(251, 191, 36, 0.6); }
-  }
+  color: #e53e3e;
+  font-weight: 900;
+  text-shadow: none;
 `;
 
 const SubHeadline = styled.p`
   font-size: 1.25rem;
   margin-bottom: 2rem;
   line-height: 1.6;
-  opacity: 0.9;
+  color: #4a5568;
   animation: slideInUp 1s ease-out 0.3s both;
 
   @media (max-width: 768px) {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    br {
+      display: none;
+    }
   }
   
   @media (max-width: 480px) {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
   }
 
   .mobile-break {
@@ -383,18 +402,18 @@ const SubHeadline = styled.p`
 
 const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
   background: ${props => props.secondary 
-    ? 'linear-gradient(45deg, #667eea, #764ba2)' 
-    : 'linear-gradient(45deg, #fbbf24, #f59e0b)'};
+    ? 'linear-gradient(45deg, #4299e1, #3182ce)' 
+    : 'linear-gradient(45deg, #e53e3e, #c53030)'};
   color: white;
-  padding: ${props => props.large ? '1rem 2rem' : '0.75rem 1.5rem'};
-  border-radius: 9999px;
+  padding: ${props => props.large ? '1.2rem 2.5rem' : '1rem 2rem'};
+  border-radius: 12px;
   border: none;
-  font-weight: 600;
-  font-size: ${props => props.large ? '1.25rem' : '1rem'};
+  font-weight: 700;
+  font-size: ${props => props.large ? '1.3rem' : '1.1rem'};
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  text-shadow: none;
   
   @media (max-width: 768px) {
     padding: ${props => props.large ? '1.2rem 2.5rem' : '1rem 2rem'};
@@ -435,8 +454,15 @@ const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
 
 const StorySection = styled.section`
   padding: 4rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2.5rem 1rem;
+  }
 `;
 
 const StoryContent = styled.div`
@@ -450,20 +476,23 @@ const SectionTitle = styled.h2`
   font-weight: 700;
   margin-bottom: 2rem;
   text-align: center;
+  color: #2d3748;
 
   @media (max-width: 768px) {
-    font-size: 1.9rem;
+    font-size: 1.8rem;
+    line-height: 1.3;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+    line-height: 1.4;
   }
 `;
 
 const BrandText = styled.span`
-  color: #fbbf24;
+  color: #e53e3e;
   font-weight: 800;
-  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+  text-shadow: none;
 `;
 
 const StoryText = styled.p`
@@ -471,14 +500,21 @@ const StoryText = styled.p`
   line-height: 1.7;
   margin-bottom: 2rem;
   text-align: left;
+  color: #4a5568;
   
   @media (max-width: 768px) {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     text-align: center;
+    line-height: 1.6;
+    
+    br {
+      display: none;
+    }
   }
   
   @media (max-width: 480px) {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
   }
 `;
 
@@ -519,6 +555,15 @@ const ComparisonList = styled.ul`
 
 const FeaturesSection = styled.section`
   padding: 4rem 1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2.5rem 1rem;
+  }
 `;
 
 const FeatureGrid = styled.div`
@@ -611,8 +656,15 @@ const FeatureDescription = styled.p`
 
 const TestimonialSection = styled.section`
   padding: 4rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2.5rem 1rem;
+  }
 `;
 
 const TestimonialGrid = styled.div`
@@ -663,59 +715,81 @@ const TestimonialText = styled.blockquote`
   line-height: 1.6;
   margin-bottom: 1rem;
   font-style: italic;
+  color: #2d3748;
   
   @media (max-width: 768px) {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
   }
 `;
 
 const TestimonialAuthor = styled.cite`
   font-size: 0.9rem;
-  opacity: 0.8;
+  color: #718096;
   
   @media (max-width: 768px) {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 `;
 
 const FinalCTASection = styled.section`
   padding: 4rem 1rem;
   text-align: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2.5rem 1rem;
+  }
 `;
 
 const FinalCTATitle = styled.h2`
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 1rem;
+  color: #2d3748;
   
   @media (max-width: 768px) {
-    font-size: 2.2rem;
+    font-size: 2rem;
+    line-height: 1.3;
   }
   
   @media (max-width: 480px) {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    line-height: 1.4;
   }
 `;
 
 const FinalCTASubtitle = styled.p`
   font-size: 1.25rem;
   margin-bottom: 2rem;
-  opacity: 0.9;
+  color: #4a5568;
+  line-height: 1.6;
   
   @media (max-width: 768px) {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    
+    br {
+      display: none;
+    }
   }
   
   @media (max-width: 480px) {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
   }
 `;
 
