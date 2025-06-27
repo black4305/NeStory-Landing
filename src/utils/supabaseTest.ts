@@ -178,4 +178,52 @@ declare global {
 
 if (typeof window !== 'undefined') {
   window.SupabaseTest = SupabaseTestManager;
+  
+  // 페이지 로드 시 자동으로 Supabase 연결 상태를 콘솔에 표시
+  setTimeout(() => {
+    console.log('%c🚀 NeStory Supabase 테스트 시스템', 'font-size: 16px; font-weight: bold; color: #4CAF50;');
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #4CAF50;');
+    
+    console.log('\n💡 사용 가능한 테스트 명령어:');
+    console.log('  🔄 window.SupabaseTest.runAllTests()     - 전체 테스트 실행');
+    console.log('  🔌 window.SupabaseTest.testConnection()  - 연결 테스트만');
+    console.log('  📝 window.SupabaseTest.testDataInsertion() - 데이터 삽입 테스트');
+    console.log('  🔍 window.SupabaseTest.testDataRetrieval() - 데이터 조회 테스트');
+    console.log('  📊 window.SupabaseTest.testStatistics()   - 통계 데이터 테스트');
+    console.log('  🧹 window.SupabaseTest.cleanupTestData()  - 테스트 데이터 정리');
+    
+    console.log('\n🎯 추천: 먼저 전체 테스트를 실행해보세요!');
+    console.log('%cwindow.SupabaseTest.runAllTests();', 'background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-family: monospace;');
+    
+    // 환경변수 설정 상태 확인
+    const hasUrl = process.env.REACT_APP_SUPABASE_URL;
+    const hasKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+    
+    console.log('\n⚙️ 환경변수 설정 상태:');
+    console.log(`  📍 SUPABASE_URL: ${hasUrl ? '✅ 설정됨' : '❌ 미설정'}`);
+    console.log(`  🔑 SUPABASE_KEY: ${hasKey ? '✅ 설정됨' : '❌ 미설정'}`);
+    
+    if (!hasUrl || !hasKey) {
+      console.log('\n⚠️ Supabase 환경변수가 설정되지 않았습니다!');
+      console.log('   .env 파일에 다음 정보를 입력해주세요:');
+      console.log('   REACT_APP_SUPABASE_URL=https://your-project-id.supabase.co');
+      console.log('   REACT_APP_SUPABASE_ANON_KEY=your-anon-key');
+    } else {
+      console.log('\n🎉 환경변수 설정 완료! 테스트를 실행할 수 있습니다.');
+      
+      // 자동으로 연결 테스트 실행
+      setTimeout(() => {
+        console.log('\n🔄 자동 연결 테스트 시작...');
+        SupabaseTestManager.testConnection().then(connected => {
+          if (connected) {
+            console.log('✅ Supabase 연결 성공! 모든 기능이 준비되었습니다.');
+          } else {
+            console.log('❌ Supabase 연결 실패. SQL 설정을 확인해주세요.');
+          }
+        });
+      }, 1000);
+    }
+    
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #4CAF50;');
+  }, 2000); // 페이지 로드 후 2초 뒤에 표시
 }
