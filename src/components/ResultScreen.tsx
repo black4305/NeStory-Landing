@@ -7,6 +7,7 @@ import { AxisScore } from '../types';
 import { travelTypes } from '../data/travelTypes';
 import { characters } from '../data/characters';
 import { regionalRecommendations } from '../data/regions';
+import { getRecommendationsByType } from '../data/specificDestinations';
 import CharacterAvatar from './CharacterAvatar';
 
 const Container = styled.div`
@@ -469,7 +470,16 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     return fallbackKey ? regionalRecommendations[fallbackKey] : null;
   };
 
+  // 구체적인 여행지 추천 (마케팅 동의 시에만)
+  const getSpecificDestinations = (region: string | undefined, travelTypeCode: string, hasConsent: boolean) => {
+    if (!region || !hasConsent || !travelTypeCode) return [];
+    
+    // 여행 유형 코드에서 추천을 위한 타입 추출
+    return getRecommendationsByType(region, travelTypeCode, hasConsent);
+  };
+
   const regionalInfo = getRegionalInfo(userRegion, hasMarketingConsent);
+  const specificDestinations = getSpecificDestinations(userRegion, typeCode, hasMarketingConsent);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
@@ -599,10 +609,56 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
         </AxisSection>
 
         
-        {regionalInfo && (
+        {hasMarketingConsent && specificDestinations.length > 0 && (
           <RecommendationSection>
             <RecommendationTitle>
-              🏡 {regionalInfo.region} 지역 맞춤 추천 (2곳)
+              🎯 {userRegion} 맞춤 여행지 추천
+            </RecommendationTitle>
+            <RecommendationList>
+              {specificDestinations.map((destination, index) => (
+                <RecommendationItem key={index}>
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    <strong>📍 {destination.name}</strong>
+                    <span style={{ 
+                      marginLeft: '0.5rem', 
+                      fontSize: '0.85rem', 
+                      color: '#667eea',
+                      background: '#f0f4ff',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: '8px',
+                      fontWeight: '600'
+                    }}>
+                      {destination.category}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.9rem', color: '#4a5568', lineHeight: '1.4' }}>
+                    {destination.description}
+                  </div>
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#667eea' }}>
+                    ⏰ {destination.duration} • 💰 {destination.cost === 'low' ? '저렴' : destination.cost === 'medium' ? '보통' : '비쌈'}
+                  </div>
+                </RecommendationItem>
+              ))}
+            </RecommendationList>
+            <div style={{ 
+              textAlign: 'center', 
+              marginTop: '1rem', 
+              padding: '0.75rem', 
+              background: 'rgba(102, 126, 234, 0.1)', 
+              borderRadius: '10px',
+              fontSize: '0.9rem',
+              color: '#667eea',
+              fontWeight: '600'
+            }}>
+              💡 {typeCode} 유형에 맞는 구체적인 여행지를 추천해드렸습니다!
+            </div>
+          </RecommendationSection>
+        )}
+        
+        {hasMarketingConsent && regionalInfo && specificDestinations.length === 0 && (
+          <RecommendationSection>
+            <RecommendationTitle>
+              🏡 {regionalInfo.region} 근처 여행지 (일반 추천)
             </RecommendationTitle>
             <RecommendationList>
               {regionalInfo.nearbyDestinations.slice(0, 2).map((dest, index) => (
@@ -615,12 +671,12 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
               textAlign: 'center', 
               marginTop: '1rem', 
               padding: '0.75rem', 
-              background: 'rgba(255, 255, 255, 0.1)', 
+              background: 'rgba(255, 193, 7, 0.1)', 
               borderRadius: '10px',
               fontSize: '0.9rem',
-              color: '#4a5568'
+              color: '#856404'
             }}>
-              💡 마케팅 정보 수신 동의로 맞춤 여행지를 추천받으셨습니다!
+              ⚠️ 해당 지역의 구체적인 여행지 정보가 준비 중입니다.
             </div>
           </RecommendationSection>
         )}
