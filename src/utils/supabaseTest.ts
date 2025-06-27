@@ -48,9 +48,10 @@ export class SupabaseTestManager {
           instagram: 'test@example.com',
           age: '20-30대',
           gender: '여성',
-          familySize: '4인 가족',
+          familySize: 4,
           region: '서울',
-          marketingConsent: true
+          marketingConsent: true,
+          privacyConsent: true
         },
         submittedAt: Date.now(),
         reliabilityScore: 85.2,

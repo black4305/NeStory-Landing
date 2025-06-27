@@ -366,11 +366,26 @@ const UniqueSharedResult: React.FC = () => {
       }
 
       try {
-        const { FirebaseService } = await import('./services/firebase');
-        const data = await FirebaseService.getSharedResult(shareId);
+        const { SupabaseService } = await import('./services/supabase');
+        const allData = await SupabaseService.getAllUserData();
+        const data = allData.find(item => item.sessionId === shareId);
         
-        if (data) {
-          setSharedData(data);
+        if (data && data.completed) {
+          setSharedData({
+            result: {
+              typeCode: data.result,
+              axisScores: data.answers ? data.answers.reduce((acc, answer) => {
+                acc[answer.questionId] = answer.score;
+                return acc;
+              }, {} as any) : {},
+              analytics: {
+                totalTime: data.totalTime,
+                clickCount: data.clickCount,
+                scrollDepth: data.scrollDepth
+              }
+            },
+            userInfo: data.userInfo
+          });
         } else {
           setError('공유된 결과를 찾을 수 없습니다.');
         }
