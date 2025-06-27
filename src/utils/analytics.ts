@@ -88,17 +88,17 @@ class Analytics {
 
   private async sendAnalytics(data: AnalyticsData): Promise<void> {
     try {
-      // public 스키마 직접 사용
-      const { SupabasePublicService } = await import('../services/supabasePublic');
-      const success = await SupabasePublicService.saveUserData(data);
+      // nestory 스키마 프록시 함수 사용
+      const { SupabaseService } = await import('../services/supabase');
+      const success = await SupabaseService.saveUserData(data);
       
       if (success) {
-        console.log('✅ Supabase public.user_responses에 분석 데이터 저장 완료');
+        console.log('✅ nestory.user_responses에 분석 데이터 저장 완료');
       } else {
-        throw new Error('Supabase 저장 실패');
+        throw new Error('nestory 스키마 저장 실패');
       }
     } catch (error) {
-      console.error('❌ Supabase 저장 실패, localStorage로 fallback:', error);
+      console.error('❌ nestory 스키마 저장 실패, localStorage로 fallback:', error);
       
       // Supabase 실패 시 localStorage 백업
       const existingData = JSON.parse(localStorage.getItem('surveyAnalytics') || '[]');
