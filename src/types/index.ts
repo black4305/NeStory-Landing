@@ -35,6 +35,7 @@ export interface AnalyticsData {
   id?: string; // UUID from database
   sessionId: string;
   startTime: number;
+  timestamp: number; // 추가: 생성 시점
   answers: Answer[];
   totalTime: number;
   clickCount: number;

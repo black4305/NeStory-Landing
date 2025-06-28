@@ -63,6 +63,7 @@ class Analytics {
     const analyticsData: AnalyticsData = {
       sessionId: this.sessionId,
       startTime: this.startTime,
+      timestamp: Date.now(),
       answers: this.answers,
       totalTime: Date.now() - this.startTime,
       clickCount: this.clickCount,
@@ -82,6 +83,7 @@ class Analytics {
     const analyticsData: AnalyticsData = {
       sessionId: this.sessionId,
       startTime: this.startTime,
+      timestamp: Date.now(),
       answers: this.answers,
       totalTime: Date.now() - this.startTime,
       clickCount: this.clickCount,

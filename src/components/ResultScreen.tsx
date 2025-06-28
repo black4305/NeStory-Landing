@@ -7,7 +7,7 @@ import { AxisScore } from '../types';
 import { travelTypes } from '../data/travelTypes';
 import { characters } from '../data/characters';
 import { regionalRecommendations } from '../data/regions';
-import { getRecommendationsByType } from '../data/specificDestinations';
+import { getRecommendationsByType } from '../data/travelDestinations';
 import CharacterAvatar from './CharacterAvatar';
 
 const Container = styled.div`
@@ -482,10 +482,10 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 
   // 구체적인 여행지 추천 (마케팅 동의 시에만)
   const getSpecificDestinations = (region: string | undefined, travelTypeCode: string, hasConsent: boolean) => {
-    if (!region || !hasConsent || !travelTypeCode) return [];
+    if (!hasConsent || !travelTypeCode) return [];
     
-    // 여행 유형 코드에서 추천을 위한 타입 추출
-    return getRecommendationsByType(region, travelTypeCode, hasConsent);
+    // 새로운 여행지 추천 시스템 사용
+    return getRecommendationsByType(travelTypeCode, region, 5);
   };
 
   const regionalInfo = getRegionalInfo(userRegion, hasMarketingConsent);
@@ -640,14 +640,17 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                         borderRadius: '8px',
                         fontWeight: '600'
                       }}>
-                        {destination.category}
+                        {destination.category === 'nature' ? '자연' : 
+                         destination.category === 'culture' ? '문화' :
+                         destination.category === 'activity' ? '액티비티' :
+                         destination.category === 'food' ? '음식' : '휴식'}
                       </span>
                     </div>
                     <div style={{ fontSize: '0.9rem', color: '#4a5568', lineHeight: '1.4' }}>
                       {destination.description}
                     </div>
                     <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#667eea' }}>
-                      ⏰ {destination.duration} • 💰 {destination.cost === 'low' ? '저렴' : destination.cost === 'medium' ? '보통' : '비쌈'}
+                      📍 {destination.location} • 🎯 {typeCode} 유형 맞춤
                     </div>
                   </RecommendationItem>
                 ))

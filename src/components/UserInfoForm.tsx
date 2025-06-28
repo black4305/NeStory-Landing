@@ -287,6 +287,7 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
 
   const isFormValid = formData.name && formData.privacyConsent;
   const canGetRecommendations = isFormValid && formData.marketingConsent;
+  const allConsentsGiven = formData.privacyConsent && formData.marketingConsent;
 
   return (
     <Container>
@@ -455,18 +456,28 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
           <Button
             onClick={handleSubmit}
             disabled={!canGetRecommendations}
+            style={{
+              filter: !canGetRecommendations ? 'blur(2px)' : 'none',
+              opacity: !canGetRecommendations ? 0.5 : 1
+            }}
             whileHover={{ scale: canGetRecommendations ? 1.05 : 1 }}
             whileTap={{ scale: canGetRecommendations ? 0.95 : 1 }}
           >
-            {canGetRecommendations ? '🎯 맞춤 추천 받기' : '📋 마케팅 동의 필요'}
+            {canGetRecommendations ? '🎯 맞춤 추천 받기' : '📋 모든 동의 필요'}
           </Button>
           <Button
             variant="secondary"
             onClick={onSkip}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            disabled={allConsentsGiven}
+            style={{
+              filter: allConsentsGiven ? 'blur(2px)' : 'none',
+              opacity: allConsentsGiven ? 0.5 : 1,
+              cursor: allConsentsGiven ? 'not-allowed' : 'pointer'
+            }}
+            whileHover={{ scale: !allConsentsGiven ? 1.05 : 1 }}
+            whileTap={{ scale: !allConsentsGiven ? 0.95 : 1 }}
           >
-            추천 없이 결과만 보기
+            {allConsentsGiven ? '✅ 추천 이용 가능' : '건너뛰기'}
           </Button>
         </ButtonGroup>
         
