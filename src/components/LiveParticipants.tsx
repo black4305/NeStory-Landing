@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SupabaseService } from '../services/supabase';
 
 const ParticipantsBanner = styled(motion.div)`
   position: fixed !important;
@@ -121,14 +122,39 @@ const CloseButton = styled.button`
 
 const LiveParticipants: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
+  const [recentCompletions, setRecentCompletions] = useState<any[]>([]);
 
-  // 실제 한국 이름 목록
+  // 실제 한국 이름 목록 (백업용)
   const koreanNames = [
     '김민수', '이영희', '박철수', '최수진', '정민호', '강지은', '윤세영', '임도현',
     '한소영', '오준혁', '신예린', '배현우', '노은정', '송지훈', '전미래', '조현석',
     '홍유진', '문성호', '서다은', '황민준', '양수아', '백도윤', '권서연', '남태영',
     '고은비', '안준서', '유채원', '장민석', '현지우', '마서진'
   ];
+
+  // 실제 설문 완료 데이터 가져오기
+  const loadRecentCompletions = async () => {
+    try {
+      const allData = await SupabaseService.getAllUserData();
+      // 완료된 설문만 필터링하고, 최근 10개 선택
+      const completed = allData
+        .filter(item => item.completed && item.userInfo?.name)
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 10);
+      
+      setRecentCompletions(completed);
+      console.log('실제 설문 완료자:', completed.length, '명');
+    } catch (error) {
+      console.error('설문 완료 데이터 로드 실패:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadRecentCompletions();
+    // 30초마다 데이터 새로고침
+    const interval = setInterval(loadRecentCompletions, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // 이름을 가운데 글자 숨김 처리 (예: 홍길동 → 홍O동)
   const maskName = (name: string) => {
@@ -140,7 +166,7 @@ const LiveParticipants: React.FC = () => {
     return name;
   };
 
-  // 여러 메시지 생성
+  // 실제 데이터 기반 메시지 생성
   const generateMessages = () => {
     const actions = [
       { text: '설문을 완료했습니다', icon: '✅' },
@@ -151,7 +177,21 @@ const LiveParticipants: React.FC = () => {
     ];
     const messages = [];
     
-    for (let i = 0; i < 6; i++) {
+    // 실제 완료 데이터가 있으면 사용
+    if (recentCompletions.length > 0) {
+      recentCompletions.forEach((completion, index) => {
+        if (index < 6) { // 최대 6개까지만
+          const name = completion.userInfo?.name;
+          const displayName = name ? maskName(name) : '익명';
+          const action = actions[index % actions.length];
+          const result = completion.result || '미지';
+          messages.push(`${action.icon} ${displayName}님이 ${result} 유형으로 ${action.text}`);
+        }
+      });
+    }
+    
+    // 실제 데이터가 부족하면 가짜 데이터로 채우기
+    while (messages.length < 6) {
       const randomName = koreanNames[Math.floor(Math.random() * koreanNames.length)];
       const randomAction = actions[Math.floor(Math.random() * actions.length)];
       messages.push(`${randomAction.icon} ${maskName(randomName)}님이 ${randomAction.text}`);
@@ -172,6 +212,9 @@ const LiveParticipants: React.FC = () => {
     if (isHidden === 'true') {
       setIsVisible(false);
     }
+    
+    // 디버깅: 컴포넌트가 마운트되었는지 확인
+    console.log('LiveParticipants 마운트됨, isVisible:', !isHidden);
   }, []);
 
   if (!isVisible) return null;

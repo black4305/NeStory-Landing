@@ -92,11 +92,18 @@ const Container = styled.div`
   padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   
   @media (max-width: 768px) {
-    padding: 0.75rem;
+    min-height: auto;
+    padding: 2rem 0.75rem;
     justify-content: flex-start;
-    padding-top: 2rem;
+    touch-action: manipulation;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1.5rem 0.5rem;
   }
 `;
 

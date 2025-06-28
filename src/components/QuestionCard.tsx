@@ -5,65 +5,25 @@ import { Question } from '../types';
 import NeStoryTILogo from './NeStoryTILogo';
 
 const Container = styled.div`
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-items: center;
+  justify-content: center;
   min-height: 100vh;
-  min-height: -webkit-fill-available;
-  height: 100vh;
-  height: -webkit-fill-available;
-  max-height: 100vh;
-  max-height: -webkit-fill-available;
   padding: 1rem;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
   
-  /* iOS Safari 및 Chrome 모바일 주소창 대응 */
-  @supports (-webkit-touch-callout: none) {
-    height: 100vh;
-    height: -webkit-fill-available;
-    min-height: -webkit-fill-available;
-    max-height: -webkit-fill-available;
+  @media (max-width: 768px) {
+    min-height: auto;
+    padding: 2rem 1rem;
+    touch-action: manipulation;
   }
   
-  /* 모바일 브라우저별 정밀 대응 */
-  @media screen and (max-width: 768px) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 0.5rem;
-    grid-template-rows: 60px 1fr 60px;
-    gap: 0.5rem;
-    height: 100vh;
-    height: -webkit-fill-available;
-    max-height: 100vh;
-    max-height: -webkit-fill-available;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    overflow: hidden;
-  }
-  
-  @media screen and (max-width: 375px) {
-    padding: 0.25rem;
-    grid-template-rows: 50px 1fr 50px;
-    gap: 0.25rem;
-  }
-  
-  /* iOS Safari 특화 */
-  @media screen and (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) {
-    height: 100vh;
-    height: -webkit-fill-available;
-    max-height: 100vh;
-    max-height: -webkit-fill-available;
+  @media (max-width: 480px) {
+    padding: 1.5rem 0.5rem;
   }
 `;
 
