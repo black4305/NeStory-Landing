@@ -226,12 +226,6 @@ const LandingPage: React.FC = () => {
               </CTAButtonGroup>
             </motion.div>
             
-            <ScrollHint>
-              <ScrollText>😱 실제 후기가 더 궁금하다면?</ScrollText>
-              <ScrollIcon>👇👇👇</ScrollIcon>
-              <PulsatingScrollText>아래로 스크롤하세요!</PulsatingScrollText>
-              <ScrollArrow />
-            </ScrollHint>
           </HeroContent>
         </HeroSection>
 
@@ -249,15 +243,15 @@ const LandingPage: React.FC = () => {
               <StoryAuthor>- 실제 사용자 김○○님의 눈물 후기</StoryAuthor>
             </EmotionalStory>
 
-            <StoryText>
-              <strong>👩‍👧‍👦 김○○님 (7살, 4살 엄마):</strong><br />
-              "와.. 진짜 우리 가족 똑같이 나왔어😱 4살이 좋아할만한 곳이랑 7살이 재밌어할 곳 딱 나누어서 추천해주는데... 어떻게 알지?"
-            </StoryText>
+            <TestimonialBox>
+              <TestimonialHeader>👩‍👧‍👦 김○○님 (7살, 4살 엄마)</TestimonialHeader>
+              <TestimonialContent>"와.. 진짜 우리 가족 똑같이 나왔어😱 4살이 좋아할만한 곳이랑 7살이 재밌어할 곳 딱 나누어서 추천해주는데... 어떻게 알지?"</TestimonialContent>
+            </TestimonialBox>
 
-            <StoryText>
-              <strong>👨‍👩‍👧 박○○님 (5살 딸 가족):</strong><br />
-              "헐 우리 딸 완전 활동형이라고 나왔는데 정말 맞아ㅋㅋ 추천해준 체험농장 갔는데 딸이 하루종일 뛰어놀더라구요!"
-            </StoryText>
+            <TestimonialBox secondary>
+              <TestimonialHeader>👨‍👩‍👧 박○○님 (5살 딸 가족)</TestimonialHeader>
+              <TestimonialContent>"헐 우리 딸 완전 활동형이라고 나왔는데 정말 맞아ㅋㅋ 추천해준 체험농장 갔는데 딸이 하루종일 뛰어놀더라구요!"</TestimonialContent>
+            </TestimonialBox>
 
             <StoryText>
               <strong>🔥 15,237가족이 인정한 정확도!</strong><br />
@@ -790,17 +784,19 @@ const TrustIndicators = styled.div`
 
 const TrustItem = styled.div`
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
+  color: white;
+  font-weight: 700;
+  padding: 0.6rem 1.2rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   
   @media (max-width: 768px) {
     font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0.5rem 1rem;
   }
 `;
 
@@ -853,28 +849,6 @@ const CenteredButtonContainer = styled.div`
 `;
 
 
-const PulsatingScrollText = styled.div`
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #ff6b6b;
-  animation: pulse 2s infinite;
-  margin-top: 0.5rem;
-  
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.7;
-      transform: scale(1.05);
-    }
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-  }
-`;
 
 const MobileScrollHint = styled.div`
   display: block;
@@ -1349,77 +1323,6 @@ const FinalCTASubtitle = styled.p`
   }
 `;
 
-const ScrollHint = styled.div`
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  animation: bounce 2s infinite;
-  
-  @media (max-width: 768px) {
-    bottom: 1.5rem;
-  }
-  
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-      transform: translateX(-50%) translateY(0);
-    }
-    40% {
-      transform: translateX(-50%) translateY(-10px);
-    }
-    60% {
-      transform: translateX(-50%) translateY(-5px);
-    }
-  }
-`;
-
-const ScrollText = styled.div`
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 0.25rem;
-  
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-`;
-
-const ScrollIcon = styled.div`
-  font-size: 1.5rem;
-  animation: wiggle 1s ease-in-out infinite;
-  
-  @keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg); }
-    75% { transform: rotate(10deg); }
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 1.3rem;
-  }
-`;
-
-const ScrollArrow = styled.div`
-  width: 20px;
-  height: 20px;
-  border-right: 2px solid rgba(255, 255, 255, 0.8);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.8);
-  transform: rotate(45deg);
-  animation: fadeInOut 2s infinite;
-  
-  @keyframes fadeInOut {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
-  }
-  
-  @media (max-width: 768px) {
-    width: 16px;
-    height: 16px;
-  }
-`;
 
 const HookingBadge = styled.div`
   background: linear-gradient(45deg, #ff6b6b, #ffa500);
@@ -1512,6 +1415,59 @@ const UrgencyBadge = styled.div`
   @media (max-width: 768px) {
     font-size: 0.9rem;
     padding: 0.6rem 1.2rem;
+  }
+`;
+
+const TestimonialBox = styled.div<{ secondary?: boolean }>`
+  background: ${props => props.secondary 
+    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'};
+  color: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin: 1.5rem 0;
+  box-shadow: 0 8px 25px ${props => props.secondary 
+    ? 'rgba(102, 126, 234, 0.3)' 
+    : 'rgba(79, 172, 254, 0.3)'};
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  @media (max-width: 768px) {
+    padding: 1.2rem;
+    margin: 1.2rem 0;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+`;
+
+const TestimonialHeader = styled.div`
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+  color: rgba(255, 255, 255, 0.9);
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+  }
+`;
+
+const TestimonialContent = styled.div`
+  font-size: 1.1rem;
+  line-height: 1.6;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
   }
 `;
 
