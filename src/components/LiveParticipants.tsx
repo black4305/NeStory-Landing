@@ -9,15 +9,13 @@ const ParticipantsBanner = styled(motion.div)`
   right: 0;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  padding: 12px 16px;
+  padding: 12px 0;
   font-size: 14px;
   font-weight: 600;
   z-index: 999;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
   
   @media (max-width: 768px) {
     padding: 10px 12px;
@@ -68,7 +66,37 @@ const LiveIndicator = styled(motion.span)`
   }
 `;
 
+const ScrollingContainer = styled.div`
+  display: flex;
+  animation: scroll 30s linear infinite;
+  gap: 40px;
+  
+  @keyframes scroll {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+`;
+
+const MessageItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  
+  @media (max-width: 480px) {
+    gap: 6px;
+  }
+`;
+
 const CloseButton = styled.button`
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   background: rgba(255,255,255,0.2);
   border: none;
   color: white;
@@ -76,7 +104,7 @@ const CloseButton = styled.button`
   padding: 4px 8px;
   border-radius: 50%;
   font-size: 14px;
-  margin-left: auto;
+  z-index: 1000;
   
   &:hover {
     background: rgba(255,255,255,0.3);
@@ -85,16 +113,17 @@ const CloseButton = styled.button`
   @media (max-width: 480px) {
     font-size: 12px;
     padding: 3px 6px;
+    right: 12px;
   }
   
   @media (max-width: 375px) {
     font-size: 11px;
     padding: 2px 5px;
+    right: 8px;
   }
 `;
 
 const LiveParticipants: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState('');
   const [isVisible, setIsVisible] = useState(true);
 
   // 실제 한국 이름 목록
@@ -115,18 +144,19 @@ const LiveParticipants: React.FC = () => {
     return name;
   };
 
-  useEffect(() => {
-    // 실시간 사용자 업데이트
-    const updateUser = () => {
+  // 여러 메시지 생성
+  const generateMessages = () => {
+    const actions = ['설문을 완료했습니다', '여행 유형을 확인했습니다', '테스트를 마쳤습니다'];
+    const messages = [];
+    
+    for (let i = 0; i < 8; i++) {
       const randomName = koreanNames[Math.floor(Math.random() * koreanNames.length)];
-      setCurrentUser(randomName);
-    };
-
-    updateUser(); // 첫 실행
-    const interval = setInterval(updateUser, 4000 + Math.random() * 6000); // 4-10초마다 업데이트
-
-    return () => clearInterval(interval);
-  }, []);
+      const randomAction = actions[Math.floor(Math.random() * actions.length)];
+      messages.push(`🔴 LIVE 방금 ${maskName(randomName)}님이 ${randomAction}`);
+    }
+    
+    return messages;
+  };
 
   const handleClose = () => {
     setIsVisible(false);
@@ -152,31 +182,19 @@ const LiveParticipants: React.FC = () => {
         exit={{ y: 100, opacity: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <LiveIndicator
-          animate={{
-            opacity: [1, 0.5, 1]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          🔴 LIVE
-        </LiveIndicator>
-        
-        <span>방금</span>
-        <UserName>
-          <motion.span
-            key={currentUser}
-            initial={{ y: -10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {maskName(currentUser)}
-          </motion.span>
-        </UserName>
-        <span>님이 설문을 완료했습니다</span>
+        <ScrollingContainer>
+          {generateMessages().map((message, index) => (
+            <MessageItem key={index}>
+              {message}
+            </MessageItem>
+          ))}
+          {/* 끊김 없는 스크롤을 위해 메시지 복제 */}
+          {generateMessages().map((message, index) => (
+            <MessageItem key={`duplicate-${index}`}>
+              {message}
+            </MessageItem>
+          ))}
+        </ScrollingContainer>
         
         <CloseButton onClick={handleClose}>
           ×

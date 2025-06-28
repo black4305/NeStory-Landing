@@ -375,9 +375,6 @@ const LandingPage: React.FC = () => {
           <CTAButton large onClick={handleFinalStartTest}>
             🚀 지금 바로 우리 가족 타입 확인하기!
           </CTAButton>
-          <FinalCTASubInfo>
-            💯 완전 무료 | 📱 간편 테스트 | 🎯 즉시 결과 확인
-          </FinalCTASubInfo>
         </FinalCTASection>
       </ContentOverlay>
       
@@ -855,21 +852,6 @@ const CenteredButtonContainer = styled.div`
   text-align: center;
 `;
 
-const FinalCTASubInfo = styled.div`
-  font-size: 0.9rem;
-  opacity: 0.8;
-  margin-top: 1rem;
-  color: white;
-  text-align: center;
-  
-  @media (max-width: 768px) {
-    font-size: 0.85rem;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 0.8rem;
-  }
-`;
 
 const PulsatingScrollText = styled.div`
   font-size: 1.2rem;
