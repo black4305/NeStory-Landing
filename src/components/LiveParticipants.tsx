@@ -4,58 +4,53 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const ParticipantsBanner = styled(motion.div)`
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 20px;
+  right: 20px;
+  width: 280px;
+  height: 200px;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  padding: 12px 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   z-index: 999;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  border-radius: 15px;
   overflow: hidden;
-  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
   
   @media (max-width: 768px) {
-    padding: 10px 12px;
-    font-size: 13px;
-    gap: 6px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 8px 10px;
+    width: 250px;
+    height: 180px;
+    bottom: 15px;
+    right: 15px;
     font-size: 12px;
-    gap: 4px;
   }
-  
-  @media (max-width: 375px) {
-    padding: 6px 8px;
-    font-size: 11px;
-    gap: 3px;
-  }
-`;
-
-const UserName = styled.span`
-  background: rgba(255,255,255,0.2);
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-weight: 800;
   
   @media (max-width: 480px) {
-    padding: 2px 6px;
-    border-radius: 10px;
+    width: 220px;
+    height: 160px;
+    bottom: 10px;
+    right: 10px;
+    font-size: 11px;
   }
   
   @media (max-width: 375px) {
-    padding: 2px 5px;
-    border-radius: 8px;
+    width: 200px;
+    height: 140px;
+    font-size: 10px;
   }
 `;
 
 const LiveIndicator = styled(motion.span)`
   color: #ff4757;
   font-weight: 800;
+  animation: pulse 2s infinite;
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
   
   @media (max-width: 480px) {
     font-size: 0.9em;
@@ -68,16 +63,29 @@ const LiveIndicator = styled(motion.span)`
 
 const ScrollingContainer = styled.div`
   display: flex;
-  animation: scroll 30s linear infinite;
-  gap: 40px;
+  flex-direction: column;
+  animation: verticalScroll 20s linear infinite;
+  gap: 15px;
+  padding: 15px;
+  height: 100%;
   
-  @keyframes scroll {
+  @keyframes verticalScroll {
     0% {
-      transform: translateX(100%);
+      transform: translateY(100%);
     }
     100% {
-      transform: translateX(-100%);
+      transform: translateY(-100%);
     }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px;
+    gap: 10px;
   }
 `;
 
@@ -86,17 +94,25 @@ const MessageItem = styled.div`
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   
   @media (max-width: 480px) {
     gap: 6px;
+    padding: 6px 10px;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 5px 8px;
   }
 `;
 
 const CloseButton = styled.button`
   position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 10px;
+  top: 10px;
   background: rgba(255,255,255,0.2);
   border: none;
   color: white;
@@ -107,19 +123,47 @@ const CloseButton = styled.button`
   z-index: 1000;
   
   &:hover {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.4);
   }
   
   @media (max-width: 480px) {
     font-size: 12px;
     padding: 3px 6px;
-    right: 12px;
+    right: 8px;
+    top: 8px;
   }
   
   @media (max-width: 375px) {
     font-size: 11px;
     padding: 2px 5px;
-    right: 8px;
+    right: 6px;
+    top: 6px;
+  }
+`;
+
+const LiveHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 15px 8px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  
+  @media (max-width: 768px) {
+    padding: 10px 12px 6px 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px 10px 5px 10px;
+  }
+`;
+
+const HeaderText = styled.span`
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.9;
+  
+  @media (max-width: 480px) {
+    font-size: 11px;
   }
 `;
 
@@ -146,13 +190,19 @@ const LiveParticipants: React.FC = () => {
 
   // 여러 메시지 생성
   const generateMessages = () => {
-    const actions = ['설문을 완료했습니다', '여행 유형을 확인했습니다', '테스트를 마쳤습니다'];
+    const actions = [
+      { text: '설문을 완료했습니다', icon: '✅' },
+      { text: '여행 유형을 확인했습니다', icon: '🎯' },
+      { text: '테스트를 마쳤습니다', icon: '🎉' },
+      { text: '결과를 공유했습니다', icon: '📤' },
+      { text: '가족 유형을 발견했습니다', icon: '💖' }
+    ];
     const messages = [];
     
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
       const randomName = koreanNames[Math.floor(Math.random() * koreanNames.length)];
       const randomAction = actions[Math.floor(Math.random() * actions.length)];
-      messages.push(`🔴 LIVE 방금 ${maskName(randomName)}님이 ${randomAction}`);
+      messages.push(`${randomAction.icon} ${maskName(randomName)}님이 ${randomAction.text}`);
     }
     
     return messages;
@@ -182,6 +232,11 @@ const LiveParticipants: React.FC = () => {
         exit={{ y: 100, opacity: 0 }}
         transition={{ duration: 0.5 }}
       >
+        <LiveHeader>
+          <LiveIndicator>🔴</LiveIndicator>
+          <HeaderText>실시간 활동</HeaderText>
+        </LiveHeader>
+        
         <ScrollingContainer>
           {generateMessages().map((message, index) => (
             <MessageItem key={index}>
