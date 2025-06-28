@@ -162,6 +162,33 @@ const LandingPage: React.FC = () => {
       {/* 실시간 참여자 위젯 */}
       <LiveParticipants />
       
+      {/* 모바일 테스트용 버튼 */}
+      <div style={{
+        position: 'fixed',
+        top: '80px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 1001,
+        display: 'block'
+      }}>
+        <button
+          onClick={handleFinalStartTest}
+          style={{
+            background: 'linear-gradient(45deg, #e53e3e, #c53030)',
+            color: 'white',
+            padding: '1rem 2rem',
+            borderRadius: '12px',
+            border: 'none',
+            fontWeight: '700',
+            fontSize: '1rem',
+            cursor: 'pointer',
+            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)'
+          }}
+        >
+          🚀 테스트 버튼 (확인용)
+        </button>
+      </div>
+      
       <VideoBackground autoPlay muted loop playsInline>
         <source src="/video/family-travel.mp4" type="video/mp4" />
       </VideoBackground>
@@ -362,8 +389,8 @@ const LandingPage: React.FC = () => {
           </TestimonialGrid>
         </TestimonialSection>
 
-        {/* Final CTA */}
-        <FinalCTASection>
+        {/* Final CTA - 임시로 숨김 */}
+        <FinalCTASection style={{ display: 'none' }}>
           <UrgencyBadge>
             ⚡ 15,237번째 가족이 되어보세요!
           </UrgencyBadge>
@@ -376,6 +403,33 @@ const LandingPage: React.FC = () => {
             🚀 지금 바로 우리 가족 타입 확인하기!
           </CTAButton>
         </FinalCTASection>
+        
+        {/* 임시 테스트 섹션 */}
+        <div style={{
+          padding: '100px 20px',
+          textAlign: 'center',
+          background: '#f0f0f0',
+          margin: '50px 0'
+        }}>
+          <h2>이 섹션이 보이나요?</h2>
+          <p>모바일에서 스크롤 테스트</p>
+          <button
+            onClick={handleFinalStartTest}
+            style={{
+              background: 'linear-gradient(45deg, #e53e3e, #c53030)',
+              color: 'white',
+              padding: '20px 40px',
+              borderRadius: '12px',
+              border: 'none',
+              fontWeight: '700',
+              fontSize: '1.2rem',
+              cursor: 'pointer',
+              boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)'
+            }}
+          >
+            🚀 여기서도 버튼 테스트
+          </button>
+        </div>
       </ContentOverlay>
       
       {/* 마이크로 커밋먼트 컴포넌트 */}

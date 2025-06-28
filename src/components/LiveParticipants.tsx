@@ -3,21 +3,22 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ParticipantsBanner = styled(motion.div)`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
   height: 60px;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   font-size: 14px;
   font-weight: 600;
-  z-index: 999;
+  z-index: 9999 !important;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
   overflow: hidden;
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(255,255,255,0.2);
+  display: block !important;
   
   @media (max-width: 768px) {
     height: 55px;
