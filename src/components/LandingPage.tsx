@@ -409,6 +409,8 @@ const LandingContainer = styled.div`
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   
   /* 배경 애니메이션 효과 */
   &::before {
@@ -467,12 +469,12 @@ const HeroSection = styled.section`
   }
   
   @media (max-width: 480px) {
-    padding: 3rem 0.8rem;
+    padding: 3rem 1rem;
     padding-top: 4.5rem;
   }
   
   @media (max-width: 375px) {
-    padding: 2.5rem 0.6rem;
+    padding: 2.5rem 1rem;
     padding-top: 4rem;
   }
   

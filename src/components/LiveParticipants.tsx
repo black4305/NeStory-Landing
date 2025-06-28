@@ -2,150 +2,186 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ParticipantsWidget = styled(motion.div)`
+const ParticipantsBanner = styled(motion.div)`
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   padding: 12px 16px;
-  border-radius: 25px;
   font-size: 14px;
   font-weight: 600;
   z-index: 999;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  cursor: pointer;
-  user-select: none;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   
   @media (max-width: 768px) {
-    bottom: 15px;
-    right: 15px;
-    padding: 10px 14px;
+    padding: 10px 12px;
     font-size: 13px;
-    border-radius: 20px;
+    gap: 6px;
   }
   
   @media (max-width: 480px) {
-    bottom: 12px;
-    right: 12px;
-    padding: 8px 12px;
+    padding: 8px 10px;
     font-size: 12px;
-    border-radius: 18px;
+    gap: 4px;
   }
   
   @media (max-width: 375px) {
-    bottom: 10px;
-    right: 10px;
-    padding: 7px 10px;
+    padding: 6px 8px;
     font-size: 11px;
-    border-radius: 15px;
+    gap: 3px;
   }
 `;
 
-const ParticipantCount = styled.span`
+const UserName = styled.span`
   background: rgba(255,255,255,0.2);
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 12px;
-  margin: 0 4px;
   font-weight: 800;
   
   @media (max-width: 480px) {
-    padding: 1px 6px;
-    margin: 0 3px;
+    padding: 2px 6px;
     border-radius: 10px;
   }
   
   @media (max-width: 375px) {
-    padding: 1px 5px;
-    margin: 0 2px;
+    padding: 2px 5px;
     border-radius: 8px;
   }
 `;
 
-const PulseCircle = styled(motion.div)`
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 12px;
-  height: 12px;
-  background: #ff4757;
-  border-radius: 50%;
-  border: 2px solid white;
+const LiveIndicator = styled(motion.span)`
+  color: #ff4757;
+  font-weight: 800;
   
   @media (max-width: 480px) {
-    width: 10px;
-    height: 10px;
-    border: 1.5px solid white;
+    font-size: 0.9em;
   }
   
   @media (max-width: 375px) {
-    width: 8px;
-    height: 8px;
-    border: 1px solid white;
+    font-size: 0.8em;
+  }
+`;
+
+const CloseButton = styled.button`
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  font-size: 14px;
+  margin-left: auto;
+  
+  &:hover {
+    background: rgba(255,255,255,0.3);
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 11px;
+    padding: 2px 5px;
   }
 `;
 
 const LiveParticipants: React.FC = () => {
-  const [currentCount, setCurrentCount] = useState(32);
+  const [currentUser, setCurrentUser] = useState('');
   const [isVisible, setIsVisible] = useState(true);
 
+  // 실제 한국 이름 목록
+  const koreanNames = [
+    '김민수', '이영희', '박철수', '최수진', '정민호', '강지은', '윤세영', '임도현',
+    '한소영', '오준혁', '신예린', '배현우', '노은정', '송지훈', '전미래', '조현석',
+    '홍유진', '문성호', '서다은', '황민준', '양수아', '백도윤', '권서연', '남태영',
+    '고은비', '안준서', '유채원', '장민석', '현지우', '마서진'
+  ];
+
+  // 이름을 가운데 글자 숨김 처리 (예: 홍길동 → 홍O동)
+  const maskName = (name: string) => {
+    if (name.length === 2) {
+      return name[0] + 'O';
+    } else if (name.length === 3) {
+      return name[0] + 'O' + name[2];
+    }
+    return name;
+  };
+
   useEffect(() => {
-    // 실시간 참여자 수 시뮬레이션
-    const updateCount = () => {
-      // 25-45 사이에서 랜덤하게 변동
-      const baseCount = 35;
-      const variation = Math.floor(Math.random() * 21) - 10; // -10 ~ +10
-      const newCount = Math.max(25, Math.min(45, baseCount + variation));
-      setCurrentCount(newCount);
+    // 실시간 사용자 업데이트
+    const updateUser = () => {
+      const randomName = koreanNames[Math.floor(Math.random() * koreanNames.length)];
+      setCurrentUser(randomName);
     };
 
-    const interval = setInterval(updateCount, 3000 + Math.random() * 5000); // 3-8초마다 업데이트
+    updateUser(); // 첫 실행
+    const interval = setInterval(updateUser, 4000 + Math.random() * 6000); // 4-10초마다 업데이트
 
     return () => clearInterval(interval);
   }, []);
 
-  const handleClick = () => {
-    // 클릭 시 잠시 숨기기
+  const handleClose = () => {
     setIsVisible(false);
-    setTimeout(() => setIsVisible(true), 5000);
+    // 세션 스토리지에 숨김 상태 저장
+    sessionStorage.setItem('liveBannerHidden', 'true');
   };
+
+  // 세션 스토리지에서 숨김 상태 확인
+  useEffect(() => {
+    const isHidden = sessionStorage.getItem('liveBannerHidden');
+    if (isHidden === 'true') {
+      setIsVisible(false);
+    }
+  }, []);
 
   if (!isVisible) return null;
 
   return (
     <AnimatePresence>
-      <ParticipantsWidget
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleClick}
+      <ParticipantsBanner
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 100, opacity: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        <PulseCircle
+        <LiveIndicator
           animate={{
-            scale: [1, 1.3, 1],
-            opacity: [1, 0.7, 1]
+            opacity: [1, 0.5, 1]
           }}
           transition={{
             duration: 2,
             repeat: Infinity,
             ease: "easeInOut"
           }}
-        />
+        >
+          🔴 LIVE
+        </LiveIndicator>
         
-        🔴 현재
-        <ParticipantCount>
+        <span>방금</span>
+        <UserName>
           <motion.span
-            key={currentCount}
+            key={currentUser}
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {currentCount}
+            {maskName(currentUser)}
           </motion.span>
-        </ParticipantCount>
-        명이 테스트 중
-      </ParticipantsWidget>
+        </UserName>
+        <span>님이 설문을 완료했습니다</span>
+        
+        <CloseButton onClick={handleClose}>
+          ×
+        </CloseButton>
+      </ParticipantsBanner>
     </AnimatePresence>
   );
 };

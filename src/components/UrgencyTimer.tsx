@@ -9,25 +9,26 @@ const TimerContainer = styled(motion.div)`
   right: 0;
   background: linear-gradient(135deg, #ff6b6b, #ff8e53);
   color: white;
-  padding: 8px 16px;
+  padding: 16px 24px;
   text-align: center;
   font-weight: bold;
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  font-size: 18px;
   
   @media (max-width: 768px) {
-    padding: 6px 12px;
-    font-size: 13px;
+    padding: 12px 20px;
+    font-size: 16px;
   }
   
   @media (max-width: 480px) {
-    padding: 5px 10px;
-    font-size: 12px;
+    padding: 10px 16px;
+    font-size: 14px;
   }
   
   @media (max-width: 375px) {
-    padding: 4px 8px;
-    font-size: 11px;
+    padding: 8px 12px;
+    font-size: 13px;
   }
 `;
 
@@ -53,62 +54,55 @@ const TimerText = styled.div`
 
 const TimeDisplay = styled.span`
   background: rgba(255,255,255,0.2);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 16px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 22px;
   font-weight: 800;
+  margin: 0 2px;
   
   @media (max-width: 768px) {
-    font-size: 14px;
-    padding: 2px 6px;
+    font-size: 20px;
+    padding: 3px 10px;
   }
   
   @media (max-width: 480px) {
-    font-size: 12px;
-    padding: 1px 5px;
+    font-size: 18px;
+    padding: 2px 8px;
   }
   
   @media (max-width: 375px) {
-    font-size: 11px;
-    padding: 1px 4px;
+    font-size: 16px;
+    padding: 2px 6px;
   }
 `;
 
 const UrgencyTimer: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState({
-    hours: 23,
-    minutes: 59,
-    seconds: 59
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
   });
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // 오늘 23:59:59까지의 시간 계산
+    // 2025년 8월 1일 00:00:00까지의 시간 계산
     const calculateTimeLeft = () => {
       const now = new Date();
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
+      const targetDate = new Date('2025-08-01T00:00:00');
       
-      const difference = endOfDay.getTime() - now.getTime();
+      const difference = targetDate.getTime() - now.getTime();
       
       if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((difference / 1000 / 60) % 60);
         const seconds = Math.floor((difference / 1000) % 60);
         
-        setTimeLeft({ hours, minutes, seconds });
+        setTimeLeft({ days, hours, minutes, seconds });
       } else {
-        // 시간이 지나면 다음날로 리셋
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(23, 59, 59, 999);
-        
-        const newDifference = tomorrow.getTime() - now.getTime();
-        const hours = Math.floor((newDifference / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((newDifference / 1000 / 60) % 60);
-        const seconds = Math.floor((newDifference / 1000) % 60);
-        
-        setTimeLeft({ hours, minutes, seconds });
+        // 시간이 지나면 0으로 설정
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     };
 
@@ -120,7 +114,17 @@ const UrgencyTimer: React.FC = () => {
 
   const handleClose = () => {
     setIsVisible(false);
+    // 세션 스토리지에 숨김 상태 저장
+    sessionStorage.setItem('urgencyTimerHidden', 'true');
   };
+
+  // 세션 스토리지에서 숨김 상태 확인
+  useEffect(() => {
+    const isHidden = sessionStorage.getItem('urgencyTimerHidden');
+    if (isHidden === 'true') {
+      setIsVisible(false);
+    }
+  }, []);
 
   if (!isVisible) return null;
 
@@ -131,8 +135,9 @@ const UrgencyTimer: React.FC = () => {
       transition={{ duration: 0.5 }}
     >
       <TimerText>
-        <span>🔥 오늘만 특별 혜택!</span>
+        <span>🔥 2025년 8월 1일 자정까지 특별 혜택!</span>
         <span>
+          <TimeDisplay>{timeLeft.days}일</TimeDisplay>
           <TimeDisplay>{String(timeLeft.hours).padStart(2, '0')}</TimeDisplay>:
           <TimeDisplay>{String(timeLeft.minutes).padStart(2, '0')}</TimeDisplay>:
           <TimeDisplay>{String(timeLeft.seconds).padStart(2, '0')}</TimeDisplay>
@@ -145,9 +150,9 @@ const UrgencyTimer: React.FC = () => {
             border: 'none',
             color: 'white',
             cursor: 'pointer',
-            fontSize: window.innerWidth <= 480 ? '14px' : window.innerWidth <= 768 ? '16px' : '18px',
-            marginLeft: window.innerWidth <= 480 ? '4px' : '8px',
-            padding: '2px'
+            fontSize: window.innerWidth <= 480 ? '16px' : window.innerWidth <= 768 ? '18px' : '20px',
+            marginLeft: window.innerWidth <= 480 ? '6px' : '10px',
+            padding: '4px'
           }}
         >
           ×
