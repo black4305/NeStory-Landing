@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { SupabaseService } from '../services/supabase';
 
 interface LandingVisit {
-  id: string;
+  visit_id: string;
   timestamp: number;
-  userAgent: string;
-  referrer: string;
-  sessionDuration?: number;
-  ctaClicked?: boolean;
-  deviceType: 'mobile' | 'tablet' | 'desktop';
+  user_agent?: string;
+  referrer?: string;
+  session_duration?: number;
+  cta_clicked?: boolean;
+  device_type?: string;
+  scroll_depth?: number;
 }
 
 const LandingAnalytics: React.FC = () => {
   const [visits, setVisits] = useState<LandingVisit[]>([]);
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalVisits: 0,
     todayVisits: 0,
@@ -22,13 +25,19 @@ const LandingAnalytics: React.FC = () => {
     mobileRatio: 0
   });
 
-  const loadLandingData = useCallback(() => {
-    // localStorage에서 랜딩 페이지 방문 데이터 로드
-    const landingData = localStorage.getItem('landingPageAnalytics');
-    const parsedData: LandingVisit[] = landingData ? JSON.parse(landingData) : [];
-    
-    setVisits(parsedData);
-    calculateStats(parsedData);
+  const loadLandingData = useCallback(async () => {
+    try {
+      setLoading(true);
+      // Supabase에서 랜딩 페이지 분석 데이터 로드
+      const analyticsData = await SupabaseService.getLandingAnalytics();
+      
+      setVisits(analyticsData);
+      calculateStats(analyticsData);
+    } catch (error) {
+      console.error('랜딩 데이터 로드 실패:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -42,15 +51,15 @@ const LandingAnalytics: React.FC = () => {
 
     const todayVisits = data.filter(visit => visit.timestamp >= todayTimestamp).length;
     const totalVisits = data.length;
-    const conversions = data.filter(visit => visit.ctaClicked).length;
+    const conversions = data.filter(visit => visit.cta_clicked).length;
     const conversionRate = totalVisits > 0 ? (conversions / totalVisits) * 100 : 0;
     
-    const sessionsWithDuration = data.filter(visit => visit.sessionDuration);
+    const sessionsWithDuration = data.filter(visit => visit.session_duration && visit.session_duration > 0);
     const averageSessionTime = sessionsWithDuration.length > 0 
-      ? sessionsWithDuration.reduce((sum, visit) => sum + (visit.sessionDuration || 0), 0) / sessionsWithDuration.length 
+      ? sessionsWithDuration.reduce((sum, visit) => sum + (visit.session_duration || 0), 0) / sessionsWithDuration.length 
       : 0;
     
-    const mobileVisits = data.filter(visit => visit.deviceType === 'mobile').length;
+    const mobileVisits = data.filter(visit => visit.device_type === 'mobile').length;
     const mobileRatio = totalVisits > 0 ? (mobileVisits / totalVisits) * 100 : 0;
 
     setStats({
@@ -67,7 +76,7 @@ const LandingAnalytics: React.FC = () => {
     return `${Math.floor(seconds / 60)}분 ${Math.round(seconds % 60)}초`;
   };
 
-  const getDeviceIcon = (deviceType: string) => {
+  const getDeviceIcon = (deviceType?: string) => {
     switch (deviceType) {
       case 'mobile': return '📱';
       case 'tablet': return '📟';
@@ -75,7 +84,7 @@ const LandingAnalytics: React.FC = () => {
     }
   };
 
-  const getReferrerDisplay = (referrer: string) => {
+  const getReferrerDisplay = (referrer?: string) => {
     if (!referrer || referrer === '') return '직접 접속';
     try {
       const url = new URL(referrer);
@@ -85,19 +94,29 @@ const LandingAnalytics: React.FC = () => {
     }
   };
 
-  const clearLandingData = () => {
-    if (window.confirm('랜딩 페이지 분석 데이터를 모두 삭제하시겠습니까?')) {
-      localStorage.removeItem('landingPageAnalytics');
-      setVisits([]);
-      setStats({
-        totalVisits: 0,
-        todayVisits: 0,
-        conversionRate: 0,
-        averageSessionTime: 0,
-        mobileRatio: 0
-      });
+  const clearLandingData = async () => {
+    if (window.confirm('정말로 모든 랜딩 페이지 분석 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+      try {
+        // Supabase에서 모든 랜딩 분석 데이터 삭제
+        // 주의: 실제 운영환경에서는 관리자 권한 확인 필요
+        alert('현재 데이터 삭제 기능은 안전상 비활성화되어 있습니다.\n개발자에게 문의해주세요.');
+      } catch (error) {
+        console.error('랜딩 데이터 삭제 실패:', error);
+        alert('데이터 삭제 중 오류가 발생했습니다.');
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <Container>
+        <div style={{ textAlign: 'center', padding: '3rem' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+          <div>랜딩 페이지 데이터를 불러오는 중...</div>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -159,14 +178,14 @@ const LandingAnalytics: React.FC = () => {
         ) : (
           <VisitsList>
             {visits.slice(0, 20).map((visit, index) => (
-              <VisitItem key={visit.id || index}>
+              <VisitItem key={visit.visit_id || index}>
                 <VisitInfo>
                   <VisitHeader>
-                    <DeviceIcon>{getDeviceIcon(visit.deviceType)}</DeviceIcon>
+                    <DeviceIcon>{getDeviceIcon(visit.device_type)}</DeviceIcon>
                     <VisitTime>
                       {new Date(visit.timestamp).toLocaleString('ko-KR')}
                     </VisitTime>
-                    {visit.ctaClicked && <ConversionBadge>✨ 전환</ConversionBadge>}
+                    {visit.cta_clicked && <ConversionBadge>✨ 전환</ConversionBadge>}
                   </VisitHeader>
                   
                   <VisitDetails>
@@ -175,10 +194,17 @@ const LandingAnalytics: React.FC = () => {
                       <DetailValue>{getReferrerDisplay(visit.referrer)}</DetailValue>
                     </DetailItem>
                     
-                    {visit.sessionDuration && (
+                    {visit.session_duration && (
                       <DetailItem>
                         <DetailLabel>체류:</DetailLabel>
-                        <DetailValue>{formatSessionTime(visit.sessionDuration)}</DetailValue>
+                        <DetailValue>{formatSessionTime(visit.session_duration)}</DetailValue>
+                      </DetailItem>
+                    )}
+                    
+                    {visit.scroll_depth && (
+                      <DetailItem>
+                        <DetailLabel>스크롤:</DetailLabel>
+                        <DetailValue>{visit.scroll_depth.toFixed(1)}%</DetailValue>
                       </DetailItem>
                     )}
                   </VisitDetails>
@@ -193,10 +219,11 @@ const LandingAnalytics: React.FC = () => {
       <InfoSection>
         <InfoTitle>📘 데이터 수집 안내</InfoTitle>
         <InfoList>
-          <InfoItem>• 랜딩 페이지(/landing) 방문 시 자동으로 데이터가 수집됩니다</InfoItem>
+          <InfoItem>• 메인 랜딩 페이지(/) 방문 시 자동으로 데이터가 수집됩니다</InfoItem>
           <InfoItem>• CTA 버튼 클릭 시 전환으로 기록됩니다</InfoItem>
-          <InfoItem>• 체류 시간은 페이지 이탈 시 계산됩니다</InfoItem>
-          <InfoItem>• 데이터는 브라우저 localStorage에 저장됩니다</InfoItem>
+          <InfoItem>• 체류 시간과 스크롤 깊이는 페이지 이탈 시 계산됩니다</InfoItem>
+          <InfoItem>• 데이터는 Supabase nestory-landing 스키마에 저장됩니다</InfoItem>
+          <InfoItem>• 디바이스 타입별, 유입 경로별 분석이 가능합니다</InfoItem>
         </InfoList>
       </InfoSection>
     </Container>

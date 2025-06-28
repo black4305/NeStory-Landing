@@ -324,6 +324,26 @@ export class SupabaseService {
     }
   }
 
+  // 랜딩 페이지 분석 데이터 조회
+  static async getLandingAnalytics() {
+    try {
+      const { data: analytics, error } = await supabase
+        .from('nestory_landing_analytics')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.error('랜딩 분석 데이터 조회 오류:', error);
+        return [];
+      }
+
+      return analytics || [];
+    } catch (error) {
+      console.error('랜딩 분석 데이터 조회 실패:', error);
+      return [];
+    }
+  }
+
   // 관리자 페이지용: nestory-landing 활성 사용자 조회
   static async getNestoryLandingActiveUsers() {
     try {
