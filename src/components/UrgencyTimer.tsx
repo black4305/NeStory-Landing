@@ -114,17 +114,8 @@ const UrgencyTimer: React.FC = () => {
 
   const handleClose = () => {
     setIsVisible(false);
-    // 세션 스토리지에 숨김 상태 저장
-    sessionStorage.setItem('urgencyTimerHidden', 'true');
+    // 세션 저장 제거 - 페이지 새로고침 시 다시 표시됨
   };
-
-  // 세션 스토리지에서 숨김 상태 확인
-  useEffect(() => {
-    const isHidden = sessionStorage.getItem('urgencyTimerHidden');
-    if (isHidden === 'true') {
-      setIsVisible(false);
-    }
-  }, []);
 
   if (!isVisible) return null;
 

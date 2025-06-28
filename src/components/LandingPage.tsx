@@ -307,21 +307,27 @@ const LandingPage: React.FC = () => {
               <FeatureIcon>🎯</FeatureIcon>
               <FeatureTitle>우리 가족 여행 성향</FeatureTitle>
               <FeatureDescription>
-                활동적인 가족? 힐링 추구형? 8가지 유형 중 우리 가족이 어떤 스타일인지 정확히 분석해드려요
+                활동적인 가족? 힐링 추구형?<br />
+                8가지 유형 중 우리 가족이 어떤 스타일인지<br />
+                정확히 분석해드려요
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
               <FeatureIcon>🗺️</FeatureIcon>
               <FeatureTitle>맞춤 여행지 추천</FeatureTitle>
               <FeatureDescription>
-                "우리 동네에서 갈 만한 곳이 있을까?" 걱정 끝! 거주지역 기반으로 딱 맞는 여행지를 추천해드려요
+                "우리 동네에서 갈 만한 곳이 있을까?" 걱정 끝!<br />
+                거주지역 기반으로 딱 맞는<br />
+                여행지를 추천해드려요
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
               <FeatureIcon>💝</FeatureIcon>
               <FeatureTitle>가족 모두 만족하는 플랜</FeatureTitle>
               <FeatureDescription>
-                아이는 재미있고, 어른은 편안하고, 할머니·할아버지도 무리하지 않는 완벽한 여행 코스를 제안해드려요
+                아이는 재미있고, 어른은 편안하고,<br />
+                할머니·할아버지도 무리하지 않는<br />
+                완벽한 여행 코스를 제안해드려요
               </FeatureDescription>
             </FeatureCard>
           </FeatureGrid>
@@ -1086,6 +1092,17 @@ const FeatureGrid = styled.div`
   gap: 2rem;
   max-width: 72rem;
   margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 1.2rem;
+    padding: 0 0.5rem;
+  }
 `;
 
 const FeatureCard = styled.div`
@@ -1108,6 +1125,19 @@ const FeatureCard = styled.div`
   &:nth-child(1) { animation-delay: 0.2s; }
   &:nth-child(2) { animation-delay: 0.4s; }
   &:nth-child(3) { animation-delay: 0.6s; }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    
+    &:hover {
+      transform: translateY(-5px) scale(1.01);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1.2rem;
+    border-radius: 0.8rem;
+  }
   
   @keyframes fadeInUp {
     0% { 
@@ -1167,6 +1197,11 @@ const FeatureDescription = styled.p`
   
   @media (max-width: 768px) {
     font-size: 1.05rem;
+    line-height: 1.5;
+    
+    br {
+      display: none;
+    }
   }
   
   @media (max-width: 480px) {
@@ -1267,7 +1302,7 @@ const TestimonialAuthor = styled.cite`
 `;
 
 const FinalCTASection = styled.section`
-  padding: 4rem 1rem;
+  padding: 4rem 1rem 6rem 1rem;
   text-align: center;
   background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
   width: 100%;
@@ -1275,13 +1310,14 @@ const FinalCTASection = styled.section`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   
   @media (max-width: 768px) {
-    padding: 3rem 1rem;
+    padding: 3rem 1rem 5rem 1rem;
   }
   
   @media (max-width: 480px) {
-    padding: 2.5rem 1rem;
+    padding: 2.5rem 1rem 4rem 1rem;
   }
 `;
 

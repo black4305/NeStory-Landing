@@ -4,88 +4,64 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const ParticipantsBanner = styled(motion.div)`
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 280px;
-  height: 200px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 60px;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   z-index: 999;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-  border-radius: 15px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
   overflow: hidden;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2);
+  border-top: 1px solid rgba(255,255,255,0.2);
   
   @media (max-width: 768px) {
-    width: 250px;
-    height: 180px;
-    bottom: 15px;
-    right: 15px;
+    height: 55px;
+    font-size: 13px;
+  }
+  
+  @media (max-width: 480px) {
+    height: 50px;
     font-size: 12px;
   }
   
-  @media (max-width: 480px) {
-    width: 220px;
-    height: 160px;
-    bottom: 10px;
-    right: 10px;
-    font-size: 11px;
-  }
-  
   @media (max-width: 375px) {
-    width: 200px;
-    height: 140px;
-    font-size: 10px;
+    height: 45px;
+    font-size: 11px;
   }
 `;
 
-const LiveIndicator = styled(motion.span)`
-  color: #ff4757;
-  font-weight: 800;
-  animation: pulse 2s infinite;
-  
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 0.9em;
-  }
-  
-  @media (max-width: 375px) {
-    font-size: 0.8em;
-  }
-`;
 
 const ScrollingContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  animation: verticalScroll 20s linear infinite;
-  gap: 15px;
-  padding: 15px;
+  align-items: center;
+  animation: horizontalScroll 25s linear infinite;
+  gap: 40px;
+  padding: 0 20px;
+  white-space: nowrap;
   height: 100%;
   
-  @keyframes verticalScroll {
+  @keyframes horizontalScroll {
     0% {
-      transform: translateY(100%);
+      transform: translateX(100%);
     }
     100% {
-      transform: translateY(-100%);
+      transform: translateX(-100%);
     }
   }
   
   @media (max-width: 768px) {
-    padding: 12px;
-    gap: 12px;
+    gap: 35px;
+    padding: 0 15px;
   }
   
   @media (max-width: 480px) {
-    padding: 10px;
-    gap: 10px;
+    gap: 30px;
+    padding: 0 10px;
   }
 `;
 
@@ -94,32 +70,34 @@ const MessageItem = styled.div`
   align-items: center;
   gap: 8px;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: inherit;
   
   @media (max-width: 480px) {
     gap: 6px;
-    padding: 6px 10px;
+    padding: 5px 12px;
   }
   
   @media (max-width: 375px) {
-    padding: 5px 8px;
+    padding: 4px 10px;
   }
 `;
 
 const CloseButton = styled.button`
   position: absolute;
-  right: 10px;
-  top: 10px;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   background: rgba(255,255,255,0.2);
   border: none;
   color: white;
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: 16px;
   z-index: 1000;
   
   &:hover {
@@ -127,45 +105,18 @@ const CloseButton = styled.button`
   }
   
   @media (max-width: 480px) {
-    font-size: 12px;
+    font-size: 14px;
     padding: 3px 6px;
-    right: 8px;
-    top: 8px;
+    right: 10px;
   }
   
   @media (max-width: 375px) {
-    font-size: 11px;
+    font-size: 12px;
     padding: 2px 5px;
-    right: 6px;
-    top: 6px;
+    right: 8px;
   }
 `;
 
-const LiveHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 15px 8px 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  
-  @media (max-width: 768px) {
-    padding: 10px 12px 6px 12px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 8px 10px 5px 10px;
-  }
-`;
-
-const HeaderText = styled.span`
-  font-size: 12px;
-  font-weight: 700;
-  opacity: 0.9;
-  
-  @media (max-width: 480px) {
-    font-size: 11px;
-  }
-`;
 
 const LiveParticipants: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -232,11 +183,6 @@ const LiveParticipants: React.FC = () => {
         exit={{ y: 100, opacity: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <LiveHeader>
-          <LiveIndicator>🔴</LiveIndicator>
-          <HeaderText>실시간 활동</HeaderText>
-        </LiveHeader>
-        
         <ScrollingContainer>
           {generateMessages().map((message, index) => (
             <MessageItem key={index}>
