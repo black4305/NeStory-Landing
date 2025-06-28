@@ -401,7 +401,7 @@ const LandingPage: React.FC = () => {
 // Styled Components
 const LandingContainer = styled.div`
   position: relative;
-  min-height: 100vh;
+  width: 100%;
   overflow-x: hidden;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -443,7 +443,14 @@ const ContentOverlay = styled.div`
   z-index: 2;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 50%, rgba(241, 245, 249, 0.98) 100%);
   color: #1a202c;
+  width: 100%;
+  overflow-x: hidden;
   
+  @media (max-width: 768px) {
+    /* 모바일에서 스크롤 보장 */
+    min-height: auto;
+    touch-action: pan-y;
+  }
 `;
 
 const HeroSection = styled.section`
@@ -452,7 +459,7 @@ const HeroSection = styled.section`
   align-items: center;
   text-align: center;
   padding: 6rem 1rem;
-  min-height: 100vh;
+  min-height: 80vh;
   justify-content: center;
   position: relative;
   z-index: 3;
@@ -462,16 +469,19 @@ const HeroSection = styled.section`
   word-wrap: break-word;
   
   @media (max-width: 768px) {
+    min-height: 70vh;
     padding: 4rem 1rem;
     padding-top: 5rem; /* UrgencyTimer 공간 확보 */
   }
   
   @media (max-width: 480px) {
+    min-height: 60vh;
     padding: 3rem 1rem;
     padding-top: 4.5rem;
   }
   
   @media (max-width: 375px) {
+    min-height: 50vh;
     padding: 2.5rem 1rem;
     padding-top: 4rem;
   }
@@ -1302,7 +1312,7 @@ const TestimonialAuthor = styled.cite`
 `;
 
 const FinalCTASection = styled.section`
-  padding: 4rem 1rem 6rem 1rem;
+  padding: 4rem 1rem 8rem 1rem;
   text-align: center;
   background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
   width: 100%;
@@ -1313,11 +1323,15 @@ const FinalCTASection = styled.section`
   justify-content: center;
   
   @media (max-width: 768px) {
-    padding: 3rem 1rem 5rem 1rem;
+    padding: 3rem 1rem 7rem 1rem;
   }
   
   @media (max-width: 480px) {
-    padding: 2.5rem 1rem 4rem 1rem;
+    padding: 2.5rem 1rem 6rem 1rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 2rem 1rem 5rem 1rem;
   }
 `;
 

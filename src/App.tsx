@@ -29,9 +29,10 @@ const GlobalStyle = createGlobalStyle`
   html {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-    /* 모바일 브라우저의 주소창 고려 */
-    height: 100%;
-    height: -webkit-fill-available;
+    /* 모바일 스크롤 활성화 */
+    overflow: auto;
+    height: auto;
+    min-height: 100%;
   }
 
   body {
@@ -41,13 +42,16 @@ const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    height: 100%;
-    height: -webkit-fill-available;
-    /* 모바일 터치 최적화 */
+    overflow-y: auto;
+    /* 높이 제한 제거로 스크롤 허용 */
+    min-height: 100vh;
+    height: auto;
+    /* 모바일 터치 스크롤 활성화 */
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
+    /* 터치 최적화 */
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
   }
 
   /* 모바일 우선 스타일링 */
@@ -79,6 +83,9 @@ const GlobalStyle = createGlobalStyle`
 const AppContainer = styled.div`
   width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
 `;
 
 type AppState = 'start' | 'pretest' | 'survey' | 'userInfo' | 'thankYou' | 'result';
