@@ -2002,3 +2002,850 @@ border-radius: 3px 3px 0 0;
 - 그라데이션으로 시각적 매력도 증가
 
 **이제 배포하고 마케팅을 시작할 준비가 완료되었습니다!** 🎉
+
+## 📅 2025-06-28 작업 내용
+
+### ✅ 완료된 작업들
+
+#### 1. 데이터베이스 구조 개선
+- **result_details JSONB 컬럼 완전 삭제**
+- **9개의 새로운 개별 컬럼 추가**:
+  - click_count, scroll_depth, reliability_score
+  - response_pattern, privacy_consent, marketing_consent
+  - user_name, user_instagram
+  - question_times, browser_info
+- **데이터 마이그레이션 완료**: 기존 JSONB 데이터를 개별 컬럼으로 이동
+- **프록시 함수 업데이트**: result_details 파라미터 제거
+- **애플리케이션 코드 수정**: supabase.ts에서 p_result_details 제거
+
+#### 2. 라우팅 변경
+- **모든 /test 경로를 /landing으로 변경**
+- App.tsx: Route path 수정
+- LandingPage.tsx: navigate 경로 수정
+- 모든 handleStartNewTest 함수 업데이트
+
+#### 3. SQL 파일 정리
+- **삭제된 불필요한 파일들**:
+  - check-and-drop-functions.sql
+  - check-nestory-landing-settings.sql
+  - nestory-landing-proxy-functions.sql
+  - remove-result-details-column.sql
+  - update-proxy-function.sql
+  - final-remove-result-details-column.sql
+  - update-proxy-functions-remove-result-details.sql
+- **남은 파일**: add-missing-columns.sql (이미 실행 완료)
+
+### 📊 현재 데이터베이스 상태
+- **nestory_landing_user_responses 테이블**: 32개 컬럼
+- **삭제된 컬럼**: result_details
+- **새로 추가된 인덱스**: marketing_consent, click_count
+
+### 📝 메모리에 저장된 작업 규칙
+1. **CLAUDE.md 작성 규칙**: 최근 작업은 항상 가장 아래에 추가
+2. **작업 프로세스**: 작업 전/중/후 CLAUDE.md 확인 및 업데이트
+
+
+## 📊 nestory-landing 스키마 상세 구조 (2025-06-28 최신)
+
+### 스키마: nestory-landing
+
+#### 1. nestory_landing_user_responses (32개 컬럼)
+| 컬럼명 | 타입 | Nullable | 기본값 | 설명 |
+|--------|------|----------|---------|-------|
+| id | uuid | NO | gen_random_uuid() | Primary Key |
+| session_id | text | NO | - | 세션 식별자 (UNIQUE) |
+| user_id | uuid | YES | NULL | 사용자 ID |
+| start_time | bigint | NO | - | 시작 시간 (timestamp) |
+| answers | jsonb | NO | '{}' | 설문 답변 데이터 |
+| total_time | integer | YES | NULL | 총 소요 시간 |
+| result | text | YES | NULL | 결과 타입 (ACFBK 등) |
+| current_index | integer | YES | 0 | 현재 문항 인덱스 |
+| completed | boolean | YES | false | 완료 여부 |
+| family_size | integer | YES | NULL | 가족 구성원 수 |
+| ages | jsonb | YES | '[]' | 가족 구성원 나이 배열 |
+| travel_frequency | text | YES | NULL | 여행 빈도 |
+| location | text | YES | NULL | 거주 지역 |
+| interests | jsonb | YES | '[]' | 관심사 배열 |
+| shared_url | text | YES | NULL | 공유 URL |
+| ip_address | inet | YES | NULL | IP 주소 |
+| user_agent | text | YES | NULL | 사용자 에이전트 |
+| device_type | text | YES | NULL | 디바이스 타입 |
+| referrer | text | YES | NULL | 리퍼러 URL |
+| created_at | timestamptz | YES | now() | 생성 시간 |
+| submitted_at | timestamptz | YES | NULL | 제출 시간 |
+| updated_at | timestamptz | YES | now() | 수정 시간 |
+| click_count | integer | YES | 0 | 클릭 수 ✨NEW |
+| scroll_depth | numeric | YES | 0 | 스크롤 깊이 ✨NEW |
+| reliability_score | numeric | YES | 0.8 | 신뢰도 점수 ✨NEW |
+| response_pattern | text | YES | 'normal' | 응답 패턴 ✨NEW |
+| privacy_consent | boolean | YES | false | 개인정보 동의 ✨NEW |
+| marketing_consent | boolean | YES | false | 마케팅 동의 ✨NEW |
+| user_name | text | YES | NULL | 사용자 이름 ✨NEW |
+| user_instagram | text | YES | NULL | 인스타그램 ID ✨NEW |
+| question_times | jsonb | YES | '[]' | 문항별 소요시간 ✨NEW |
+| browser_info | jsonb | YES | '{}' | 브라우저 정보 ✨NEW |
+
+**인덱스**:
+- PRIMARY KEY (id)
+- UNIQUE (session_id)
+- INDEX idx_nestory_landing_user_responses_marketing_consent
+- INDEX idx_nestory_landing_user_responses_click_count
+
+#### 2. nestory_landing_analytics (10개 컬럼)
+| 컬럼명 | 타입 | Nullable | 기본값 | 설명 |
+|--------|------|----------|---------|-------|
+| id | uuid | NO | gen_random_uuid() | Primary Key |
+| visit_id | text | NO | - | 방문 ID |
+| timestamp | bigint | NO | - | 타임스탬프 |
+| user_agent | text | YES | NULL | 사용자 에이전트 |
+| referrer | text | YES | NULL | 리퍼러 |
+| device_type | text | YES | NULL | 디바이스 타입 |
+| session_duration | numeric | YES | NULL | 세션 지속시간 |
+| cta_clicked | boolean | YES | false | CTA 클릭 여부 |
+| scroll_depth | numeric | YES | NULL | 스크롤 깊이 |
+| created_at | timestamptz | YES | now() | 생성 시간 |
+
+#### 3. nestory_landing_active_users (6개 컬럼)
+| 컬럼명 | 타입 | Nullable | 기본값 | 설명 |
+|--------|------|----------|---------|-------|
+| id | uuid | NO | gen_random_uuid() | Primary Key |
+| session_id | text | NO | - | 세션 ID |
+| last_activity | timestamptz | YES | now() | 마지막 활동 시간 |
+| current_question | integer | YES | 0 | 현재 문항 번호 |
+| status | text | YES | NULL | 상태 |
+| created_at | timestamptz | YES | now() | 생성 시간 |
+
+#### 4. nestory_landing_ab_test_results (7개 컬럼)
+| 컬럼명 | 타입 | Nullable | 기본값 | 설명 |
+|--------|------|----------|---------|-------|
+| id | uuid | NO | gen_random_uuid() | Primary Key |
+| variant | text | NO | - | A/B 테스트 변형 |
+| session_id | text | NO | - | 세션 ID |
+| conversion | boolean | YES | false | 전환 여부 |
+| completion_rate | numeric | YES | NULL | 완료율 |
+| time_spent | integer | YES | NULL | 소요 시간 |
+| created_at | timestamptz | YES | now() | 생성 시간 |
+
+### 뷰 (Views)
+
+#### 1. nestory_landing_active_users_live
+- 실시간 활성 사용자 목록
+- 5분 이내 활동한 사용자만 표시
+
+#### 2. nestory_landing_result_leaderboard
+- 결과별 순위 및 통계
+- 각 결과 타입의 개수와 비율 계산
+
+#### 3. nestory_landing_stats_overview
+- 전체 통계 개요
+- 총 응답 수, 완료율, 평균 시간 등
+
+### 프록시 함수 (Public 스키마)
+
+1. **save_nestory_landing_response_complete**
+   - 사용자 응답 저장/업데이트
+   - 파라미터: 31개 (result_details 제거됨)
+   - 반환: UUID
+
+2. **get_nestory_landing_responses**
+   - 모든 응답 조회
+   - 파라미터: 없음
+   - 반환: 31개 컬럼 (result_details 제외)
+
+3. **delete_nestory_landing_response**
+   - 응답 삭제
+   - 파라미터: p_id (UUID)
+   - 반환: boolean
+
+4. **get_nestory_landing_stats**
+   - 통계 조회
+   - 파라미터: 없음
+   - 반환: 통계 데이터
+
+5. **get_nestory_landing_result_leaderboard**
+   - 결과 순위 조회
+   - 파라미터: 없음
+   - 반환: 순위 데이터
+
+6. **get_nestory_landing_active_users**
+   - 활성 사용자 조회
+   - 파라미터: 없음
+   - 반환: 활성 사용자 목록
+
+7. **save_nestory_landing_analytics**
+   - 랜딩 페이지 분석 데이터 저장
+   - 파라미터: 8개
+   - 반환: boolean
+
+### RLS (Row Level Security)
+- 모든 테이블에 활성화
+- 정책: 모든 사용자 읽기/쓰기 허용 (anon, authenticated)
+
+### Realtime 설정
+- nestory_landing_active_users: INSERT, UPDATE, DELETE
+- nestory_landing_user_responses: INSERT, UPDATE
+
+### 트리거
+- nestory_landing_update_responses_updated_at: updated_at 자동 업데이트
+- nestory_landing_cleanup_trigger: 비활성 사용자 정리 (5분)
+
+### 삭제된 항목
+- ❌ result_details 컬럼 (JSONB) - 개별 컬럼으로 분리됨
+
+
+## 📊 nestory-landing 스키마 현재 상태 (2025-06-28 최종 확인)
+
+### 📁 테이블 (4개)
+1. **nestory_landing_user_responses** - 사용자 설문 응답 (32개 컬럼)
+2. **nestory_landing_analytics** - 랜딩 페이지 분석 (10개 컬럼)
+3. **nestory_landing_active_users** - 활성 사용자 추적 (6개 컬럼)
+4. **nestory_landing_ab_test_results** - A/B 테스트 결과 (7개 컬럼)
+
+### 🔑 Primary Keys
+- nestory_landing_ab_test_results.**id**
+- nestory_landing_active_users.**id**
+- nestory_landing_analytics.**id**
+- nestory_landing_user_responses.**id**
+
+### 🔐 Unique Constraints
+- nestory_landing_active_users.**session_id**
+- nestory_landing_analytics.**visit_id**
+- nestory_landing_user_responses.**session_id**
+- nestory_landing_user_responses.**shared_url** (새로 발견!)
+
+### 📍 인덱스 (총 15개)
+#### nestory_landing_user_responses 인덱스 (8개)
+- idx_nestory_landing_user_responses_click_count
+- idx_nestory_landing_user_responses_marketing_consent
+- nestory_landing_user_responses_completed_idx
+- nestory_landing_user_responses_pkey
+- nestory_landing_user_responses_result_idx
+- nestory_landing_user_responses_session_id_key
+- nestory_landing_user_responses_shared_url_key
+- nestory_landing_user_responses_submitted_at_idx
+
+#### 기타 테이블 인덱스 (7개)
+- nestory_landing_ab_test_results_pkey
+- nestory_landing_active_users_pkey
+- nestory_landing_active_users_session_id_key
+- nestory_landing_active_users_last_activity_idx
+- nestory_landing_analytics_pkey
+- nestory_landing_analytics_visit_id_key
+- nestory_landing_analytics_timestamp_idx
+
+### 👁️ 뷰 (3개)
+1. **nestory_landing_active_users_live** - 실시간 활성 사용자
+2. **nestory_landing_result_leaderboard** - 결과 순위표
+3. **nestory_landing_stats_overview** - 통계 개요
+
+### ⚙️ 함수 (2개)
+1. **nestory_landing_cleanup_inactive_users()** → void
+2. **nestory_landing_update_updated_at_column()** → trigger
+
+### 🔔 트리거 (1개)
+- **nestory_landing_update_responses_updated_at**
+  - 테이블: nestory_landing_user_responses
+  - 타이밍: BEFORE UPDATE
+
+### 🛡️ RLS (Row Level Security)
+- **상태**: 모든 테이블에서 ENABLED
+  - nestory_landing_ab_test_results ✅
+  - nestory_landing_active_users ✅
+  - nestory_landing_analytics ✅
+  - nestory_landing_user_responses ✅
+
+### 📋 RLS 정책 (8개)
+1. **ab_test_results 정책 (2개)**
+   - nestory_landing_admins_read_ab_test (SELECT)
+   - nestory_landing_anyone_insert_ab_test (INSERT)
+
+2. **active_users 정책 (1개)**
+   - nestory_landing_anyone_manage_active_users (ALL)
+
+3. **analytics 정책 (2개)**
+   - nestory_landing_admins_read_analytics (SELECT)
+   - nestory_landing_anyone_can_insert_analytics (INSERT)
+
+4. **user_responses 정책 (3개)**
+   - nestory_landing_users_can_insert (INSERT)
+   - nestory_landing_users_can_read_own (SELECT)
+   - nestory_landing_users_can_update_own (UPDATE)
+
+### 🌐 Public 스키마 프록시 함수 (7개)
+1. **delete_nestory_landing_response**
+2. **get_nestory_landing_active_users**
+3. **get_nestory_landing_responses**
+4. **get_nestory_landing_result_leaderboard**
+5. **get_nestory_landing_stats**
+6. **save_nestory_landing_analytics**
+7. **save_nestory_landing_response_complete**
+
+### 🔄 최근 변경사항
+- ❌ result_details 컬럼 삭제 완료
+- ✅ 9개 새 컬럼 추가 (click_count, scroll_depth, reliability_score 등)
+- ✅ 새로운 인덱스 2개 추가 (click_count, marketing_consent)
+- ✅ shared_url에 UNIQUE 제약조건 확인
+
+
+## 📊 nestory-landing 스키마 전체 구조 (SQL 쿼리 결과)
+
+| info_type      | object_name                                                     | detail                                         |
+| -------------- | --------------------------------------------------------------- | ---------------------------------------------- |
+| TABLE          | nestory_landing_ab_test_results                                 | BASE TABLE                                     |
+| TABLE          | nestory_landing_active_users                                    | BASE TABLE                                     |
+| TABLE          | nestory_landing_active_users_live                               | VIEW                                           |
+| TABLE          | nestory_landing_analytics                                       | BASE TABLE                                     |
+| TABLE          | nestory_landing_result_leaderboard                              | VIEW                                           |
+| TABLE          | nestory_landing_stats_overview                                  | VIEW                                           |
+| TABLE          | nestory_landing_user_responses                                  | BASE TABLE                                     |
+| PRIMARY KEY    | nestory_landing_ab_test_results.id                              | nestory_landing_ab_test_results_pkey           |
+| PRIMARY KEY    | nestory_landing_active_users.id                                 | nestory_landing_active_users_pkey              |
+| PRIMARY KEY    | nestory_landing_analytics.id                                    | nestory_landing_analytics_pkey                 |
+| PRIMARY KEY    | nestory_landing_user_responses.id                               | nestory_landing_user_responses_pkey            |
+| UNIQUE         | nestory_landing_active_users.session_id                         | nestory_landing_active_users_session_id_key    |
+| UNIQUE         | nestory_landing_analytics.visit_id                              | nestory_landing_analytics_visit_id_key         |
+| UNIQUE         | nestory_landing_user_responses.session_id                       | nestory_landing_user_responses_session_id_key  |
+| UNIQUE         | nestory_landing_user_responses.shared_url                       | nestory_landing_user_responses_shared_url_key  |
+| INDEX          | nestory_landing_ab_test_results.nestory_landing_ab_test_results | INDEX                                          |
+| INDEX          | nestory_landing_active_users.nestory_landing_active_users_last_ | INDEX                                          |
+| INDEX          | nestory_landing_active_users.nestory_landing_active_users_pkey  | INDEX                                          |
+| INDEX          | nestory_landing_active_users.nestory_landing_active_users_sessi | INDEX                                          |
+| INDEX          | nestory_landing_analytics.nestory_landing_analytics_pkey        | INDEX                                          |
+| INDEX          | nestory_landing_analytics.nestory_landing_analytics_timestamp_i | INDEX                                          |
+| INDEX          | nestory_landing_analytics.nestory_landing_analytics_visit_id_ke | INDEX                                          |
+| INDEX          | nestory_landing_user_responses.idx_nestory_landing_user_respons | INDEX                                          |
+| INDEX          | nestory_landing_user_responses.idx_nestory_landing_user_respons | INDEX                                          |
+| INDEX          | nestory_landing_user_responses.nestory_landing_user_responses_c | INDEX                                          |
+| INDEX          | nestory_landing_user_responses.nestory_landing_user_responses_p | INDEX                                          |
+| INDEX          | nestory_landing_user_responses.nestory_landing_user_responses_r | INDEX                                          |
+| INDEX          | nestory_landing_user_responses.nestory_landing_user_responses_s | INDEX                                          |
+| INDEX          | nestory_landing_user_responses.nestory_landing_user_responses_s | INDEX                                          |
+| INDEX          | nestory_landing_user_responses.nestory_landing_user_responses_s | INDEX                                          |
+| VIEW           | nestory_landing_active_users_live                               | VIEW                                           |
+| VIEW           | nestory_landing_result_leaderboard                              | VIEW                                           |
+| VIEW           | nestory_landing_stats_overview                                  | VIEW                                           |
+| FUNCTION       | nestory_landing_cleanup_inactive_users                          | void                                           |
+| FUNCTION       | nestory_landing_update_updated_at_column                        | trigger                                        |
+| TRIGGER        | nestory_landing_update_responses_updated_at                     | nestory_landing_user_responses - BEFORE UPDATE |
+| RLS            | nestory_landing_ab_test_results                                 | ENABLED                                        |
+| RLS            | nestory_landing_active_users                                    | ENABLED                                        |
+| RLS            | nestory_landing_analytics                                       | ENABLED                                        |
+| RLS            | nestory_landing_user_responses                                  | ENABLED                                        |
+| RLS POLICY     | nestory_landing_ab_test_results.nestory_landing_admins_read_ab_ | SELECT                                         |
+| RLS POLICY     | nestory_landing_ab_test_results.nestory_landing_anyone_insert_a | INSERT                                         |
+| RLS POLICY     | nestory_landing_active_users.nestory_landing_anyone_manage_acti | ALL                                            |
+| RLS POLICY     | nestory_landing_analytics.nestory_landing_admins_read_analytics | SELECT                                         |
+| RLS POLICY     | nestory_landing_analytics.nestory_landing_anyone_can_insert_ana | INSERT                                         |
+| RLS POLICY     | nestory_landing_user_responses.nestory_landing_users_can_insert | INSERT                                         |
+| RLS POLICY     | nestory_landing_user_responses.nestory_landing_users_can_read_o | SELECT                                         |
+| RLS POLICY     | nestory_landing_user_responses.nestory_landing_users_can_update | UPDATE                                         |
+| PROXY FUNCTION | delete_nestory_landing_response                                 | PUBLIC SCHEMA                                  |
+| PROXY FUNCTION | get_nestory_landing_active_users                                | PUBLIC SCHEMA                                  |
+| PROXY FUNCTION | get_nestory_landing_responses                                   | PUBLIC SCHEMA                                  |
+| PROXY FUNCTION | get_nestory_landing_result_leaderboard                          | PUBLIC SCHEMA                                  |
+| PROXY FUNCTION | get_nestory_landing_stats                                       | PUBLIC SCHEMA                                  |
+| PROXY FUNCTION | save_nestory_landing_analytics                                  | PUBLIC SCHEMA                                  |
+| PROXY FUNCTION | save_nestory_landing_response_complete                          | PUBLIC SCHEMA                                  |
+
+
+## 📋 nestory-landing 스키마 완전한 상세 정보 (2025-06-28)
+
+### 🗂️ 모든 테이블 컬럼 상세
+
+#### 1. nestory_landing_user_responses (33개 컬럼)
+| 순서 | 컬럼명 | 타입 | NULL 허용 | 기본값 | 설명 |
+|------|--------|------|-----------|---------|------|
+| 1 | id | uuid | NO | gen_random_uuid() | Primary Key |
+| 2 | session_id | text | NO | - | 세션 식별자 (UNIQUE) |
+| 3 | user_id | uuid | YES | NULL | 사용자 ID |
+| 4 | start_time | bigint | NO | - | 시작 시간 |
+| 5 | answers | jsonb | NO | '{}' | 설문 답변 |
+| 6 | total_time | integer | YES | NULL | 총 소요 시간 |
+| 7 | result | text | YES | NULL | 결과 타입 |
+| 8 | current_index | integer | YES | 0 | 현재 문항 인덱스 |
+| 9 | completed | boolean | YES | false | 완료 여부 |
+| 10 | family_size | integer | YES | NULL | 가족 구성원 수 |
+| 11 | ages | jsonb | YES | '[]' | 가족 나이 배열 |
+| 12 | travel_frequency | text | YES | NULL | 여행 빈도 |
+| 13 | location | text | YES | NULL | 거주 지역 |
+| 14 | interests | jsonb | YES | '[]' | 관심사 배열 |
+| 16 | shared_url | text | YES | NULL | 공유 URL (UNIQUE) |
+| 17 | ip_address | inet | YES | NULL | IP 주소 |
+| 18 | user_agent | text | YES | NULL | 사용자 에이전트 |
+| 19 | device_type | text | YES | NULL | 디바이스 타입 |
+| 20 | referrer | text | YES | NULL | 리퍼러 |
+| 21 | created_at | timestamptz | YES | now() | 생성 시간 |
+| 22 | submitted_at | timestamptz | YES | NULL | 제출 시간 |
+| 23 | updated_at | timestamptz | YES | now() | 수정 시간 |
+| 24 | click_count | integer | YES | 0 | 클릭 수 ✨ |
+| 25 | scroll_depth | numeric | YES | 0 | 스크롤 깊이 ✨ |
+| 26 | reliability_score | numeric | YES | 0.8 | 신뢰도 점수 ✨ |
+| 27 | response_pattern | text | YES | 'normal' | 응답 패턴 ✨ |
+| 28 | privacy_consent | boolean | YES | false | 개인정보 동의 ✨ |
+| 29 | marketing_consent | boolean | YES | false | 마케팅 동의 ✨ |
+| 30 | user_name | text | YES | NULL | 사용자 이름 ✨ |
+| 31 | user_instagram | text | YES | NULL | 인스타그램 ID ✨ |
+| 32 | question_times | jsonb | YES | '[]' | 문항별 시간 ✨ |
+| 33 | browser_info | jsonb | YES | '{}' | 브라우저 정보 ✨ |
+
+#### 2. nestory_landing_analytics (10개 컬럼)
+| 순서 | 컬럼명 | 타입 | NULL 허용 | 기본값 |
+|------|--------|------|-----------|---------|
+| 1 | id | uuid | NO | gen_random_uuid() |
+| 2 | visit_id | text | NO | - |
+| 3 | timestamp | bigint | NO | - |
+| 4 | user_agent | text | YES | NULL |
+| 5 | referrer | text | YES | NULL |
+| 6 | device_type | text | YES | NULL |
+| 7 | session_duration | numeric | YES | NULL |
+| 8 | cta_clicked | boolean | YES | false |
+| 9 | scroll_depth | numeric | YES | NULL |
+| 10 | created_at | timestamptz | YES | now() |
+
+#### 3. nestory_landing_active_users (6개 컬럼)
+| 순서 | 컬럼명 | 타입 | NULL 허용 | 기본값 |
+|------|--------|------|-----------|---------|
+| 1 | id | uuid | NO | gen_random_uuid() |
+| 2 | session_id | text | NO | - |
+| 3 | last_activity | timestamptz | YES | now() |
+| 4 | current_question | integer | YES | 0 |
+| 5 | status | text | YES | NULL |
+| 6 | created_at | timestamptz | YES | now() |
+
+#### 4. nestory_landing_ab_test_results (7개 컬럼)
+| 순서 | 컬럼명 | 타입 | NULL 허용 | 기본값 |
+|------|--------|------|-----------|---------|
+| 1 | id | uuid | NO | gen_random_uuid() |
+| 2 | variant | text | NO | - |
+| 3 | session_id | text | NO | - |
+| 4 | conversion | boolean | YES | false |
+| 5 | completion_rate | numeric | YES | NULL |
+| 6 | time_spent | integer | YES | NULL |
+| 7 | created_at | timestamptz | YES | now() |
+
+### 🛡️ RLS 정책 상세 조건
+
+#### ab_test_results 정책
+- **nestory_landing_admins_read_ab_tests** (SELECT)
+  - 역할: public
+  - 조건: true (모든 읽기 허용)
+  - 체크: NO_CHECK
+
+- **nestory_landing_anyone_insert_ab_tests** (INSERT)
+  - 역할: public
+  - 조건: NO_CONDITION (모든 삽입 허용)
+  - 체크: true
+
+#### active_users 정책
+- **nestory_landing_anyone_manage_active_users** (ALL)
+  - 역할: public
+  - 조건: true (모든 작업 허용)
+  - 체크: true
+
+#### analytics 정책
+- **nestory_landing_admins_read_analytics** (SELECT)
+  - 역할: public
+  - 조건: true (모든 읽기 허용)
+  - 체크: NO_CHECK
+
+- **nestory_landing_anyone_can_insert_analytics** (INSERT)
+  - 역할: public
+  - 조건: NO_CONDITION (모든 삽입 허용)
+  - 체크: true
+
+#### user_responses 정책
+- **nestory_landing_users_can_insert** (INSERT)
+  - 역할: public
+  - 조건: NO_CONDITION (모든 삽입 허용)
+  - 체크: true
+
+- **nestory_landing_users_can_read_own** (SELECT)
+  - 역할: public
+  - 조건: true (모든 읽기 허용)
+  - 체크: NO_CHECK
+
+- **nestory_landing_users_can_update_own** (UPDATE)
+  - 역할: public
+  - 조건: true (모든 업데이트 허용)
+  - 체크: NO_CHECK
+
+### 🔄 Realtime 설정 상세
+- **nestory-landing.nestory_landing_active_users**
+  - Publication: supabase_realtime
+  - 상태: ENABLED
+
+- **nestory-landing.nestory_landing_user_responses**
+  - Publication: supabase_realtime
+  - 상태: ENABLED
+
+### ⚙️ 함수 상세
+
+#### nestory-landing 스키마 함수
+1. **nestory_landing_cleanup_inactive_users()**
+   - 반환: void
+   - 파라미터: 없음
+   - 보안: SECURITY_INVOKER
+
+2. **nestory_landing_update_updated_at_column()**
+   - 반환: trigger
+   - 파라미터: 없음
+   - 보안: SECURITY_INVOKER
+
+#### Public 스키마 프록시 함수
+1. **delete_nestory_landing_response**
+   - 반환: boolean
+   - 파라미터: p_id uuid
+
+2. **get_nestory_landing_active_users**
+   - 반환: TABLE(id uuid, session_id text, last_activity timestamptz, ...)
+   - 파라미터: 없음
+
+3. **get_nestory_landing_responses**
+   - 반환: TABLE(id uuid, session_id text, user_id uuid, start_time bigint, ...)
+   - 파라미터: 없음
+
+4. **get_nestory_landing_result_leaderboard**
+   - 반환: TABLE(result text, count bigint, percentage numeric)
+   - 파라미터: 없음
+
+5. **get_nestory_landing_stats**
+   - 반환: TABLE(total_responses bigint, completed_responses bigint, ...)
+   - 파라미터: 없음
+
+6. **save_nestory_landing_analytics**
+   - 반환: uuid
+   - 파라미터: p_visit_id text, p_timestamp bigint, p_user_agent text, ...
+
+7. **save_nestory_landing_response_complete**
+   - 반환: uuid
+   - 파라미터: p_session_id text, p_user_id uuid DEFAULT NULL, ...
+
+### 🔔 트리거 상세
+- **nestory_landing_update_responses_updated_at**
+  - 테이블: nestory_landing_user_responses
+  - 타이밍: BEFORE_UPDATE
+  - 함수: nestory_landing_update_updated_at_column()
+
+### 👁️ 뷰 정의 요약
+1. **nestory_landing_active_users_live**: 최근 활성 사용자 필터링
+2. **nestory_landing_result_leaderboard**: 결과별 통계 및 비율 계산
+3. **nestory_landing_stats_overview**: 전체 응답 통계 집계
+
+## 🎯 Task 7: 후킹 요소 추가 완료 (2025-06-28)
+**작업 내용**: 다른 성공적인 퍼널들 벤치마킹하여 메인페이지 + 랜딩페이지에 후킹 요소 추가
+
+### 생성된 새로운 컴포넌트들:
+
+#### 1. UrgencyTimer.tsx
+- **위치**: 페이지 상단 고정
+- **기능**: 실시간 카운트다운 타이머 (오늘 23:59:59까지)
+- **심리학적 효과**: 긴급성/희소성 (Urgency/Scarcity)
+- **특징**: 
+  - 실제 시간 기반 카운트다운
+  - 모바일 반응형 디자인
+  - 닫기 버튼 제공
+  - 그라데이션 배경과 애니메이션
+
+#### 2. LiveParticipants.tsx  
+- **위치**: 우하단 고정 위젯
+- **기능**: 실시간 참여자 수 표시 (25-45명 사이 랜덤 변동)
+- **심리학적 효과**: 사회적 증명 (Social Proof)
+- **특징**:
+  - 3-8초마다 참여자 수 업데이트
+  - 펄스 애니메이션과 호버 효과
+  - 클릭 시 5초간 숨기기 기능
+  - 빨간색 라이브 인디케이터
+
+#### 3. TrustBadges.tsx
+- **위치**: Hero Section 내 CTA 버튼 하단
+- **기능**: 신뢰성/보안 배지 5개 (SSL 보안, 1분 완료, 10만+ 분석, 98% 만족도, 무료 서비스)
+- **심리학적 효과**: 신뢰성 구축 (Trust Building)
+- **특징**:
+  - 순차적 애니메이션 등장
+  - 호버 시 확대 효과
+  - 모바일 랩핑 레이아웃
+
+#### 4. ExitIntentPopup.tsx
+- **트리거**: 마우스가 페이지 상단을 벗어날 때
+- **기능**: 이탈 의도 감지 시 특별 제안 팝업
+- **심리학적 효과**: FOMO (Fear of Missing Out)
+- **특징**:
+  - 세션당 1회만 표시
+  - 오버레이와 모달 디자인
+  - 특별 혜택 강조
+  - 수락/거절 버튼 제공
+
+#### 5. MicroCommitment.tsx
+- **트리거**: 페이지 진입 30초 후 자동 표시
+- **기능**: 3단계 간단한 사전 질문
+- **심리학적 효과**: 마이크로 커밋먼트 (Micro-Commitment)
+- **특징**:
+  - 단계별 진행 표시
+  - 답변 선택 후 다음 버튼 활성화
+  - 완료 시 실제 테스트로 연결
+  - 부담 없는 사전 참여 유도
+
+### LandingPage.tsx 통합:
+- 모든 후킹 컴포넌트 import 및 state 관리 추가
+- Exit intent 감지 로직 구현
+- 30초 후 마이크로 커밋먼트 자동 표시
+- 각 컴포넌트의 세션 저장소 기반 중복 방지
+- 적절한 z-index 및 위치 조정으로 UI 충돌 방지
+
+### 심리학적 전환 최적화 전략:
+1. **긴급성**: 시간 제한된 특별 혜택 강조
+2. **사회적 증명**: 실시간 참여자 수와 후기
+3. **신뢰성**: 보안 배지와 통계 수치
+4. **FOMO**: 놓치면 안 되는 기회 강조
+5. **점진적 참여**: 작은 커밋먼트부터 시작
+
+### 구현된 기능:
+- ✅ 실시간 카운트다운 타이머
+- ✅ 라이브 참여자 카운터
+- ✅ 신뢰성 배지 컬렉션
+- ✅ Exit Intent 팝업
+- ✅ 마이크로 커밋먼트 플로우
+- ✅ 모든 컴포넌트 LandingPage 통합
+- ✅ 세션 기반 중복 방지 로직
+- ✅ 모바일 반응형 디자인
+
+## 📱 Task 8: 모바일 최적화 완료 (2025-06-28)
+**작업 내용**: 디자인 개선 및 줄바꿈 최적화, 완전한 반응형 구현
+
+### 모바일 최적화 세부 작업:
+
+#### 1. 모든 후킹 컴포넌트 모바일 반응형 개선
+**UrgencyTimer.tsx 개선**:
+- 480px 이하: 폰트 크기 12px, 패딩 5px 10px
+- 375px 이하: 폰트 크기 11px, 패딩 4px 8px
+- TimeDisplay 및 닫기 버튼 브레이크포인트 세분화
+
+**LiveParticipants.tsx 개선**:
+- 480px 이하: border-radius 18px, 폰트 12px
+- 375px 이하: border-radius 15px, 폰트 11px
+- PulseCircle 크기 보정 (8px 최소 크기)
+
+**TrustBadges.tsx 개선**:
+- 배지 간격 및 패딩 브레이크포인트별 세분화
+- 375px 이하: 폰트 10px, 패딩 4px 8px
+
+**ExitIntentPopup.tsx 개선**:
+- 팝업 크기 vw 단위로 조정 (90vw → 98vw)
+- 모든 텍스트 사이즈 및 버튼 브레이크포인트별 최적화
+
+**MicroCommitment.tsx 개선**:
+- 옵션 버튼 크기 및 마진 브레이크포인트별 세분화
+- 다음 버튼 border-radius 브레이크포인트별 조정
+
+#### 2. LandingPage 모바일 UX 개선
+**HeroSection 개선**:
+- UrgencyTimer 위한 상단 패딩 추가 (5rem → 4rem)
+- 375px 이하: padding-top 4rem
+
+**타이포그래피 개선**:
+- MainHeadline: 375px 이하 1.7rem
+- EmotionalHook: 고리 및 마진 브레이크포인트별 세분화
+- BenefitText: 375px 이하 0.85rem
+
+**비주얼 요소 개선**:
+- BenefitItem hover 효과 모바일에서 축소 (translateX 10px → 5px)
+- BenefitEmoji 크기 브레이크포인트별 조정
+
+#### 3. 모바일 사용성 향상 파일 생성
+**GlobalStyles.ts 생성**:
+- 모바일 터치 개선 (-webkit-tap-highlight-color)
+- 스크롤 개선 (-webkit-overflow-scrolling: touch)
+- 입력 필드 줄 방지 (font-size: 16px)
+- iOS 안전 영역 대응 (safe-area-inset)
+- 가로 스크롤 방지
+
+**useViewport.ts 훅 생성**:
+- 브레이크포인트 감지 (isMobile, isTablet, isDesktop)
+- 리사이즈 이벤트 처리
+- 동적 뷰포트 상태 관리
+
+**MobileOptimizations.tsx 유틸리티 생성**:
+- 모바일 주소창 숨김 처리
+- 방향 변경 시 레이아웃 조정
+- 뒤로가기 버튼 사용자 확인 대화상자
+- TouchFeedback 컴포넌트 (:active 상태 시각적 피드백)
+- ScrollHint 컴포넌트 (스크롤 안내)
+
+#### 4. App.tsx 모바일 최적화 통합
+- GlobalStyles import 및 적용
+- 모바일 터치 하이라이트 비활성화
+- 스모스 스크롤링 활성화
+
+### 모바일 최적화 결과:
+- ✅ 완전한 반응형 디자인 구현 (320px → 1920px+)
+- ✅ 4단계 브레이크포인트 세분화 (375px, 480px, 768px, 1024px+)
+- ✅ 모바일 터치 UX 최적화
+- ✅ iOS Safari 및 Android Chrome 호환성
+- ✅ 모바일 성능 최적화
+- ✅ 가로/세로 모드 대응
+- ✅ 주소창 숨김 및 레이아웃 안정성
+- ✅ 터치 피드백 및 시각적 향상
+
+## 📊 Task 4: 관리자 페이지 수정 완료 (2025-06-28)
+**작업 내용**: 쿼리 및 통계 기능 새 스키마에 맞게 수정
+
+### 관리자 페이지 업데이트 세부 작업:
+
+#### 1. SupabaseService 새로운 관리자 API 추가
+**getNestoryLandingUserData()**: 새로운 스키마에서 사용자 데이터 조회
+**deleteNestoryLandingUserData()**: 새로운 스키마에서 데이터 삭제
+**getNestoryLandingStats()**: 전체 통계 조회
+**getNestoryLandingLeaderboard()**: 결과별 리더보드 조회
+**getNestoryLandingActiveUsers()**: 활성 사용자 조회
+**getAllUserData()**: 기존 함수명 호환성 유지 (별칭)
+
+#### 2. useSupabaseData 훅 업데이트
+- 새로운 API 함수 사용도록 업데이트
+- 데이터 로드 오류 처리 개선
+- localStorage 백업 메커니즘 유지
+
+#### 3. EnhancedAdminDashboard 호환성 개선
+- nestory-landing 스키마 데이터 로드 로그 추가
+- 데이터 처리 오류 방지 (null 값 처리)
+- CSV 내보내기 데이터 포맷 개선
+
+### 관리자 페이지 결과:
+- ✅ 새로운 nestory-landing 스키마와 완전 호환
+- ✅ 기존 차트 및 통계 기능 유지
+- ✅ 오류 처리 및 로깅 개선
+- ✅ 데이터 내보내기 안정성 향상
+
+## 🧪 Task 5: 실제 설문 테스트 완료 (2025-06-28)
+**작업 내용**: 데이터 저장/조회 동작 확인 및 테스트 도구 구축
+
+### 테스트 도구 및 검증 시스템 구축:
+
+#### 1. testDataFlow.ts 유틸리티 생성
+**createTestData()**: 실제와 동일한 더미 데이터 생성
+**testDataSave()**: 데이터 저장 테스트
+**testDataRetrieval()**: 데이터 조회 테스트
+**testStatsRetrieval()**: 통계 조회 테스트
+**testLeaderboardRetrieval()**: 리더보드 조회 테스트
+**testLandingAnalyticsSave()**: 랜딩 분석 데이터 저장 테스트
+**runFullDataFlowTest()**: 전체 데이터 플로우 테스트
+
+#### 2. DebugPanel.tsx 개발 도구 생성
+- 개발 환경에서만 표시되는 플로팅 디버그 패널
+- Supabase 연결 테스트 버튼
+- 전체 데이터 플로우 테스트 버튼
+- 최근 데이터 조회 버튼
+- 실시간 로그 표시 및 상태 인디케이터
+
+#### 3. 실제 애플리케이션 통합
+- LandingPage에 DebugPanel 컴포넌트 추가
+- App.tsx에 개발 환경에서 testDataFlow 로드
+- analytics.ts는 이미 새로운 스키마 호환
+- 브라우저 콘솔에서 window.testDataFlow() 실행 가능
+
+### 테스트 결과 및 검증:
+- ✅ 설문 데이터 저장 동작 확인
+- ✅ 랜딩 분석 데이터 저장 동작 확인
+- ✅ 관리자 페이지 데이터 조회 동작 확인
+- ✅ 통계 및 리더보드 조회 동작 확인
+- ✅ 오류 처리 및 localStorage 백업 동작 확인
+- ✅ 실시간 디버깅 도구 제공
+
+## 🔗 Task 9: Survey 퍼널 통합 방안 결정 완료 (2025-06-28)
+**작업 내용**: 현재 프로젝트 vs 외부 URL 페이지네이션 분석 및 결정
+
+### 외부 설문 분석:
+- **URL**: https://nestory-survey.vercel.app
+- **브랜드**: 동일한 NeStory 브랜드 사용
+- **플랫폼**: Vercel 호스팅, JavaScript 기반
+- **상태**: 이미 구축 완료된 상태
+
+### 결정된 전략: 하이브리드 접근법
+**단계적 통합을 통한 점진적 최적화**
+
+#### Phase 1: 스마트 연결 (✅ 구현 완료)
+1. **MicroCommitment 수정**:
+   - 내부 설문 vs 외부 전문 설문 선택 옵션 추가
+   - 사용자 사전 답변을 쿼리 파라미터로 전달
+   - 세션 ID 및 디바이스 정보 전달
+
+2. **LandingPage 연결 로직**:
+   - `handleSurveyRedirect()` 함수 추가
+   - 외부 설문으로 리다이렉트 시 컨텍스트 유지
+   - 같은 창에서 이동 (뒤로가기 가능)
+
+3. **전달 데이터**:
+   ```javascript
+   const params = {
+     source: 'family-travel-landing',
+     sessionId: 유니크_세션_ID,
+     device: 'mobile|desktop',
+     timestamp: 현재_시간,
+     preAnswers: JSON.stringify(사전_답변)
+   };
+   ```
+
+#### Phase 2: 데이터 연계 (계획 중)
+- 세션 추적 시스템 구축
+- 외부 설문 완료 추적
+- 통합 분석 대시보드
+- A/B 테스트: 내부 vs 외부 설문 성과 비교
+
+#### Phase 3: 완전 통합 (장기 계획)
+- 외부 설문 로직 마이그레이션
+- 단일 도메인 통합
+- 고도화된 개인화 및 최적화
+
+### 구현된 기능:
+- ✅ 외부 설문 URL 분석 및 전략 수립
+- ✅ MicroCommitment 컴포넌트에 이중 옵션 추가
+- ✅ 세션 데이터 전달 시스템 구축
+- ✅ 사용자 선택에 따른 동적 라우팅
+- ✅ 하이브리드 접근법 상세 문서화
+
+### 기대 효과:
+- **단기**: 기존 투자 보호 + 즉시 전환율 개선
+- **중기**: 두 시스템 간 데이터 연계 및 통합 분석
+- **장기**: 완전 통합된 고성능 여행 성향 분석 플랫폼
+
+---
+
+# 🎆 전체 프로젝트 완료 요약
+
+## 완료된 주요 작닅들:
+
+### 📊 데이터베이스 마이그레이션
+- nestory → nestory-landing 스키마 완전 마이그레이션
+- JSONB → 개별 컨럼 구조 개선
+- 프록시 함수 및 모든 애플리케이션 코드 업데이트
+
+### 🎨 전환 최적화 시스템
+- 5가지 심리학적 후킹 요소 구현
+- 실시간 참여자 추적, 긴급성 타이머, 신뢰성 배지
+- Exit Intent 팝업, 마이크로 커밋먼트 시스템
+
+### 📱 모바일 완전 최적화
+- 4단계 브레이크포인트 세분화 (320px-1920px+)
+- iOS/Android 호환성, 터치 UX 최적화
+- 전용 모바일 유틸리티 및 글로벌 스타일 시스템
+
+### 📈 관리자 시스템 업그레이드
+- nestory-landing 스키마 호환 완료
+- 새로운 API 함수 및 오류 처리 개선
+- 실시간 데이터 분석 및 CSV 내보내기 안정성 향상
+
+### 🧪 테스트 및 검증 시스템
+- 전체 데이터 플로우 테스트 유틸리티
+- 개발용 디버그 패널 및 실시간 모니터링
+- Supabase 연결 및 데이터 무결성 검증
+
+### 🔗 하이브리드 퍼널 전략
+- 내부 vs 외부 설문 이중 옵션 제공
+- 사용자 선택에 따른 동적 라우팅
+- 세션 데이터 전달 및 컨텍스트 유지
+
+## 🚀 최종 결과물:
+- **완전히 작동하는 고성능 랜딩 페이지**
+- **전환율 최적화된 5가지 심리학적 후킹 시스템**
+- **완전한 모바일 반응형 디자인**
+- **안정적인 데이터베이스 및 분석 시스템**
+- **유연한 하이브리드 설문 연결 시스템**

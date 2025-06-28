@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnalyticsData } from '../types';
-import { SupabasePublicService } from '../services/supabasePublic';
+import { SupabaseService } from '../services/supabase';
 
 export const useSupabaseData = () => {
   const [data, setData] = useState<AnalyticsData[]>([]);
@@ -37,8 +37,8 @@ export const useSupabaseData = () => {
       setLoading(true);
       setError(null);
       
-      // Supabase에서 데이터 로드
-      const surveyData = await SupabasePublicService.getAllUserData();
+      // 새로운 nestory-landing 스키마에서 데이터 로드
+      const surveyData = await SupabaseService.getNestoryLandingUserData();
       setData(surveyData);
       setStatistics(calculateStatistics(surveyData));
       
@@ -78,8 +78,15 @@ export const useSupabaseData = () => {
 
   const deleteData = async (sessionId: string) => {
     try {
+      // sessionId로 해당 데이터의 id 찾기
+      const itemToDelete = data.find(item => item.sessionId === sessionId);
+      if (!itemToDelete?.id) {
+        console.error('❌ 삭제할 데이터의 ID를 찾을 수 없습니다.');
+        return false;
+      }
+
       const { SupabaseService } = await import('../services/supabase');
-      const success = await SupabaseService.deleteUserData(sessionId);
+      const success = await SupabaseService.deleteNestoryLandingUserData(itemToDelete.id);
       if (success) {
         // 로컬 데이터에서도 제거
         setData(prevData => prevData.filter(item => item.sessionId !== sessionId));

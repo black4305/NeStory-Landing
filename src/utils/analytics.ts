@@ -101,12 +101,12 @@ class Analytics {
       const success = await SupabaseService.saveUserData(data);
       
       if (success) {
-        console.log('✅ nestory.user_responses에 분석 데이터 저장 완료');
+        console.log('✅ nestory-landing.nestory_landing_user_responses에 분석 데이터 저장 완료');
       } else {
-        throw new Error('nestory 스키마 저장 실패');
+        throw new Error('nestory-landing 스키마 저장 실패');
       }
     } catch (error) {
-      console.error('❌ nestory 스키마 저장 실패, localStorage로 fallback:', error);
+      console.error('❌ nestory-landing 스키마 저장 실패, localStorage로 fallback:', error);
       
       // Supabase 실패 시 localStorage 백업
       const existingData = JSON.parse(localStorage.getItem('surveyAnalytics') || '[]');

@@ -32,6 +32,7 @@ export interface UserInfo {
 }
 
 export interface AnalyticsData {
+  id?: string; // UUID from database
   sessionId: string;
   startTime: number;
   answers: Answer[];
@@ -47,6 +48,16 @@ export interface AnalyticsData {
   reliabilityScore?: number;
   questionProgress?: number[];
   responsePattern?: 'consistent' | 'inconsistent' | 'random';
+  // 새로 추가된 필드들
+  privacyConsent?: boolean;
+  questionTimes?: Array<{questionId: number; timeSpent: number}>;
+  browserInfo?: {
+    language: string;
+    platform: string;
+    screenWidth: number;
+    screenHeight: number;
+    timezone: string;
+  };
 }
 
 export interface AxisScore {

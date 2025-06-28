@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
+import { GlobalStyles } from './styles/GlobalStyles';
 import StartScreen from './components/StartScreen';
 import PreTestPage from './components/PreTestPage';
 import QuestionCard from './components/QuestionCard';
@@ -16,15 +17,22 @@ import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
 import { Answer, UserInfo } from './types';
 
+// 테스트 환경에서만 로드
+if (process.env.NODE_ENV === 'development') {
+  import('./utils/testDataFlow');
+}
+
 const GlobalStyle = createGlobalStyle`
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   }
 
   html {
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
     /* 모바일 브라우저의 주소창 고려 */
     height: 100%;
     height: -webkit-fill-available;
@@ -324,7 +332,7 @@ const SharedResult: React.FC = () => {
   };
 
   const handleStartNewTest = () => {
-    navigate('/test');
+    navigate('/landing');
   };
 
   if (loading) {
@@ -400,7 +408,7 @@ const UniqueSharedResult: React.FC = () => {
   }, [shareId]);
 
   const handleStartNewTest = () => {
-    navigate('/test');
+    navigate('/landing');
   };
 
   if (loading) {
@@ -471,9 +479,10 @@ function App() {
   return (
     <AppContainer>
       <GlobalStyle />
+      <GlobalStyles />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/test" element={<SurveyApp />} />
+        <Route path="/landing" element={<SurveyApp />} />
         <Route path="/result" element={<SharedResult />} />
         <Route path="/share/:shareId" element={<UniqueSharedResult />} />
         <Route path="/all-types" element={<AllTypesRoute />} />

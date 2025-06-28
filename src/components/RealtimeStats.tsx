@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabaseAdvanced } from '../services/supabaseAdvanced';
+import { SupabaseService } from '../services/supabase';
 
 interface RealtimeStatsProps {
   show?: boolean;
@@ -13,26 +13,36 @@ const RealtimeStats: React.FC<RealtimeStatsProps> = ({ show = true }) => {
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
-    // 실시간 활성 사용자 구독
-    supabaseAdvanced.subscribeToActiveUsers(setActiveUsers);
+    // 초기 데이터 로드
+    loadInitialData();
 
-    // 실시간 리더보드 구독
-    supabaseAdvanced.subscribeToLeaderboard(setLeaderboard);
-
-    // 초기 통계 로드
-    loadStats();
-
-    // 30초마다 통계 업데이트
-    const interval = setInterval(loadStats, 30000);
+    // 30초마다 데이터 업데이트
+    const interval = setInterval(loadInitialData, 30000);
 
     return () => {
       clearInterval(interval);
-      supabaseAdvanced.cleanup();
     };
   }, []);
 
+  const loadInitialData = async () => {
+    // 활성 사용자 수 가져오기
+    const activeUsersData = await SupabaseService.getActiveUsers();
+    if (activeUsersData) {
+      setActiveUsers(activeUsersData.count || 0);
+    }
+
+    // 리더보드 데이터 가져오기
+    const leaderboardData = await SupabaseService.getResultLeaderboard();
+    if (leaderboardData) {
+      setLeaderboard(leaderboardData);
+    }
+
+    // 통계 데이터 가져오기
+    loadStats();
+  };
+
   const loadStats = async () => {
-    const data = await supabaseAdvanced.getStatsOverview();
+    const data = await SupabaseService.getStatsData();
     if (data) {
       setStats(data);
     }

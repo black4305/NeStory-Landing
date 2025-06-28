@@ -401,9 +401,10 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
     }
   };
 
-  // Supabase 데이터가 로드되면 신뢰도 점수 계산하여 업데이트
+  // nestory-landing 스키마 데이터가 로드되면 신뢰도 점수 계산하여 업데이트
   useEffect(() => {
     if (supabaseData.length > 0) {
+      console.log(`✅ nestory-landing 스키마에서 ${supabaseData.length}개 데이터 로드 완료`);
       const processedData = supabaseData.map((item: AnalyticsData) => {
         // 신뢰도 점수 계산
         if (item.answers && item.answers.length > 0) {
@@ -414,12 +415,17 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
             responsePattern: reliability.pattern
           };
         }
-        return item;
+        return {
+          ...item,
+          reliabilityScore: 0,
+          responsePattern: 'random' as const
+        };
       });
       
       setAnalyticsData(processedData);
       setFilteredData(processedData);
     } else if (!loading && error) {
+      console.warn('❌ nestory-landing 스키마 데이터 로드 실패, localStorage 백업 사용');
       // Supabase 실패 시 localStorage 백업 사용
       loadAnalyticsDataFromLocal();
     }
@@ -492,11 +498,11 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
       item.userInfo?.region || '',
       item.result || '',
       item.completed ? '완료' : '미완료',
-      Math.round(item.totalTime / 1000),
-      item.clickCount,
-      item.scrollDepth,
-      item.deviceType,
-      item.reliabilityScore || '',
+      Math.round((item.totalTime || 0) / 1000),
+      item.clickCount || 0,
+      Math.round((item.scrollDepth || 0) * 100) / 100,
+      item.deviceType || 'unknown',
+      Math.round((item.reliabilityScore || 0) * 100) / 100,
       item.responsePattern === 'consistent' ? '일관적' : 
         item.responsePattern === 'inconsistent' ? '부분적 일관성' :
         item.responsePattern === 'random' ? '무작위' : '',

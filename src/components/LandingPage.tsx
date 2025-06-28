@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import RealtimeStats from './RealtimeStats';
-import { supabaseAdvanced } from '../services/supabaseAdvanced';
+import UrgencyTimer from './UrgencyTimer';
+import LiveParticipants from './LiveParticipants';
+import TrustBadges from './TrustBadges';
+import ExitIntentPopup from './ExitIntentPopup';
+import MicroCommitment from './MicroCommitment';
+import DebugPanel from './DebugPanel';
+import { SupabaseService } from '../services/supabase';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const [showExitIntent, setShowExitIntent] = useState(false);
+  const [showMicroCommitment, setShowMicroCommitment] = useState(false);
 
   React.useEffect(() => {
     const visitId = Date.now().toString();
@@ -23,7 +31,7 @@ const LandingPage: React.FC = () => {
     };
 
     // Supabase에 방문 데이터 저장
-    supabaseAdvanced.trackLandingAnalytics({
+    SupabaseService.saveLandingAnalytics({
       visitId,
       timestamp: visit.timestamp,
       userAgent: visit.userAgent,
@@ -31,8 +39,8 @@ const LandingPage: React.FC = () => {
       deviceType: visit.deviceType
     });
 
-    // 실시간 활성 사용자 추적
-    supabaseAdvanced.trackActiveUser(sessionId, 'landing');
+    // 실시간 활성 사용자 추적 - 이 기능은 현재 SupabaseService에 없으므로 제거합니다
+    // 필요시 별도 구현 필요
 
     // 스크롤 깊이 추적
     let maxScrollDepth = 0;
@@ -47,7 +55,7 @@ const LandingPage: React.FC = () => {
     const handleBeforeUnload = () => {
       const sessionDuration = (Date.now() - startTime) / 1000;
       if (sessionDuration > 1) {
-        supabaseAdvanced.trackLandingAnalytics({
+        SupabaseService.saveLandingAnalytics({
           visitId,
           timestamp: visit.timestamp,
           userAgent: visit.userAgent,
@@ -60,9 +68,29 @@ const LandingPage: React.FC = () => {
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
+    // Exit intent 감지
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0 && !sessionStorage.getItem('exitIntentShown')) {
+        setShowExitIntent(true);
+        sessionStorage.setItem('exitIntentShown', 'true');
+      }
+    };
+    
+    // 페이지 진입 후 30초 후 마이크로 커밋먼트 표시
+    const microCommitmentTimer = setTimeout(() => {
+      if (!sessionStorage.getItem('microCommitmentShown')) {
+        setShowMicroCommitment(true);
+        sessionStorage.setItem('microCommitmentShown', 'true');
+      }
+    }, 30000);
+    
+    document.addEventListener('mouseleave', handleMouseLeave);
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('scroll', trackScrollDepth);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      clearTimeout(microCommitmentTimer);
     };
   }, []);
 
@@ -76,7 +104,7 @@ const LandingPage: React.FC = () => {
   const handleStartTest = () => {
     // CTA 클릭 이벤트 기록
     const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
-    supabaseAdvanced.trackLandingAnalytics({
+    SupabaseService.saveLandingAnalytics({
       visitId,
       timestamp: Date.now(),
       userAgent: navigator.userAgent,
@@ -93,11 +121,49 @@ const LandingPage: React.FC = () => {
   };
 
   const handleFinalStartTest = () => {
-    navigate('/test');
+    navigate('/landing');
+  };
+
+  const handleExitIntentAccept = () => {
+    setShowExitIntent(false);
+    // 마이크로 커밋먼트 바로 표시
+    setShowMicroCommitment(true);
+  };
+
+  const handleMicroCommitmentComplete = () => {
+    setShowMicroCommitment(false);
+    // 실제 테스트로 이동
+    navigate('/landing');
+  };
+
+  const handleSurveyRedirect = (preAnswers: string[]) => {
+    setShowMicroCommitment(false);
+    
+    // 세션 정보 준비
+    const sessionId = Date.now().toString();
+    const deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+    
+    // 외부 설문으로 리다이렉트
+    const params = new URLSearchParams({
+      source: 'family-travel-landing',
+      sessionId,
+      device: deviceType,
+      timestamp: Date.now().toString(),
+      preAnswers: JSON.stringify(preAnswers)
+    });
+    
+    // 새 창이 아닌 같은 창에서 전환 (뒤로가기 가능)
+    window.location.href = `https://nestory-survey.vercel.app?${params}`;
   };
 
   return (
     <LandingContainer>
+      {/* 긴급성 타이머 */}
+      <UrgencyTimer />
+      
+      {/* 실시간 참여자 위젯 */}
+      <LiveParticipants />
+      
       <VideoBackground autoPlay muted loop playsInline>
         <source src="/video/family-travel.mp4" type="video/mp4" />
       </VideoBackground>
@@ -158,6 +224,9 @@ const LandingPage: React.FC = () => {
                   <TrustItem>💕 23,847가족이 선택한 이유</TrustItem>
                   <TrustItem>🎯 "진짜 우리 가족 같아요!"</TrustItem>
                 </TrustIndicators>
+                
+                {/* 신뢰성 배지 */}
+                <TrustBadges />
               </CTAButtonGroup>
             </motion.div>
             
@@ -315,6 +384,25 @@ const LandingPage: React.FC = () => {
           </FinalCTASubInfo>
         </FinalCTASection>
       </ContentOverlay>
+      
+      {/* 마이크로 커밋먼트 컴포넌트 */}
+      {showMicroCommitment && (
+        <MicroCommitment 
+          onComplete={handleMicroCommitmentComplete}
+          onSurveyRedirect={handleSurveyRedirect}
+        />
+      )}
+      
+      {/* Exit Intent 팝업 */}
+      {showExitIntent && (
+        <ExitIntentPopup 
+          onAccept={handleExitIntentAccept}
+          onClose={() => setShowExitIntent(false)}
+        />
+      )}
+      
+      {/* 개발 환경 디버그 패널 */}
+      <DebugPanel />
     </LandingContainer>
   );
 };
@@ -376,6 +464,21 @@ const HeroSection = styled.section`
   position: relative;
   z-index: 3;
   
+  @media (max-width: 768px) {
+    padding: 4rem 1rem;
+    padding-top: 5rem; /* UrgencyTimer 공간 확보 */
+  }
+  
+  @media (max-width: 480px) {
+    padding: 3rem 0.8rem;
+    padding-top: 4.5rem;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 2.5rem 0.6rem;
+    padding-top: 4rem;
+  }
+  
   /* 히어로 글로우 효과 */
   &::before {
     content: '';
@@ -423,13 +526,21 @@ const MainHeadline = styled.h1`
   }
 
   @media (max-width: 768px) {
-    font-size: 2.3rem;
+    font-size: 2.2rem;
     line-height: 1.3;
+    margin-bottom: 1.2rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 2rem;
+    font-size: 1.9rem;
     line-height: 1.4;
+    margin-bottom: 1rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 1.7rem;
+    line-height: 1.4;
+    margin-bottom: 0.8rem;
   }
   
   @keyframes slideInUp {
@@ -448,11 +559,18 @@ const EmotionalHook = styled.div`
   opacity: 0.95;
   
   @media (max-width: 768px) {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 1.2rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
   }
 `;
 
@@ -472,6 +590,17 @@ const EmotionalBenefits = styled.div`
   
   @media (max-width: 768px) {
     gap: 0.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  @media (max-width: 375px) {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
 `;
 
@@ -495,6 +624,23 @@ const BenefitItem = styled.div`
   @media (max-width: 768px) {
     padding: 0.8rem 1.2rem;
     gap: 0.8rem;
+    border-radius: 12px;
+    
+    &:hover {
+      transform: translateX(5px);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.7rem 1rem;
+    gap: 0.6rem;
+    border-radius: 10px;
+  }
+  
+  @media (max-width: 375px) {
+    padding: 0.6rem 0.8rem;
+    gap: 0.5rem;
+    border-radius: 8px;
   }
 `;
 
@@ -507,11 +653,15 @@ const BenefitEmoji = styled.div`
   }
   
   @media (max-width: 768px) {
-    font-size: 3rem;
+    font-size: 2.8rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 2.5rem;
+    font-size: 2.3rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 2rem;
   }
 `;
 
@@ -521,7 +671,15 @@ const BenefitText = styled.div`
   color: #2d3748;
   
   @media (max-width: 768px) {
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 375px) {
+    font-size: 0.85rem;
   }
 `;
 
