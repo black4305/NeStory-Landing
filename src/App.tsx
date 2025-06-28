@@ -17,10 +17,6 @@ import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
 import { Answer, UserInfo } from './types';
 
-// 테스트 환경에서만 로드
-if (process.env.NODE_ENV === 'development') {
-  import('./utils/testDataFlow');
-}
 
 const GlobalStyle = createGlobalStyle`
   * {

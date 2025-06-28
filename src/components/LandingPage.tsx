@@ -8,7 +8,6 @@ import LiveParticipants from './LiveParticipants';
 import TrustBadges from './TrustBadges';
 import ExitIntentPopup from './ExitIntentPopup';
 import MicroCommitment from './MicroCommitment';
-import DebugPanel from './DebugPanel';
 import { SupabaseService } from '../services/supabase';
 
 const LandingPage: React.FC = () => {
@@ -401,8 +400,6 @@ const LandingPage: React.FC = () => {
         />
       )}
       
-      {/* 개발 환경 디버그 패널 */}
-      <DebugPanel />
     </LandingContainer>
   );
 };
