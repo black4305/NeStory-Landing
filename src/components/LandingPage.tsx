@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import RealtimeStats from './RealtimeStats';
 import UrgencyTimer from './UrgencyTimer';
 import LiveParticipants from './LiveParticipants';
 import TrustBadges from './TrustBadges';
@@ -167,8 +166,6 @@ const LandingPage: React.FC = () => {
         <source src="/video/family-travel.mp4" type="video/mp4" />
       </VideoBackground>
       
-      {/* 실시간 통계 위젯 */}
-      <RealtimeStats show={true} />
       
       <ContentOverlay>
         {/* Hero Section */}
@@ -462,6 +459,10 @@ const HeroSection = styled.section`
   justify-content: center;
   position: relative;
   z-index: 3;
+  width: 100%;
+  max-width: 100vw;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
   
   @media (max-width: 768px) {
     padding: 4rem 1rem;
@@ -720,6 +721,9 @@ const CTAButtonGroup = styled.div`
   flex-direction: column;
   gap: 1.5rem;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
 `;
 
 const PrimaryCTAButton = styled.button`
@@ -986,6 +990,12 @@ const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
 const StorySection = styled.section`
   padding: 4rem 1rem;
   background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  width: 100%;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
@@ -1086,6 +1096,8 @@ const ComparisonTitle = styled.h3`
 const ComparisonList = styled.ul`
   list-style: disc;
   margin-left: 1.25rem;
+  text-align: left;
+  display: inline-block;
   
   li {
     margin-bottom: 0.5rem;
@@ -1097,6 +1109,11 @@ const FeaturesSection = styled.section`
   padding: 4rem 1rem;
   background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
   text-align: center;
+  width: 100%;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
@@ -1297,6 +1314,11 @@ const FinalCTASection = styled.section`
   padding: 4rem 1rem;
   text-align: center;
   background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  width: 100%;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
