@@ -4,57 +4,27 @@ import { motion } from 'framer-motion';
 import NeStoryTILogo from './NeStoryTILogo';
 
 const Container = styled.div`
-  display: grid;
-  grid-template-rows: 1fr auto 1fr;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-items: center;
+  justify-content: center;
   min-height: 100vh;
-  min-height: -webkit-fill-available;
-  height: 100vh;
-  height: -webkit-fill-available;
-  max-height: 100vh;
-  max-height: -webkit-fill-available;
-  padding: 1rem;
+  padding: 2rem 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   text-align: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  overflow: hidden;
-  
-  /* iOS Safari 및 Chrome 모바일 주소창 대응 */
-  @supports (-webkit-touch-callout: none) {
-    height: 100vh;
-    height: -webkit-fill-available;
-    min-height: -webkit-fill-available;
-    max-height: -webkit-fill-available;
-  }
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   
   @media (max-width: 768px) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 0.5rem;
-    grid-template-rows: 1fr auto 1fr;
-    gap: 0.5rem;
-    height: 100vh;
-    height: -webkit-fill-available;
-    max-height: 100vh;
-    max-height: -webkit-fill-available;
+    padding: 1rem 0.5rem;
     min-height: 100vh;
-    min-height: -webkit-fill-available;
-    overflow: hidden;
+    overflow-y: auto;
   }
   
   @media (max-width: 375px) {
-    padding: 0.25rem;
-    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
   }
 `;
 
@@ -112,11 +82,12 @@ const ContentWrapper = styled.div`
   justify-content: center;
   width: 100%;
   max-width: 500px;
+  flex: 1;
   
   @media (max-width: 768px) {
     max-width: 100%;
-    height: 100%;
-    justify-content: space-evenly;
+    justify-content: center;
+    gap: 1rem;
   }
 `;
 
@@ -175,11 +146,11 @@ const Feature = styled.div`
 const LogoSection = styled.div`
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
   
   @media (max-width: 768px) {
-    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 `;
 
@@ -255,7 +226,6 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
           🤔 우리 가족은 어떤 스타일일까?
         </StartButton>
       </ContentWrapper>
-      <div></div>
     </Container>
   );
 };

@@ -593,7 +593,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 <AxisLabel>
                   <AxisName>{config.name}</AxisName>
                   <AxisResult isLeft={!isRight}>
-                    {resultType.korean} ({score}/10)
+                    {resultType.korean} ({Math.round((score / (axis === 'A' ? 20 : 15)) * 10)}/10)
                   </AxisResult>
                 </AxisLabel>
                 
@@ -651,6 +651,19 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                     </div>
                     <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#667eea' }}>
                       📍 {destination.location} • 🎯 {typeCode} 유형 맞춤
+                      {destination.region === userRegion?.split(' ')[0] && (
+                        <span style={{ 
+                          marginLeft: '0.5rem',
+                          color: '#059669',
+                          fontWeight: '600',
+                          background: '#d1fae5',
+                          padding: '0.1rem 0.4rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem'
+                        }}>
+                          🏠 우리 지역
+                        </span>
+                      )}
                     </div>
                   </RecommendationItem>
                 ))
