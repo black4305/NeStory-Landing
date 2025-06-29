@@ -373,9 +373,11 @@ const LandingPage: React.FC = () => {
             더 이상 "어디 갈까?" 고민하지 마세요! <br />
             2분 후면 우리 가족 맞춤 여행지를 알 수 있습니다 ✈️
           </FinalCTASubtitle>
-          <CTAButton large onClick={handleFinalStartTest}>
-            🚀 지금 바로 우리 가족 타입 확인하기!
-          </CTAButton>
+          <FinalCTAButtonContainer>
+            <CTAButton large onClick={handleFinalStartTest}>
+              🚀 지금 바로 우리 가족 타입 확인하기!
+            </CTAButton>
+          </FinalCTAButtonContainer>
         </FinalCTASection>
       </ContentOverlay>
       
@@ -1313,7 +1315,8 @@ const TestimonialAuthor = styled.cite`
 `;
 
 const FinalCTASection = styled.section`
-  padding: 4rem 1rem 8rem 1rem;
+  padding: 4rem 1rem;
+  padding-bottom: calc(60px + 3rem); /* 라이브 배너 높이 + 여유 공간 */
   text-align: center;
   background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
   width: 100%;
@@ -1324,15 +1327,18 @@ const FinalCTASection = styled.section`
   justify-content: center;
   
   @media (max-width: 768px) {
-    padding: 3rem 1rem 7rem 1rem;
+    padding: 3rem 1rem;
+    padding-bottom: calc(55px + 2.5rem); /* 라이브 배너 높이 + 여유 공간 */
   }
   
   @media (max-width: 480px) {
-    padding: 2.5rem 1rem 6rem 1rem;
+    padding: 2.5rem 1rem;
+    padding-bottom: calc(50px + 2rem); /* 라이브 배너 높이 + 여유 공간 */
   }
   
   @media (max-width: 375px) {
-    padding: 2rem 1rem 5rem 1rem;
+    padding: 2rem 1rem;
+    padding-bottom: calc(45px + 1.5rem); /* 라이브 배너 높이 + 여유 공간 */
   }
 `;
 
@@ -1372,6 +1378,14 @@ const FinalCTASubtitle = styled.p`
     font-size: 1.1rem;
     line-height: 1.5;
   }
+`;
+
+const FinalCTAButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  text-align: center;
 `;
 
 

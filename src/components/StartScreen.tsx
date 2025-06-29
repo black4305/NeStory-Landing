@@ -195,7 +195,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
           <h3 style={{ marginTop: 0 }}>🤔 혹시 이런 고민 있으셨나요?</h3>
           <p style={{ fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1rem' }}>
             "아이들은 놀이공원, 어른들은 카페... 모두 만족할 곳이 있을까?"<br />
-            <strong>딱 6개 질문</strong>으로 우리 가족 성향을 알아보세요!
+            <strong>딱 10개 질문</strong>으로 우리 가족 성향을 알아보세요!
           </p>
           
           <div style={{ 
@@ -210,7 +210,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
           
           <Features>
             <Feature>⏱️ 3분 완성</Feature>
-            <Feature>🎮 재미있는 밸런스게임</Feature>
+            <Feature>🧭 여행 성향 진단</Feature>
             <Feature>📍 지역별 맞춤 추천</Feature>
           </Features>
         </Description>
