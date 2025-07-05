@@ -445,6 +445,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
   const [showConfetti, setShowConfetti] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const resultCardRef = useRef<HTMLDivElement>(null);
+  const captureAreaRef = useRef<HTMLDivElement>(null);
   
   const travelType = travelTypes[typeCode] || {
     code: typeCode,
@@ -498,20 +499,20 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 
 
   const downloadResult = async () => {
-    if (!resultCardRef.current) return;
+    if (!captureAreaRef.current) return;
     
     setIsDownloading(true);
     try {
       // 스크롤을 맨 위로 이동
       window.scrollTo(0, 0);
       
-      const canvas = await html2canvas(resultCardRef.current, {
+      const canvas = await html2canvas(captureAreaRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
         logging: false,
-        width: resultCardRef.current.scrollWidth,
-        height: resultCardRef.current.scrollHeight
+        width: captureAreaRef.current.scrollWidth,
+        height: captureAreaRef.current.scrollHeight
       });
       
       // 이미지 다운로드
@@ -546,77 +547,79 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8 }}
       >
-        <TypeCode>{typeCode}</TypeCode>
-        <Title>{travelType.title}</Title>
-        <Description>{travelType.description}</Description>
+        <div ref={captureAreaRef}>
+          <TypeCode>{typeCode}</TypeCode>
+          <Title>{travelType.title}</Title>
+          <Description>{travelType.description}</Description>
 
-        <CharacterSection>
-          <CharacterContainer>
-            <CharacterAvatar typeCode={typeCode} />
-          </CharacterContainer>
-          <CharacterName>{character.name}</CharacterName>
-          <CharacterPersonality>{character.personality}</CharacterPersonality>
-          
-          <CelebrityMatch>
-            ⭐ 비슷한 연예인 가족: <strong>{character.celebrity}</strong>
-          </CelebrityMatch>
-          
-          <CelebrityMatch>
-            {character.specialItem && `🎒 필수 아이템: ${character.specialItem}`}
-          </CelebrityMatch>
-          
-          <CelebrityMatch>
-            {character.trait && `✨ 특징: ${character.trait}`}
-          </CelebrityMatch>
-          
-          <FunFact>
-            💡 {character.funFact}
-          </FunFact>
-        </CharacterSection>
-
-        <AxisSection>
-          <AxisTitle>📊 나의 여행 성향 분석</AxisTitle>
-          {Object.entries(axisScores).map(([axisKey, score]) => {
-            const axis = axisKey as keyof typeof axisConfig;
-            const config = axisConfig[axis];
-            // 10점 만점 기준으로 위치 계산
-            const normalizedScore = (score - 2) / 8; // 0~1 사이 값 (2점~10점 범위)
-            const enhancedPosition = normalizedScore < 0.5 
-              ? normalizedScore * 0.8 * 100 + 10  // 왼쪽: 10~50% 범위
-              : (normalizedScore - 0.5) * 0.8 * 100 + 50; // 오른쪽: 50~90% 범위
-            const position = Math.max(10, Math.min(90, enhancedPosition));
-            const isRight = score >= 6; // 10점 만점 기준 6점 이상
-            const resultType = isRight ? config.right : config.left;
+          <CharacterSection>
+            <CharacterContainer>
+              <CharacterAvatar typeCode={typeCode} />
+            </CharacterContainer>
+            <CharacterName>{character.name}</CharacterName>
+            <CharacterPersonality>{character.personality}</CharacterPersonality>
             
-            return (
-              <AxisItem key={axis}>
-                <AxisLabel>
-                  <AxisName>{config.name}</AxisName>
-                  <AxisResult isLeft={!isRight}>
-                    {resultType.korean} ({Math.round((score / (axis === 'A' ? 20 : 15)) * 10)}/10)
-                  </AxisResult>
-                </AxisLabel>
-                
-                <AxisBar>
-                  <AxisLeftLabel>{config.left.label}</AxisLeftLabel>
-                  <AxisProgress>
-                    <AxisIndicator
-                      position={position}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.5, type: "spring", stiffness: 300 }}
-                    />
-                  </AxisProgress>
-                  <AxisRightLabel>{config.right.label}</AxisRightLabel>
-                </AxisBar>
-                
-                <AxisDescription>
-                  {resultType.desc}
-                </AxisDescription>
-              </AxisItem>
-            );
-          })}
-        </AxisSection>
+            <CelebrityMatch>
+              ⭐ 비슷한 연예인 가족: <strong>{character.celebrity}</strong>
+            </CelebrityMatch>
+            
+            <CelebrityMatch>
+              {character.specialItem && `🎒 필수 아이템: ${character.specialItem}`}
+            </CelebrityMatch>
+            
+            <CelebrityMatch>
+              {character.trait && `✨ 특징: ${character.trait}`}
+            </CelebrityMatch>
+            
+            <FunFact>
+              💡 {character.funFact}
+            </FunFact>
+          </CharacterSection>
+
+          <AxisSection>
+            <AxisTitle>📊 나의 여행 성향 분석</AxisTitle>
+            {Object.entries(axisScores).map(([axisKey, score]) => {
+              const axis = axisKey as keyof typeof axisConfig;
+              const config = axisConfig[axis];
+              // 10점 만점 기준으로 위치 계산
+              const normalizedScore = (score - 2) / 8; // 0~1 사이 값 (2점~10점 범위)
+              const enhancedPosition = normalizedScore < 0.5 
+                ? normalizedScore * 0.8 * 100 + 10  // 왼쪽: 10~50% 범위
+                : (normalizedScore - 0.5) * 0.8 * 100 + 50; // 오른쪽: 50~90% 범위
+              const position = Math.max(10, Math.min(90, enhancedPosition));
+              const isRight = score >= 6; // 10점 만점 기준 6점 이상
+              const resultType = isRight ? config.right : config.left;
+              
+              return (
+                <AxisItem key={axis}>
+                  <AxisLabel>
+                    <AxisName>{config.name}</AxisName>
+                    <AxisResult isLeft={!isRight}>
+                      {resultType.korean} ({Math.round((score / (axis === 'A' ? 20 : 15)) * 10)}/10)
+                    </AxisResult>
+                  </AxisLabel>
+                  
+                  <AxisBar>
+                    <AxisLeftLabel>{config.left.label}</AxisLeftLabel>
+                    <AxisProgress>
+                      <AxisIndicator
+                        position={position}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.5, type: "spring", stiffness: 300 }}
+                      />
+                    </AxisProgress>
+                    <AxisRightLabel>{config.right.label}</AxisRightLabel>
+                  </AxisBar>
+                  
+                  <AxisDescription>
+                    {resultType.desc}
+                  </AxisDescription>
+                </AxisItem>
+              );
+            })}
+          </AxisSection>
+        </div>
 
         
         {hasMarketingConsent && (specificDestinations.length > 0 || regionalInfo) && (
