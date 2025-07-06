@@ -7,16 +7,18 @@ import LiveParticipants from './LiveParticipants';
 import TrustBadges from './TrustBadges';
 import ExitIntentPopup from './ExitIntentPopup';
 import MicroCommitment from './MicroCommitment';
+import TwoStepOptinModal from './TwoStepOptinModal';
 import { SupabaseService } from '../services/supabase';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [showExitIntent, setShowExitIntent] = useState(false);
   const [showMicroCommitment, setShowMicroCommitment] = useState(false);
+  const [showOptinModal, setShowOptinModal] = useState(false);
 
   React.useEffect(() => {
     const visitId = Date.now().toString();
-    const sessionId = `landing-${visitId}`;
+    // const sessionId = `landing-${visitId}`;
     sessionStorage.setItem('visitId', visitId);
     
     // 랜딩 페이지 방문 데이터 수집
@@ -111,15 +113,24 @@ const LandingPage: React.FC = () => {
       ctaClicked: true
     });
 
-    // 스크롤로 다음 섹션으로 이동
-    const storySection = document.querySelector('[data-section="story"]');
-    if (storySection) {
-      storySection.scrollIntoView({ behavior: 'smooth' });
-    }
+    // 옵트인 모달 열기
+    setShowOptinModal(true);
   };
 
-  const handleFinalStartTest = () => {
-    navigate('/landing');
+  // const handleFinalStartTest = () => {
+  //   navigate('/landing');
+  // };
+
+  const handleOptinSubmit = async (data: { name?: string; phone: string; userType: string }) => {
+    try {
+      // 여기서 연락처와 사용자 정보를 서버로 전송
+      console.log('Optin data:', data);
+      
+      // 결과 페이지로 리디렉션 (실제 구현에서는 사용자 타입에 따라 동적으로 처리)
+      navigate('/test');
+    } catch (error) {
+      console.error('Failed to submit optin:', error);
+    }
   };
 
   const handleExitIntentAccept = () => {
@@ -178,13 +189,13 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <EmotionalHook>"엄마... 이번 여행은 정말 재밌었어"</EmotionalHook>
+                <EmotionalHook>"매번 똑같은 가족여행, 이제 그만!"</EmotionalHook>
                 <MainTitle>
-                  아이가 이렇게 말하는<br />
-                  <HighlightText>마법 같은 순간</HighlightText><br />
-                  우리 가족도 만들 수 있어요
+                  우리 아이와 배우자가 모두 만족할<br />
+                  <HighlightText>인생 여행지</HighlightText><br />
+                  2분 만에 과학적으로 찾아보세요
                 </MainTitle>
-                <SubText>23,847가족이 이미 경험한 특별함을 2분에 발견하세요</SubText>
+                <SubText>가족 모두가 즐거워하는 여행의 비밀을 지금 바로 확인하세요</SubText>
               </motion.div>
             </MainHeadline>
             <motion.div
@@ -214,7 +225,7 @@ const LandingPage: React.FC = () => {
             >
               <CTAButtonGroup>
                 <PrimaryCTAButton onClick={handleStartTest}>
-                  <ButtonText>우리 가족 행복 여행 만들기</ButtonText>
+                  <ButtonText>내 여행유형 무료로 분석하기 →</ButtonText>
                   <ButtonSubtext>2분이면 평생 추억이 바뀝니다</ButtonSubtext>
                 </PrimaryCTAButton>
                 <TrustIndicators>
@@ -237,8 +248,21 @@ const LandingPage: React.FC = () => {
               🚨 실제 카톡 대화 캡쳐
             </HookingBadge>
             <SectionTitle>
-              💕 "우리 가족이 이렇게 행복할 수 있구나"
+              😰 "이런 가족여행 고민, 혹시 나만?"
             </SectionTitle>
+            <ProblemList>
+              <ProblemItem>😩 "아이들은 놀이공원, 어른들은 조용한 곳 원해요"</ProblemItem>
+              <ProblemItem>😫 "매번 같은 곳만 가서 지겨워하는 가족들"</ProblemItem>
+              <ProblemItem>🤷‍♀️ "여행 계획 세우다가 서로 의견 달라서 포기"</ProblemItem>
+              <ProblemItem>💸 "비싼 여행비 쓰고도 누군가는 항상 불만족"</ProblemItem>
+            </ProblemList>
+            
+            <SolutionSection>
+              <SolutionTitle>
+                ✨ 하지만 이제 해결책이 있습니다!
+              </SolutionTitle>
+            </SolutionSection>
+            
             <EmotionalStory>
               <StoryQuote>"처음으로 온 가족이 만족한 여행이었어요. 시어머니는 편하다고 하시고, 남편은 스트레스 안 받는다고 하고, 아이들은 또 가고 싶다고... 이런 기적 같은 일이 정말 가능하구나 싶었어요."</StoryQuote>
               <StoryAuthor>- 실제 사용자 김○○님의 눈물 후기</StoryAuthor>
@@ -280,13 +304,8 @@ const LandingPage: React.FC = () => {
             </ComparisonGrid>
 
             <CenteredButtonContainer>
-              <CTAButton secondary onClick={() => {
-                const featuresSection = document.querySelector('[data-section="features"]');
-                if (featuresSection) {
-                  featuresSection.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}>
-                더 자세히 알아보기 →
+              <CTAButton secondary onClick={handleStartTest}>
+                내 여행유형 확인하기 →
               </CTAButton>
             </CenteredButtonContainer>
             
@@ -333,6 +352,12 @@ const LandingPage: React.FC = () => {
             </FeatureCard>
           </FeatureGrid>
           
+          <CenteredButtonContainer>
+            <CTAButton onClick={handleStartTest}>
+              지금 바로 내 여행유형 분석하기!
+            </CTAButton>
+          </CenteredButtonContainer>
+
           <MobileScrollHint>
             <MobileScrollText>🎉 후기도 보시고 테스트도 해보세요! 🎉</MobileScrollText>
             <MobileScrollSubtext>밑으로 더 스크롤하세요</MobileScrollSubtext>
@@ -374,7 +399,7 @@ const LandingPage: React.FC = () => {
             2분 후면 우리 가족 맞춤 여행지를 알 수 있습니다 ✈️
           </FinalCTASubtitle>
           <FinalCTAButtonContainer>
-            <CTAButton large onClick={handleFinalStartTest}>
+            <CTAButton large onClick={handleStartTest}>
               🚀 지금 바로 우리 가족 타입 확인하기!
             </CTAButton>
           </FinalCTAButtonContainer>
@@ -396,6 +421,14 @@ const LandingPage: React.FC = () => {
           onClose={() => setShowExitIntent(false)}
         />
       )}
+
+      {/* 2단계 옵트인 모달 */}
+      <TwoStepOptinModal
+        isVisible={showOptinModal}
+        onClose={() => setShowOptinModal(false)}
+        onSubmit={handleOptinSubmit}
+        userType="탐험가형" // 실제로는 동적으로 설정
+      />
       
     </LandingContainer>
   );
@@ -1533,6 +1566,47 @@ const TestimonialContent = styled.div`
   
   @media (max-width: 480px) {
     font-size: 0.95rem;
+  }
+`;
+
+const ProblemList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fff5f5, #fed7d7);
+  border-radius: 15px;
+  border-left: 5px solid #ff6b6b;
+`;
+
+const ProblemItem = styled.div`
+  font-size: 1.1rem;
+  color: #2d3748;
+  padding: 0.8rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0.7rem;
+  }
+`;
+
+const SolutionSection = styled.div`
+  margin: 2rem 0;
+`;
+
+const SolutionTitle = styled.h3`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
   }
 `;
 
