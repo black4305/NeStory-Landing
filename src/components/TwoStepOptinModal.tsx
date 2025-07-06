@@ -25,8 +25,8 @@ const TwoStepOptinModal: React.FC<TwoStepOptinModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleKakaoClick = () => {
-    // 카카오톡 채널 추가 URL (실제 URL로 교체 필요)
-    window.open('https://pf.kakao.com/_your_kakao_channel_id', '_blank');
+    // 카카오톡 채널 추가 URL
+    window.open('http://pf.kakao.com/_YJtTn', '_blank');
     onClose();
   };
 
