@@ -234,7 +234,6 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
     gender: '',
     familySize: 1,
     region: '',
-    marketingConsent: false,
     privacyConsent: false
   });
 
@@ -286,8 +285,6 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
   };
 
   const isFormValid = formData.name && formData.privacyConsent;
-  const canGetRecommendations = isFormValid && formData.marketingConsent;
-  const allConsentsGiven = formData.privacyConsent && formData.marketingConsent;
 
   return (
     <Container>
@@ -296,11 +293,11 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <Title>🎁 우리 지역 맞춤 여행지 알아보기</Title>
+        <Title>📝 추가 정보 입력</Title>
         <Subtitle>
-          <strong>마케팅 정보 수신 동의</strong> 시 거주지역 기반으로<br/>
+          테스트 결과를 더욱 정확하게 분석하기 위한<br/>
           <span style={{ color: '#667eea', fontWeight: '600' }}>
-            📍 딱 2곳의 맞춤 여행지</span>를 추천해드려요! 
+            선택적 정보 입력</span>입니다.
         </Subtitle>
 
         <FormGroup>
@@ -417,84 +414,38 @@ const UserInfoForm: React.FC<UserInfoFormProps> = ({ onSubmit, onSkip }) => {
 
           <PrivacyText>
             <strong>개인정보 수집 및 이용 동의</strong><br/>
-            • <strong>수집목적:</strong> 맞춤 여행지 추천, 서비스 개선, 고객 상담<br/>
+            • <strong>수집목적:</strong> 서비스 개선, 고객 상담<br/>
             • <strong>수집항목:</strong> 이름, 인스타그램 계정, 연령대, 성별, 가족구성원수, 거주지역, 설문응답결과<br/>
             • <strong>보유기간:</strong> 서비스 이용 종료 후 3년<br/>
             • <strong>위탁업체:</strong> 소셜미디어 서비스 제공업체(Meta)<br/>
             귀하는 개인정보 수집 및 이용을 거부할 권리가 있으나, 거부 시 서비스 이용이 제한될 수 있습니다.
           </PrivacyText>
 
-          <CheckboxItem>
-            <Checkbox
-              checked={formData.marketingConsent}
-              onChange={(e) => handleInputChange('marketingConsent', e.target.checked)}
-            />
-            <CheckboxLabel>
-              <strong>(선택) 마케팅 정보 수신 동의</strong> - 이벤트, 프로모션, 맞춤 여행지 정보
-              <br/>
-              <div style={{ 
-                background: '#e8f4fd', 
-                borderRadius: '8px', 
-                padding: '0.75rem', 
-                marginTop: '0.5rem',
-                border: '1px solid #667eea'
-              }}>
-                <div style={{ color: '#667eea', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                  ✨ 마케팅 동의 시 혜택
-                </div>
-                <div style={{ color: '#2d3748', fontSize: '0.8rem', lineHeight: '1.4' }}>
-                  • 거주지역 기반 맞춤 여행지 <strong>2곳 추천</strong><br/>
-                  • 우리 가족 성향에 딱 맞는 장소만 엄선<br/>
-                  • 새로운 여행 이벤트 및 할인 정보 우선 제공
-                </div>
-              </div>
-            </CheckboxLabel>
-          </CheckboxItem>
         </CheckboxGroup>
 
         <ButtonGroup>
           <Button
             onClick={handleSubmit}
-            disabled={!canGetRecommendations}
+            disabled={!isFormValid}
             style={{
-              filter: !canGetRecommendations ? 'blur(2px)' : 'none',
-              opacity: !canGetRecommendations ? 0.5 : 1
+              filter: !isFormValid ? 'blur(2px)' : 'none',
+              opacity: !isFormValid ? 0.5 : 1
             }}
-            whileHover={{ scale: canGetRecommendations ? 1.05 : 1 }}
-            whileTap={{ scale: canGetRecommendations ? 0.95 : 1 }}
+            whileHover={{ scale: isFormValid ? 1.05 : 1 }}
+            whileTap={{ scale: isFormValid ? 0.95 : 1 }}
           >
-            {canGetRecommendations ? '🎯 맞춤 추천 받기' : '📋 모든 동의 필요'}
+            {isFormValid ? '✅ 정보 저장하고 결과 보기' : '📋 필수 정보 입력 필요'}
           </Button>
           <Button
             variant="secondary"
             onClick={onSkip}
-            disabled={allConsentsGiven}
-            style={{
-              filter: allConsentsGiven ? 'blur(2px)' : 'none',
-              opacity: allConsentsGiven ? 0.5 : 1,
-              cursor: allConsentsGiven ? 'not-allowed' : 'pointer'
-            }}
-            whileHover={{ scale: !allConsentsGiven ? 1.05 : 1 }}
-            whileTap={{ scale: !allConsentsGiven ? 0.95 : 1 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            {allConsentsGiven ? '✅ 추천 이용 가능' : '건너뛰기'}
+            건너뛰기
           </Button>
         </ButtonGroup>
         
-        {!formData.marketingConsent && (
-          <div style={{
-            textAlign: 'center',
-            marginTop: '1rem',
-            padding: '0.75rem',
-            background: '#fff3cd',
-            border: '1px solid #ffeaa7',
-            borderRadius: '8px',
-            fontSize: '0.85rem',
-            color: '#856404'
-          }}>
-            💡 <strong>마케팅 정보 수신에 동의</strong>하시면 거주지역 기반 맞춤 여행지를 추천받을 수 있어요!
-          </div>
-        )}
       </FormCard>
     </Container>
   );

@@ -27,8 +27,8 @@ export interface UserInfo {
   gender: string;
   familySize: number;
   region: string;
-  marketingConsent: boolean;
   privacyConsent: boolean;
+  marketingConsent?: boolean;
 }
 
 export interface AnalyticsData {

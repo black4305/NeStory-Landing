@@ -24,8 +24,7 @@ const PreTestPage: React.FC<PreTestPageProps> = ({ onStart }) => {
         </Title>
         
         <Description>
-          간단한 질문을 통해 가족의 여행 성향을 분석하고,<br />
-          맞춤형 여행지 추천을 받아보세요!
+          간단한 질문을 통해 가족의 여행 성향을 분석해보세요!
         </Description>
         
         <FeatureList>
@@ -46,7 +45,7 @@ const PreTestPage: React.FC<PreTestPageProps> = ({ onStart }) => {
           <FeatureItem>
             <FeatureIcon>🏞️</FeatureIcon>
             <FeatureText>
-              <strong>맞춤 여행지 추천</strong> (지역별 특화)
+              <strong>여행 스타일 가이드</strong>
             </FeatureText>
           </FeatureItem>
           

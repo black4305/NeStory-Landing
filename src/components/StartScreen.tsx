@@ -205,13 +205,13 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
             marginBottom: '1rem',
             fontSize: '0.85rem'
           }}>
-            🎯 <strong>테스트 완료 후</strong>: 맞춤 여행지 + 우리 지역 추천 장소까지!
+            🎯 <strong>테스트 완료 후</strong>: 나만의 여행 스타일 분석 결과 확인!
           </div>
           
           <Features>
             <Feature>⏱️ 3분 완성</Feature>
             <Feature>🧭 여행 성향 진단</Feature>
-            <Feature>📍 지역별 맞춤 추천</Feature>
+            <Feature>📍 여행 스타일 분석</Feature>
           </Features>
         </Description>
         

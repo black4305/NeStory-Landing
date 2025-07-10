@@ -134,13 +134,13 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <EmotionalHook>"이번 여행은 실패하고 싶지 않아요!"</EmotionalHook>
+                <EmotionalHook>"엄마, 이번 여행 왜 이렇게 재미없어?"</EmotionalHook>
                 <MainTitle>
-                  2분 만에 발견하는<br />
-                  <HighlightText>나만의 완벽한 여행</HighlightText><br />
-                  체크리스트까지 무료로!
+                  아이가 행복해하는<br />
+                  <HighlightText>우리 가족 맞춤 여행</HighlightText><br />
+                  비법 체크리스트 무료 공개!
                 </MainTitle>
-                <SubText>23,847명이 선택한 가족 여행 성공 비법</SubText>
+                <SubText>🔥 32,156명의 부모님이 이미 받아가신 특별 선물!</SubText>
               </motion.div>
             </MainHeadline>
             <motion.div
@@ -150,16 +150,12 @@ const LandingPage: React.FC = () => {
             >
               <EmotionalBenefits>
                 <BenefitItem>
-                  <BenefitEmoji>🎯</BenefitEmoji>
-                  <BenefitText>"내가 진짜 좋아하는 여행 스타일"</BenefitText>
+                  <BenefitEmoji>😍</BenefitEmoji>
+                  <BenefitText>"아이들이 계속 웃는 여행 루트"</BenefitText>
                 </BenefitItem>
                 <BenefitItem>
-                  <BenefitEmoji>💡</BenefitEmoji>
-                  <BenefitText>"나만의 완벽한 여행지 추천"</BenefitText>
-                </BenefitItem>
-                <BenefitItem>
-                  <BenefitEmoji>✨</BenefitEmoji>
-                  <BenefitText>"평생 기억에 남을 나만의 여행"</BenefitText>
+                  <BenefitEmoji>🎁</BenefitEmoji>
+                  <BenefitText>"준비물 하나도 안 빠뜨리는 체크리스트"</BenefitText>
                 </BenefitItem>
               </EmotionalBenefits>
             </motion.div>
@@ -172,22 +168,23 @@ const LandingPage: React.FC = () => {
               <LeadMagnetBanner>
                 <LeadMagnetIcon>🎁</LeadMagnetIcon>
                 <LeadMagnetContent>
-                  <LeadMagnetTitle>지금 테스트 완료하시면 <strong>무료로 드려요!</strong></LeadMagnetTitle>
+                  <LeadMagnetTitle>🚨 오늘만 <strong>100% 무료!</strong> (정가 19,900원)</LeadMagnetTitle>
                   <LeadMagnetItems>
-                    <LeadMagnetItem>✅ 맞춤형 여행 준비 체크리스트 (PDF)</LeadMagnetItem>
-                    <LeadMagnetItem>✅ 우리 지역 여름방학 특별 행사 정보</LeadMagnetItem>
+                    <LeadMagnetItem>📋 가족 여행 완벽 준비 체크리스트 (PDF 37페이지)</LeadMagnetItem>
+                    <LeadMagnetItem>🎪 2025 전국 어린이 축제 일정표 (지역별 정리)</LeadMagnetItem>
+                    <LeadMagnetItem>💰 가족 여행 예산 계산기 (엑셀 자동계산)</LeadMagnetItem>
                   </LeadMagnetItems>
                 </LeadMagnetContent>
               </LeadMagnetBanner>
 
               <CTAButtonGroup>
                 <PrimaryCTAButton onClick={handleStartTest}>
-                  <ButtonText>내 여행 스타일 분석하고 선물받기 →</ButtonText>
-                  <ButtonSubtext>2분 설문 후 바로 다운로드 가능!</ButtonSubtext>
+                  <ButtonText>🎁 19,900원 → 0원! 지금 받아가기</ButtonText>
+                  <ButtonSubtext>⏰ 1분 테스트 후 즉시 다운로드!</ButtonSubtext>
                 </PrimaryCTAButton>
                 <TrustIndicators>
-                  <TrustItem>💕 23,847명이 선택한 이유</TrustItem>
-                  <TrustItem>🎯 "진짜 나랑 똑같아!"</TrustItem>
+                  <TrustItem>🔥 오늘 이미 847명이 받아감</TrustItem>
+                  <TrustItem>⭐ "이거 정말 대박이에요!"</TrustItem>
                 </TrustIndicators>
                 
                 {/* 신뢰성 배지 */}
@@ -202,14 +199,15 @@ const LandingPage: React.FC = () => {
         <StorySection data-section="story">
           <StoryContent>
             <HookingBadge>
-              💥 92% 엄마들의 고민
+              🆘 작년 여름, 제주도에서 일어난 일
             </HookingBadge>
             <SectionTitle>
-              😱 "또 그곳? 애들이 재미없어해요..."
+              💔 "엄마, 우리 왜 여행 왔어? 집이 더 재밌어..."
             </SectionTitle>
             <ProblemList>
-              <ProblemItem>😭 "검색해도 나오는 건 똑같은 관광지뿐"</ProblemItem>
-              <ProblemItem>😤 "우리 가족한테 맞는 곳을 찾을 수가 없어요"</ProblemItem>
+              <ProblemItem>😭 "3박 4일 내내 아이들은 핸드폰만 봤어요"</ProblemItem>
+              <ProblemItem>🤯 "준비물 빠뜨려서 현지에서 20만원 추가 지출"</ProblemItem>
+              <ProblemItem>😰 "유명 맛집 2시간 대기... 아이들은 짜증만"</ProblemItem>
             </ProblemList>
             
             <SolutionSection>
@@ -219,28 +217,29 @@ const LandingPage: React.FC = () => {
             </SolutionSection>
             
             <EmotionalStory>
-              <StoryQuote>"체크리스트 보고 깜짝 놀랐어요! 생각지도 못한 준비물들이 있더라고요. 덕분에 이번 여행은 정말 완벽했어요. 아이들도 '엄마 최고!'라고..."</StoryQuote>
-              <StoryAuthor>- 7살, 5살 두 아이 엄마 박○○님</StoryAuthor>
+              <StoryQuote>"이 체크리스트 진짜 신의 한 수였어요! 비상약, 여벌옷, 아이들 간식까지... 하나도 안 빠뜨리고 다 챙겼더니 여행이 이렇게 편할 수가! 남편이 '당신 천재야?'라고 했어요ㅋㅋ"</StoryQuote>
+              <StoryAuthor>- 8살, 6살 자매 엄마 김○○님 (부산)</StoryAuthor>
             </EmotionalStory>
 
             <TestimonialBox>
-              <TestimonialHeader>🎯 실제 효과</TestimonialHeader>
-              <TestimonialContent>"여행 준비 시간 70% 단축 + 만족도 200% 상승! 진짜 우리 가족 맞춤 여행지 추천에 체크리스트까지... 이거 진짜 무료 맞아요?"</TestimonialContent>
+              <TestimonialHeader>💬 어제 받으신 분 실시간 후기</TestimonialHeader>
+              <TestimonialContent>"헐... 이 체크리스트 대박이에요! 제가 평소에 놓치던 것들이 다 있네요. 여행용 구급약, 아이 멀미약, 여벌 속옷, 비닐봉지까지... 진짜 19,900원 주고 사도 아깝지 않은데 무료라니! 남편한테도 자랑했어요ㅋㅋ"</TestimonialContent>
             </TestimonialBox>
 
 
             <StoryText>
-              <strong>🎁 지금 바로 시작하면 받을 수 있는 것들:</strong><br />
-              ✅ 나만의 여행 스타일 분석<br />
-              ✅ 맞춤 여행지 추천<br />
-              ✅ 완벽한 여행 준비 체크리스트<br />
-              ✅ 우리 지역 숨은 명소 정보
+              <strong>📦 19,900원 상당 패키지 내용물:</strong><br />
+              ✅ 우리 가족 맞춤 여행 스타일 진단서 (8페이지)<br />
+              ✅ 빠짐없는 여행 준비 체크리스트 (37페이지 PDF)<br />
+              ✅ 2025 전국 축제 일정표 + 할인 쿠폰 모음<br />
+              ✅ 가족 여행 예산 자동계산 엑셀 파일<br />
+              <strong style={{color: '#ff6b6b'}}>⏰ 오늘 자정까지만 100% 무료!</strong>
             </StoryText>
 
 
             <CenteredButtonContainer>
               <CTAButton secondary onClick={handleStartTest}>
-                지금 바로 무료로 시작하기 →
+                💸 19,900원 → 0원! 지금 당장 받기 →
               </CTAButton>
             </CenteredButtonContainer>
             
@@ -250,39 +249,42 @@ const LandingPage: React.FC = () => {
         {/* Features Section */}
         <FeaturesSection data-section="features">
           <CuriosityHook>
-            ⏰ 단 2분! 그것도 무료!
+            💸 19,900원 → 0원! 오늘 하루만!
           </CuriosityHook>
-          <SectionTitle>🎯 딱 3가지만 알려드릴게요</SectionTitle>
+          <SectionTitle>📦 패키지에 포함된 3가지 핵심 자료</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
-              <FeatureIcon>1️⃣</FeatureIcon>
-              <FeatureTitle>당신의 여행 DNA</FeatureTitle>
+              <FeatureIcon>📋</FeatureIcon>
+              <FeatureTitle>체크리스트 PDF</FeatureTitle>
               <FeatureDescription>
-                8가지 타입 중<br />
-                딱 맞는 스타일 발견
+                37페이지 분량<br />
+                준비물 하나도 안 빠뜨려요<br />
+                <strong style={{color: '#ff6b6b'}}>정가 9,900원</strong>
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>2️⃣</FeatureIcon>
-              <FeatureTitle>숨은 명소 추천</FeatureTitle>
+              <FeatureIcon>🎪</FeatureIcon>
+              <FeatureTitle>2025 축제 일정표</FeatureTitle>
               <FeatureDescription>
-                남들 모르는<br />
-                우리 동네 핫플레이스
+                전국 어린이 축제 총정리<br />
+                할인 쿠폰까지 포함!<br />
+                <strong style={{color: '#ff6b6b'}}>정가 5,000원</strong>
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>3️⃣</FeatureIcon>
-              <FeatureTitle>완벽 준비 리스트</FeatureTitle>
+              <FeatureIcon>💰</FeatureIcon>
+              <FeatureTitle>예산 계산기</FeatureTitle>
               <FeatureDescription>
-                빠뜨리면 후회할<br />
-                필수 준비물 체크!
+                엑셀 자동계산 파일<br />
+                숙박/교통/식비 한번에!<br />
+                <strong style={{color: '#ff6b6b'}}>정가 5,000원</strong>
               </FeatureDescription>
             </FeatureCard>
           </FeatureGrid>
           
           <CenteredButtonContainer>
             <CTAButton onClick={handleStartTest}>
-              2분 투자로 완벽한 여행 만들기 →
+              💎 총 19,900원 패키지 지금 무료로 받기!
             </CTAButton>
           </CenteredButtonContainer>
 
@@ -292,27 +294,33 @@ const LandingPage: React.FC = () => {
         {/* Final CTA */}
         <FinalCTASection>
           <UrgencyBadge>
-            ⚠️ 오늘만 무료! 내일부터 유료 전환
+            🔥 마감 임박! 오늘 밤 12시 정각 종료
           </UrgencyBadge>
-          <FinalCTATitle>🚨 마지막 기회를 놓치지 마세요!</FinalCTATitle>
+          <FinalCTATitle>😱 아직도 19,900원짜리를 안 받으셨어요?</FinalCTATitle>
           <FinalCTASubtitle>
-            23,847명의 엄마들이 이미 받아간<br />
-            여행 성공 비법을 무료로 받을 마지막 날!
+            지금까지 32,156명이 받아간 베스트셀러 패키지<br />
+            <span style={{color: '#ff6b6b', fontWeight: 800}}>오늘이 정말 마지막 무료 배포일입니다!</span>
           </FinalCTASubtitle>
           
           {/* 최종 리드마그넷 어필 */}
           <FinalLeadMagnet>
-            <FinalLeadMagnetTitle>🎁 지금 완료하시는 분께 특별 선물!</FinalLeadMagnetTitle>
+            <FinalLeadMagnetTitle>💝 총 19,900원 상당 패키지 구성품</FinalLeadMagnetTitle>
             <FinalLeadMagnetList>
-              <FinalLeadMagnetItem>📋 <strong>여행 준비 체크리스트</strong> - 가족 여행 필수품 완벽 정리</FinalLeadMagnetItem>
-              <FinalLeadMagnetItem>🎪 <strong>지역별 여름 행사 정보</strong> - 우리 동네 숨은 명소까지</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>📋 <strong>가족여행 완벽 체크리스트</strong> (PDF 37페이지) - 정가 9,900원</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>🎪 <strong>2025 전국 축제 일정표</strong> (엑셀파일) - 정가 5,000원</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>💰 <strong>여행 예산 자동계산기</strong> (엑셀파일) - 정가 5,000원</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>🎯 <strong>우리 가족 여행 스타일 진단서</strong> (PDF 8페이지) - 보너스!</FinalLeadMagnetItem>
             </FinalLeadMagnetList>
-            <FinalLeadMagnetNote>* 테스트 완료 후 즉시 다운로드 가능합니다</FinalLeadMagnetNote>
+            <FinalLeadMagnetNote>
+              <span style={{fontSize: '1.2rem', color: '#ff6b6b', fontWeight: 'bold'}}>
+                ⏰ 1분 테스트 완료 즉시 전체 패키지 다운로드!
+              </span>
+            </FinalLeadMagnetNote>
           </FinalLeadMagnet>
           
           <FinalCTAButtonContainer>
             <CTAButton large onClick={handleStartTest}>
-              🚀 지금 바로 내 여행 스타일 확인하고 선물받기!
+              💝 19,900원 패키지 무료로 받기 (1분 완성!)
             </CTAButton>
           </FinalCTAButtonContainer>
         </FinalCTASection>

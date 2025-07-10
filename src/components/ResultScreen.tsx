@@ -6,8 +6,6 @@ import html2canvas from 'html2canvas';
 import { AxisScore } from '../types';
 import { travelTypes } from '../data/travelTypes';
 import { characters } from '../data/characters';
-import { regionalRecommendations } from '../data/regions';
-import { getRecommendationsByType } from '../data/travelDestinations';
 import CharacterAvatar from './CharacterAvatar';
 
 const Container = styled.div`
@@ -131,20 +129,6 @@ const RecommendationTitle = styled.h3`
   font-size: 1.3rem;
   margin-bottom: 1rem;
   text-align: center;
-`;
-
-const RecommendationList = styled.ul`
-  list-style: none;
-  padding: 0;
-`;
-
-const RecommendationItem = styled.li`
-  background: white;
-  border-radius: 15px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #667eea;
 `;
 
 const AxisSection = styled.div`
@@ -411,7 +395,6 @@ interface ResultScreenProps {
     completionRate: number;
   };
   userRegion?: string;
-  hasMarketingConsent?: boolean;
   isSharedView?: boolean;
 }
 
@@ -439,7 +422,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
   onRestart,
   analytics,
   userRegion,
-  hasMarketingConsent = false,
   isSharedView = false
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
@@ -463,34 +445,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     funFact: '남들과는 다른 특별한 여행을 즐기는 개성파!'
   };
 
-  // 지역 정보 매칭 - 마케팅 동의 시에만 표시
-  const getRegionalInfo = (region: string | undefined, hasConsent: boolean) => {
-    if (!region || !hasConsent) return null;
-    
-    // 정확한 매칭 먼저 시도
-    if (regionalRecommendations[region]) {
-      return regionalRecommendations[region];
-    }
-    
-    // 시도 단위로 fallback 검색 (예: "충남 아산시" → "충남" 관련 정보)
-    const province = region.split(' ')[0];
-    const fallbackKey = Object.keys(regionalRecommendations).find(key => 
-      key.startsWith(province)
-    );
-    
-    return fallbackKey ? regionalRecommendations[fallbackKey] : null;
-  };
-
-  // 구체적인 여행지 추천 (마케팅 동의 시에만)
-  const getSpecificDestinations = (region: string | undefined, travelTypeCode: string, hasConsent: boolean) => {
-    if (!hasConsent || !travelTypeCode) return [];
-    
-    // 새로운 여행지 추천 시스템 사용
-    return getRecommendationsByType(travelTypeCode, region, 5);
-  };
-
-  const regionalInfo = getRegionalInfo(userRegion, hasMarketingConsent);
-  const specificDestinations = getSpecificDestinations(userRegion, typeCode, hasMarketingConsent);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
@@ -622,139 +576,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
         </div>
 
         
-        {hasMarketingConsent && (specificDestinations.length > 0 || regionalInfo) && (
-          <RecommendationSection>
-            <RecommendationTitle>
-              🎯 {userRegion} 맞춤 여행지 미리보기 (2곳)
-            </RecommendationTitle>
-            <RecommendationList>
-              {/* 구체적인 여행지가 있으면 2곳만 표시 */}
-              {specificDestinations.length > 0 ? (
-                specificDestinations.slice(0, 2).map((destination, index) => (
-                  <RecommendationItem key={index}>
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <strong>📍 {destination.name}</strong>
-                      <span style={{ 
-                        marginLeft: '0.5rem', 
-                        fontSize: '0.85rem', 
-                        color: '#667eea',
-                        background: '#f0f4ff',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '8px',
-                        fontWeight: '600'
-                      }}>
-                        {destination.category === 'nature' ? '자연' : 
-                         destination.category === 'culture' ? '문화' :
-                         destination.category === 'activity' ? '액티비티' :
-                         destination.category === 'food' ? '음식' : '휴식'}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.9rem', color: '#4a5568', lineHeight: '1.4' }}>
-                      {destination.description}
-                    </div>
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#667eea' }}>
-                      📍 {destination.location} • 🎯 {typeCode} 유형 맞춤
-                      {destination.region === userRegion?.split(' ')[0] && (
-                        <span style={{ 
-                          marginLeft: '0.5rem',
-                          color: '#059669',
-                          fontWeight: '600',
-                          background: '#d1fae5',
-                          padding: '0.1rem 0.4rem',
-                          borderRadius: '6px',
-                          fontSize: '0.75rem'
-                        }}>
-                          🏠 우리 지역
-                        </span>
-                      )}
-                    </div>
-                  </RecommendationItem>
-                ))
-              ) : (
-                /* 구체적인 여행지가 없으면 일반 추천 2곳 */
-                regionalInfo?.nearbyDestinations.slice(0, 2).map((dest, index) => (
-                  <RecommendationItem key={index}>
-                    🏡 {dest}
-                  </RecommendationItem>
-                ))
-              )}
-            </RecommendationList>
-            
-            {/* 미리보기 후 더 자세한 계획 유도 */}
-            <div style={{ 
-              textAlign: 'center', 
-              marginTop: '1.5rem', 
-              padding: '1.5rem', 
-              background: 'linear-gradient(135deg, #e3f2fd, #f3e5f5)', 
-              borderRadius: '15px',
-              border: '2px dashed #667eea'
-            }}>
-              <div style={{ 
-                fontSize: '1.1rem', 
-                fontWeight: 'bold', 
-                color: '#2d3748',
-                marginBottom: '0.8rem'
-              }}>
-                💭 이것은 단순한 미리보기입니다!
-              </div>
-              <div style={{ 
-                fontSize: '0.95rem', 
-                color: '#4a5568', 
-                lineHeight: '1.5',
-                marginBottom: '1rem'
-              }}>
-                🎨 <strong>{typeCode} 유형 가족</strong>을 위한 완벽한 여행 계획은<br/>
-                더 자세하고 개인화된 정보가 필요합니다.
-              </div>
-              <div style={{ 
-                fontSize: '0.85rem', 
-                color: '#667eea', 
-                fontStyle: 'italic'
-              }}>
-                ✨ 아래 버튼을 누르면 더 자세한 맞춤 계획을 받아보실 수 있어요!
-              </div>
-            </div>
-          </RecommendationSection>
-        )}
-        
-        {!hasMarketingConsent && (
-          <RecommendationSection>
-            <RecommendationTitle>
-              📍 맞춤 여행지 추천받기
-            </RecommendationTitle>
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '2rem 1rem',
-              background: 'linear-gradient(135deg, #667eea, #764ba2)',
-              borderRadius: '15px',
-              color: 'white'
-            }}>
-              <div style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
-                🎯 나만의 맞춤 여행지를 받아보세요!
-              </div>
-              <div style={{ fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '1.5rem' }}>
-                마케팅 정보 수신에 동의하시면<br/>
-                거주지역 기반 맞춤 여행지 2곳을 추천해드립니다.
-              </div>
-              <button 
-                style={{
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  border: '2px solid white',
-                  borderRadius: '25px',
-                  padding: '0.75rem 1.5rem',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  backdropFilter: 'blur(10px)'
-                }}
-                onClick={onRestart}
-              >
-                📱 다시 테스트하고 추천받기
-              </button>
-            </div>
-          </RecommendationSection>
-        )}
-        
         <ButtonGroup>
           {!isSharedView && (
             <>
@@ -778,11 +599,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           </Button>
         </ButtonGroup>
 
-        {/* 맞춤 여행 계획 제작 후킹 섹션 - 마케팅 동의 여부와 관계없이 모두에게 표시 */}
+        {/* 맞춤 여행 계획 제작 후킹 섹션 */}
         <RecommendationSection style={{ 
-          background: hasMarketingConsent 
-            ? 'linear-gradient(135deg, #ff6b6b, #feca57)' 
-            : 'linear-gradient(135deg, #667eea, #764ba2)', 
+          background: 'linear-gradient(135deg, #667eea, #764ba2)', 
           marginTop: '2rem',
           position: 'relative',
           overflow: 'hidden'
@@ -810,10 +629,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           
           <div style={{ position: 'relative', zIndex: 1 }}>
             <RecommendationTitle style={{ color: 'white', fontSize: '1.5rem', marginBottom: '1.5rem' }}>
-              {hasMarketingConsent 
-                ? `✨ ${typeCode} 유형, 더 자세한 계획이 필요하시나요? ✨`
-                : `🎯 ${typeCode} 유형만을 위한 특별 혜택!`
-              }
+              🎯 ${typeCode} 유형만을 위한 특별 혜택!
             </RecommendationTitle>
             
             <div style={{ 
@@ -827,17 +643,8 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 marginBottom: '1rem',
                 textShadow: '0 2px 4px rgba(0,0,0,0.3)'
               }}>
-                {hasMarketingConsent ? (
-                  <>
-                    📝 위의 2곳은 시작에 불과합니다!<br/>
-                    <span style={{ fontSize: '1.5rem', color: '#fff3cd' }}>완벽한 맞춤 여행 계획</span>을 받아보세요!
-                  </>
-                ) : (
-                  <>
-                    🎯 당신 가족만을 위한<br/>
-                    <span style={{ fontSize: '1.5rem', color: '#fff3cd' }}>개인 맞춤 여행 계획</span>을 제작해드립니다!
-                  </>
-                )}
+                🎯 당신 가족만을 위한<br/>
+                <span style={{ fontSize: '1.5rem', color: '#fff3cd' }}>개인 맞춤 여행 계획</span>을 제작해드립니다!
               </div>
               
               <div style={{ 
@@ -846,17 +653,8 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 marginBottom: '1.5rem',
                 opacity: '0.95'
               }}>
-                {hasMarketingConsent ? (
-                  <>
-                    🚀 위의 추천은 단순한 예시입니다.<br/>
-                    <strong>진짜 {typeCode} 유형 맞춤 계획</strong>은 훨씬 더 자세하고 개인화된 정보로 제공됩니다!
-                  </>
-                ) : (
-                  <>
-                    💫 일반적인 추천이 아닌, <strong>오직 당신 가족만</strong>을 위한<br/>
-                    세상에 단 하나뿐인 맞춤형 여행 일정을 만들어드려요!
-                  </>
-                )}
+                💫 일반적인 추천이 아닌, <strong>오직 당신 가족만</strong>을 위한<br/>
+                세상에 단 하나뿐인 맞춤형 여행 일정을 만들어드려요!
               </div>
               
               <div style={{
@@ -871,7 +669,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                   🎁 지금 신청하면 무료로 받을 수 있어요!
                 </div>
                 <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
-                  ✅ {typeCode} 유형 특화 명소 추천 ({hasMarketingConsent ? '위의 2곳 외 수십 곳 추가' : '맞춤 명소 수십 곳'})<br/>
+                  ✅ {typeCode} 유형 특화 명소 추천 (맞춤 명소 수십 곳)<br/>
                   ✅ 가족 구성원별 맞춤 액티비티 & 체험 프로그램<br/>
                   ✅ 실제 이동 경로 및 시간별 상세 일정표<br/>
                   ✅ 숨은 맛집 & 인스타 포토스팟 정보<br/>
@@ -907,10 +705,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 opacity: '0.9',
                 fontStyle: 'italic'
               }}>
-                {hasMarketingConsent 
-                  ? '⏰ 더 자세한 정보로 완벽한 계획을 세워보세요!'
-                  : '⏰ 선착순 100명 한정! 지금 바로 신청하세요'
-                }
+                ⏰ 선착순 100명 한정! 지금 바로 신청하세요
               </div>
             </div>
           </div>
