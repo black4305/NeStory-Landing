@@ -86,10 +86,10 @@ const UrgencyTimer: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // 2025년 8월 1일 00:00:00까지의 시간 계산
+    // 2025년 8월 31일 23:59:59까지의 시간 계산
     const calculateTimeLeft = () => {
       const now = new Date();
-      const targetDate = new Date('2025-08-01T00:00:00');
+      const targetDate = new Date('2025-08-31T23:59:59');
       
       const difference = targetDate.getTime() - now.getTime();
       
@@ -126,7 +126,7 @@ const UrgencyTimer: React.FC = () => {
       transition={{ duration: 0.5 }}
     >
       <TimerText>
-        <span>🔥 2025년 8월 1일 자정까지 특별 혜택!</span>
+        <span>🔥 8월 31일 자정까지만 무료 테스트!</span>
         <span>
           <TimeDisplay>{timeLeft.days}일</TimeDisplay>
           <TimeDisplay>{String(timeLeft.hours).padStart(2, '0')}</TimeDisplay>:

@@ -226,14 +226,14 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ onClose, onAccept }) 
       >
         <CloseButton onClick={onClose}>×</CloseButton>
         
-        <Title>🚨 잠깐만요!</Title>
+        <Title>🎁 무료 선물을 정말 포기하시나요?</Title>
         <Subtitle>
-          나만의 가족 여행 스타일을 알아보지 않고 가시나요?<br/>
-          1분이면 여행 성향 분석이 완료됩니다!
+          지금 나가시면 23,847명이 받아간<br/>
+          <strong style={{color: '#ff6b6b'}}>여행 준비 체크리스트</strong>를 받을 수 없어요!
         </Subtitle>
         
         <SpecialOffer>
-          🎁 지금 시작하면 맞춤 여행지 추천까지!
+          ⚡ 2분 테스트 후 즉시 다운로드 가능!
         </SpecialOffer>
         
         <CTAButton
@@ -241,7 +241,7 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ onClose, onAccept }) 
           whileTap={{ scale: 0.95 }}
           onClick={onAccept}
         >
-          🎯 무료로 테스트 시작하기
+          🎁 선물 받고 시작하기
         </CTAButton>
         
         <SecondaryButton
@@ -249,7 +249,7 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ onClose, onAccept }) 
           whileTap={{ scale: 0.98 }}
           onClick={onClose}
         >
-          다음에 할게요
+          선물 필요 없어요
         </SecondaryButton>
       </PopupContainer>
     </Overlay>

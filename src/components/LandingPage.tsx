@@ -6,15 +6,11 @@ import UrgencyTimer from './UrgencyTimer';
 import LiveParticipants from './LiveParticipants';
 import TrustBadges from './TrustBadges';
 import ExitIntentPopup from './ExitIntentPopup';
-import MicroCommitment from './MicroCommitment';
-import TwoStepOptinModal from './TwoStepOptinModal';
 import { SupabaseService } from '../services/supabase';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [showExitIntent, setShowExitIntent] = useState(false);
-  const [showMicroCommitment, setShowMicroCommitment] = useState(false);
-  const [showOptinModal, setShowOptinModal] = useState(false);
 
   React.useEffect(() => {
     const visitId = Date.now().toString();
@@ -76,21 +72,12 @@ const LandingPage: React.FC = () => {
       }
     };
     
-    // 페이지 진입 후 30초 후 마이크로 커밋먼트 표시
-    const microCommitmentTimer = setTimeout(() => {
-      if (!sessionStorage.getItem('microCommitmentShown')) {
-        setShowMicroCommitment(true);
-        sessionStorage.setItem('microCommitmentShown', 'true');
-      }
-    }, 30000);
-    
     document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('scroll', trackScrollDepth);
       document.removeEventListener('mouseleave', handleMouseLeave);
-      clearTimeout(microCommitmentTimer);
     };
   }, []);
 
@@ -113,56 +100,14 @@ const LandingPage: React.FC = () => {
       ctaClicked: true
     });
 
-    // 옵트인 모달 열기
-    setShowOptinModal(true);
-  };
-
-  // const handleFinalStartTest = () => {
-  //   navigate('/landing');
-  // };
-
-  const handleOptinSubmit = async (data: { name?: string; phone: string; userType: string }) => {
-    try {
-      // 여기서 연락처와 사용자 정보를 서버로 전송
-      console.log('Optin data:', data);
-      
-      // 결과 페이지로 리디렉션 (실제 구현에서는 사용자 타입에 따라 동적으로 처리)
-      navigate('/test');
-    } catch (error) {
-      console.error('Failed to submit optin:', error);
-    }
+    // 바로 테스트 시작
+    navigate('/landing');
   };
 
   const handleExitIntentAccept = () => {
     setShowExitIntent(false);
-    // 마이크로 커밋먼트 바로 표시
-    setShowMicroCommitment(true);
-  };
-
-  const handleMicroCommitmentComplete = () => {
-    setShowMicroCommitment(false);
-    // 실제 테스트로 이동
+    // 바로 테스트 시작
     navigate('/landing');
-  };
-
-  const handleSurveyRedirect = (preAnswers: string[]) => {
-    setShowMicroCommitment(false);
-    
-    // 세션 정보 준비
-    const sessionId = Date.now().toString();
-    const deviceType = window.innerWidth <= 768 ? 'mobile' : 'desktop';
-    
-    // 외부 설문으로 리다이렉트
-    const params = new URLSearchParams({
-      source: 'family-travel-landing',
-      sessionId,
-      device: deviceType,
-      timestamp: Date.now().toString(),
-      preAnswers: JSON.stringify(preAnswers)
-    });
-    
-    // 새 창이 아닌 같은 창에서 전환 (뒤로가기 가능)
-    window.location.href = `https://nestory-survey.vercel.app?${params}`;
   };
 
   return (
@@ -189,13 +134,13 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <EmotionalHook>"매번 똑같은 가족여행, 이제 그만!"</EmotionalHook>
+                <EmotionalHook>"이번 여행은 실패하고 싶지 않아요!"</EmotionalHook>
                 <MainTitle>
-                  우리 아이와 배우자가 모두 만족할<br />
-                  <HighlightText>인생 여행지</HighlightText><br />
-                  2분 만에 과학적으로 찾아보세요
+                  2분 만에 발견하는<br />
+                  <HighlightText>나만의 완벽한 여행</HighlightText><br />
+                  체크리스트까지 무료로!
                 </MainTitle>
-                <SubText>가족 모두가 즐거워하는 여행의 비밀을 지금 바로 확인하세요</SubText>
+                <SubText>23,847명이 선택한 가족 여행 성공 비법</SubText>
               </motion.div>
             </MainHeadline>
             <motion.div
@@ -205,16 +150,16 @@ const LandingPage: React.FC = () => {
             >
               <EmotionalBenefits>
                 <BenefitItem>
-                  <BenefitEmoji>💖</BenefitEmoji>
-                  <BenefitText>"아이들이 싸우지 않는 여행"</BenefitText>
+                  <BenefitEmoji>🎯</BenefitEmoji>
+                  <BenefitText>"내가 진짜 좋아하는 여행 스타일"</BenefitText>
                 </BenefitItem>
                 <BenefitItem>
-                  <BenefitEmoji>😊</BenefitEmoji>
-                  <BenefitText>"어른도 아이도 모두 만족"</BenefitText>
+                  <BenefitEmoji>💡</BenefitEmoji>
+                  <BenefitText>"나만의 완벽한 여행지 추천"</BenefitText>
                 </BenefitItem>
                 <BenefitItem>
                   <BenefitEmoji>✨</BenefitEmoji>
-                  <BenefitText>"평생 기억에 남을 추억"</BenefitText>
+                  <BenefitText>"평생 기억에 남을 나만의 여행"</BenefitText>
                 </BenefitItem>
               </EmotionalBenefits>
             </motion.div>
@@ -223,14 +168,26 @@ const LandingPage: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6, duration: 0.5 }}
             >
+              {/* 리드마그넷 혜택 강조 */}
+              <LeadMagnetBanner>
+                <LeadMagnetIcon>🎁</LeadMagnetIcon>
+                <LeadMagnetContent>
+                  <LeadMagnetTitle>지금 테스트 완료하시면 <strong>무료로 드려요!</strong></LeadMagnetTitle>
+                  <LeadMagnetItems>
+                    <LeadMagnetItem>✅ 맞춤형 여행 준비 체크리스트 (PDF)</LeadMagnetItem>
+                    <LeadMagnetItem>✅ 우리 지역 여름방학 특별 행사 정보</LeadMagnetItem>
+                  </LeadMagnetItems>
+                </LeadMagnetContent>
+              </LeadMagnetBanner>
+
               <CTAButtonGroup>
                 <PrimaryCTAButton onClick={handleStartTest}>
-                  <ButtonText>내 여행유형 무료로 분석하기 →</ButtonText>
-                  <ButtonSubtext>2분이면 평생 추억이 바뀝니다</ButtonSubtext>
+                  <ButtonText>내 여행 스타일 분석하고 선물받기 →</ButtonText>
+                  <ButtonSubtext>2분 설문 후 바로 다운로드 가능!</ButtonSubtext>
                 </PrimaryCTAButton>
                 <TrustIndicators>
-                  <TrustItem>💕 23,847가족이 선택한 이유</TrustItem>
-                  <TrustItem>🎯 "진짜 우리 가족 같아요!"</TrustItem>
+                  <TrustItem>💕 23,847명이 선택한 이유</TrustItem>
+                  <TrustItem>🎯 "진짜 나랑 똑같아!"</TrustItem>
                 </TrustIndicators>
                 
                 {/* 신뢰성 배지 */}
@@ -245,16 +202,14 @@ const LandingPage: React.FC = () => {
         <StorySection data-section="story">
           <StoryContent>
             <HookingBadge>
-              🚨 실제 카톡 대화 캡쳐
+              💥 92% 엄마들의 고민
             </HookingBadge>
             <SectionTitle>
-              😰 "이런 가족여행 고민, 혹시 나만?"
+              😱 "또 그곳? 애들이 재미없어해요..."
             </SectionTitle>
             <ProblemList>
-              <ProblemItem>😩 "아이들은 놀이공원, 어른들은 조용한 곳 원해요"</ProblemItem>
-              <ProblemItem>😫 "매번 같은 곳만 가서 지겨워하는 가족들"</ProblemItem>
-              <ProblemItem>🤷‍♀️ "여행 계획 세우다가 서로 의견 달라서 포기"</ProblemItem>
-              <ProblemItem>💸 "비싼 여행비 쓰고도 누군가는 항상 불만족"</ProblemItem>
+              <ProblemItem>😭 "검색해도 나오는 건 똑같은 관광지뿐"</ProblemItem>
+              <ProblemItem>😤 "우리 가족한테 맞는 곳을 찾을 수가 없어요"</ProblemItem>
             </ProblemList>
             
             <SolutionSection>
@@ -264,155 +219,104 @@ const LandingPage: React.FC = () => {
             </SolutionSection>
             
             <EmotionalStory>
-              <StoryQuote>"처음으로 온 가족이 만족한 여행이었어요. 시어머니는 편하다고 하시고, 남편은 스트레스 안 받는다고 하고, 아이들은 또 가고 싶다고... 이런 기적 같은 일이 정말 가능하구나 싶었어요."</StoryQuote>
-              <StoryAuthor>- 실제 사용자 김○○님의 눈물 후기</StoryAuthor>
+              <StoryQuote>"체크리스트 보고 깜짝 놀랐어요! 생각지도 못한 준비물들이 있더라고요. 덕분에 이번 여행은 정말 완벽했어요. 아이들도 '엄마 최고!'라고..."</StoryQuote>
+              <StoryAuthor>- 7살, 5살 두 아이 엄마 박○○님</StoryAuthor>
             </EmotionalStory>
 
             <TestimonialBox>
-              <TestimonialHeader>👩‍👧‍👦 김○○님 (7살, 4살 엄마)</TestimonialHeader>
-              <TestimonialContent>"와.. 진짜 우리 가족 똑같이 나왔어😱 4살이 좋아할만한 곳이랑 7살이 재밌어할 곳 딱 나누어서 추천해주는데... 어떻게 알지?"</TestimonialContent>
+              <TestimonialHeader>🎯 실제 효과</TestimonialHeader>
+              <TestimonialContent>"여행 준비 시간 70% 단축 + 만족도 200% 상승! 진짜 우리 가족 맞춤 여행지 추천에 체크리스트까지... 이거 진짜 무료 맞아요?"</TestimonialContent>
             </TestimonialBox>
 
-            <TestimonialBox secondary>
-              <TestimonialHeader>👨‍👩‍👧 박○○님 (5살 딸 가족)</TestimonialHeader>
-              <TestimonialContent>"헐 우리 딸 완전 활동형이라고 나왔는데 정말 맞아ㅋㅋ 추천해준 체험농장 갔는데 딸이 하루종일 뛰어놀더라구요!"</TestimonialContent>
-            </TestimonialBox>
 
             <StoryText>
-              <strong>🔥 15,237가족이 인정한 정확도!</strong><br />
-              이제 <BrandText>NeStoryTI</BrandText>로 2분만에 우리 가족 여행 성향을 알아보세요!<br />
-              <em>"어디 갈까?" 고민은 이제 끝! 🎯</em>
+              <strong>🎁 지금 바로 시작하면 받을 수 있는 것들:</strong><br />
+              ✅ 나만의 여행 스타일 분석<br />
+              ✅ 맞춤 여행지 추천<br />
+              ✅ 완벽한 여행 준비 체크리스트<br />
+              ✅ 우리 지역 숨은 명소 정보
             </StoryText>
 
-            <ComparisonGrid>
-              <ComparisonCard>
-                <ComparisonTitle>😫 이전에는</ComparisonTitle>
-                <ComparisonList>
-                  <li>"어디 갈지 모르겠어..."</li>
-                  <li>"아이들이 또 싸울 것 같은데"</li>
-                  <li>"예산은 얼마나 잡지?"</li>
-                </ComparisonList>
-              </ComparisonCard>
-              <ComparisonCard success>
-                <ComparisonTitle>😊 이제는</ComparisonTitle>
-                <ComparisonList>
-                  <li>"우리 성향에 딱이네!"</li>
-                  <li>"가족 모두 만족한 여행"</li>
-                  <li>"계획 세우기가 이렇게 쉬울 줄이야"</li>
-                </ComparisonList>
-              </ComparisonCard>
-            </ComparisonGrid>
 
             <CenteredButtonContainer>
               <CTAButton secondary onClick={handleStartTest}>
-                내 여행유형 확인하기 →
+                지금 바로 무료로 시작하기 →
               </CTAButton>
             </CenteredButtonContainer>
             
-            <MobileScrollHint>
-              <MobileScrollText>👆 아직도 더 있어요! 👆</MobileScrollText>
-              <MobileScrollSubtext>밑으로 계속 스크롤하세요</MobileScrollSubtext>
-            </MobileScrollHint>
           </StoryContent>
         </StorySection>
 
         {/* Features Section */}
         <FeaturesSection data-section="features">
           <CuriosityHook>
-            😲 "진짜 2분만에 이런 게 가능해?"
+            ⏰ 단 2분! 그것도 무료!
           </CuriosityHook>
-          <SectionTitle>✨ 2분 테스트로 이런 걸 알 수 있어요!</SectionTitle>
+          <SectionTitle>🎯 딱 3가지만 알려드릴게요</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
-              <FeatureIcon>🎯</FeatureIcon>
-              <FeatureTitle>우리 가족 여행 성향</FeatureTitle>
+              <FeatureIcon>1️⃣</FeatureIcon>
+              <FeatureTitle>당신의 여행 DNA</FeatureTitle>
               <FeatureDescription>
-                활동적인 가족? 힐링 추구형?<br />
-                8가지 유형 중 우리 가족이 어떤 스타일인지<br />
-                정확히 분석해드려요
+                8가지 타입 중<br />
+                딱 맞는 스타일 발견
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>🗺️</FeatureIcon>
-              <FeatureTitle>맞춤 여행지 추천</FeatureTitle>
+              <FeatureIcon>2️⃣</FeatureIcon>
+              <FeatureTitle>숨은 명소 추천</FeatureTitle>
               <FeatureDescription>
-                "우리 동네에서 갈 만한 곳이 있을까?" 걱정 끝!<br />
-                거주지역 기반으로 딱 맞는<br />
-                여행지를 추천해드려요
+                남들 모르는<br />
+                우리 동네 핫플레이스
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>💝</FeatureIcon>
-              <FeatureTitle>가족 모두 만족하는 플랜</FeatureTitle>
+              <FeatureIcon>3️⃣</FeatureIcon>
+              <FeatureTitle>완벽 준비 리스트</FeatureTitle>
               <FeatureDescription>
-                아이는 재미있고, 어른은 편안하고,<br />
-                할머니·할아버지도 무리하지 않는<br />
-                완벽한 여행 코스를 제안해드려요
+                빠뜨리면 후회할<br />
+                필수 준비물 체크!
               </FeatureDescription>
             </FeatureCard>
           </FeatureGrid>
           
           <CenteredButtonContainer>
             <CTAButton onClick={handleStartTest}>
-              지금 바로 내 여행유형 분석하기!
+              2분 투자로 완벽한 여행 만들기 →
             </CTAButton>
           </CenteredButtonContainer>
 
-          <MobileScrollHint>
-            <MobileScrollText>🎉 후기도 보시고 테스트도 해보세요! 🎉</MobileScrollText>
-            <MobileScrollSubtext>밑으로 더 스크롤하세요</MobileScrollSubtext>
-          </MobileScrollHint>
         </FeaturesSection>
 
-        {/* Social Proof */}
-        <TestimonialSection>
-          <TrustBadge>
-            🔥 실제 사용자 15,237명이 증명!
-          </TrustBadge>
-          <SectionTitle>💬 "헐 진짜 신기해" - 실제 후기 모음</SectionTitle>
-          <TestimonialGrid>
-            <TestimonialCard>
-              <TestimonialText>
-                "와... 진짜 우리 가족 성향이 딱 맞네요! 7살 딸이 신나하고 시어머니도 편하다고 하시니 
-                제가 제일 기뻤어요. 드디어 가족여행 스트레스에서 해방됐습니다! 😭"
-              </TestimonialText>
-              <TestimonialAuthor>- 김○○님 (서울 강남구, 워킹맘)</TestimonialAuthor>
-            </TestimonialCard>
-            <TestimonialCard>
-              <TestimonialText>
-                "매번 '어디 갈까' 고민하느라 주말이 다 지나갔는데... 
-                이제는 테스트 결과 보고 바로 결정해요. 아이들도 '엄마 센스 좋다'고 인정! 👍"
-              </TestimonialText>
-              <TestimonialAuthor>- 이○○님 (부산 해운대구, 두 아이 엄마)</TestimonialAuthor>
-            </TestimonialCard>
-          </TestimonialGrid>
-        </TestimonialSection>
 
         {/* Final CTA */}
         <FinalCTASection>
           <UrgencyBadge>
-            ⚡ 15,237번째 가족이 되어보세요!
+            ⚠️ 오늘만 무료! 내일부터 유료 전환
           </UrgencyBadge>
-          <FinalCTATitle>🎉 "우리 가족은 어떤 타입일까?" 궁금하죠?</FinalCTATitle>
+          <FinalCTATitle>🚨 마지막 기회를 놓치지 마세요!</FinalCTATitle>
           <FinalCTASubtitle>
-            더 이상 "어디 갈까?" 고민하지 마세요! <br />
-            2분 후면 우리 가족 맞춤 여행지를 알 수 있습니다 ✈️
+            23,847명의 엄마들이 이미 받아간<br />
+            여행 성공 비법을 무료로 받을 마지막 날!
           </FinalCTASubtitle>
+          
+          {/* 최종 리드마그넷 어필 */}
+          <FinalLeadMagnet>
+            <FinalLeadMagnetTitle>🎁 지금 완료하시는 분께 특별 선물!</FinalLeadMagnetTitle>
+            <FinalLeadMagnetList>
+              <FinalLeadMagnetItem>📋 <strong>여행 준비 체크리스트</strong> - 가족 여행 필수품 완벽 정리</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>🎪 <strong>지역별 여름 행사 정보</strong> - 우리 동네 숨은 명소까지</FinalLeadMagnetItem>
+            </FinalLeadMagnetList>
+            <FinalLeadMagnetNote>* 테스트 완료 후 즉시 다운로드 가능합니다</FinalLeadMagnetNote>
+          </FinalLeadMagnet>
+          
           <FinalCTAButtonContainer>
             <CTAButton large onClick={handleStartTest}>
-              🚀 지금 바로 우리 가족 타입 확인하기!
+              🚀 지금 바로 내 여행 스타일 확인하고 선물받기!
             </CTAButton>
           </FinalCTAButtonContainer>
         </FinalCTASection>
       </ContentOverlay>
-      
-      {/* 마이크로 커밋먼트 컴포넌트 */}
-      {showMicroCommitment && (
-        <MicroCommitment 
-          onComplete={handleMicroCommitmentComplete}
-          onSurveyRedirect={handleSurveyRedirect}
-        />
-      )}
       
       {/* Exit Intent 팝업 */}
       {showExitIntent && (
@@ -421,14 +325,6 @@ const LandingPage: React.FC = () => {
           onClose={() => setShowExitIntent(false)}
         />
       )}
-
-      {/* 2단계 옵트인 모달 */}
-      <TwoStepOptinModal
-        isVisible={showOptinModal}
-        onClose={() => setShowOptinModal(false)}
-        onSubmit={handleOptinSubmit}
-        userType="탐험가형" // 실제로는 동적으로 설정
-      />
       
     </LandingContainer>
   );
@@ -759,6 +655,80 @@ const StoryAuthor = styled.div`
   }
 `;
 
+const LeadMagnetBanner = styled.div`
+  background: linear-gradient(135deg, #fff5cc, #ffe4b3);
+  border: 2px solid #ffa500;
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 10px 30px rgba(255, 165, 0, 0.2);
+  animation: subtle-pulse 3s ease-in-out infinite;
+  
+  @keyframes subtle-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+`;
+
+const LeadMagnetIcon = styled.div`
+  font-size: 3rem;
+  animation: bounce 2s infinite;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+`;
+
+const LeadMagnetContent = styled.div`
+  flex: 1;
+  text-align: left;
+  
+  @media (max-width: 768px) {
+    text-align: center;
+  }
+`;
+
+const LeadMagnetTitle = styled.div`
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 0.8rem;
+  
+  strong {
+    color: #ff6b6b;
+    font-weight: 800;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+`;
+
+const LeadMagnetItems = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const LeadMagnetItem = styled.div`
+  font-size: 1rem;
+  color: #555;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+`;
+
 const CTAButtonGroup = styled.div`
   display: flex;
   flex-direction: column;
@@ -902,45 +872,6 @@ const CenteredButtonContainer = styled.div`
 
 
 
-const MobileScrollHint = styled.div`
-  display: block;
-  text-align: center;
-  margin: 3rem 0 2rem 0;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
-  
-  @media (min-width: 769px) {
-    display: none;
-  }
-`;
-
-const MobileScrollText = styled.div`
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: white;
-  margin-bottom: 0.5rem;
-  animation: bounce 2s infinite;
-  
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-      transform: translateY(0);
-    }
-    40% {
-      transform: translateY(-10px);
-    }
-    60% {
-      transform: translateY(-5px);
-    }
-  }
-`;
-
-const MobileScrollSubtext = styled.div`
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-`;
 
 
 const CTAButton = styled.button<{ secondary?: boolean; large?: boolean }>`
@@ -1076,42 +1007,6 @@ const StoryText = styled.p`
   }
 `;
 
-const ComparisonGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin: 2rem 0;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const ComparisonCard = styled.div<{ success?: boolean }>`
-  background: ${props => props.success ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.15)'};
-  border: 1px solid ${props => props.success ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.3)'};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  backdrop-filter: blur(5px);
-`;
-
-const ComparisonTitle = styled.h3`
-  font-weight: 600;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-`;
-
-const ComparisonList = styled.ul`
-  list-style: disc;
-  margin-left: 1.25rem;
-  text-align: left;
-  display: inline-block;
-  
-  li {
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-  }
-`;
 
 const FeaturesSection = styled.section`
   padding: 4rem 1rem;
@@ -1255,97 +1150,6 @@ const FeatureDescription = styled.p`
   }
 `;
 
-const TestimonialSection = styled.section`
-  padding: 4rem 1rem;
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  
-  @media (max-width: 768px) {
-    padding: 3rem 1rem;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 2.5rem 1rem;
-  }
-`;
-
-const TestimonialGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  max-width: 60rem;
-  margin: 0 auto;
-`;
-
-const TestimonialCard = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  padding: 2rem;
-  text-align: center;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-  animation: slideInLeft 1s ease-out;
-  
-  &:hover {
-    transform: translateY(-5px) scale(1.02);
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-  }
-  
-  &:nth-child(odd) {
-    animation: slideInLeft 1s ease-out;
-  }
-  
-  &:nth-child(even) {
-    animation: slideInRight 1s ease-out;
-  }
-  
-  @keyframes slideInLeft {
-    0% { transform: translateX(-50px); opacity: 0; }
-    100% { transform: translateX(0); opacity: 1; }
-  }
-  
-  @keyframes slideInRight {
-    0% { transform: translateX(50px); opacity: 0; }
-    100% { transform: translateX(0); opacity: 1; }
-  }
-`;
-
-const TestimonialText = styled.blockquote`
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-  font-style: italic;
-  color: #2d3748;
-  
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-    line-height: 1.5;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 1.05rem;
-    line-height: 1.5;
-  }
-`;
-
-const TestimonialAuthor = styled.cite`
-  font-size: 0.9rem;
-  color: #718096;
-  
-  @media (max-width: 768px) {
-    font-size: 0.95rem;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 0.9rem;
-  }
-`;
 
 const FinalCTASection = styled.section`
   padding: 4rem 1rem;
@@ -1421,6 +1225,68 @@ const FinalCTAButtonContainer = styled.div`
   text-align: center;
 `;
 
+const FinalLeadMagnet = styled.div`
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border: 2px dashed #4caf50;
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 600px;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    margin: 1.5rem auto;
+  }
+`;
+
+const FinalLeadMagnetTitle = styled.h3`
+  font-size: 1.5rem;
+  color: #2e7d32;
+  margin-bottom: 1rem;
+  font-weight: 800;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+`;
+
+const FinalLeadMagnetList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  text-align: left;
+  
+  @media (max-width: 768px) {
+    text-align: center;
+  }
+`;
+
+const FinalLeadMagnetItem = styled.div`
+  font-size: 1.1rem;
+  color: #333;
+  
+  strong {
+    color: #388e3c;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+`;
+
+const FinalLeadMagnetNote = styled.p`
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+  margin-top: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+  }
+`;
+
 
 const HookingBadge = styled.div`
   background: linear-gradient(45deg, #ff6b6b, #ffa500);
@@ -1470,28 +1336,6 @@ const CuriosityHook = styled.div`
   }
 `;
 
-const TrustBadge = styled.div`
-  background: linear-gradient(45deg, #28a745, #20c997);
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  display: inline-block;
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
-  animation: glow 2s ease-in-out infinite alternate;
-  
-  @keyframes glow {
-    from { box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3); }
-    to { box-shadow: 0 6px 25px rgba(40, 167, 69, 0.6); }
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-  }
-`;
 
 const UrgencyBadge = styled.div`
   background: linear-gradient(45deg, #dc3545, #fd7e14);
