@@ -170,9 +170,8 @@ const LandingPage: React.FC = () => {
                 <LeadMagnetContent>
                   <LeadMagnetTitle>🚨 오늘만 <strong>100% 무료!</strong> (정가 19,900원)</LeadMagnetTitle>
                   <LeadMagnetItems>
-                    <LeadMagnetItem>📋 가족 여행 완벽 준비 체크리스트 (PDF 37페이지)</LeadMagnetItem>
-                    <LeadMagnetItem>🎪 2025 전국 어린이 축제 일정표 (지역별 정리)</LeadMagnetItem>
-                    <LeadMagnetItem>💰 가족 여행 예산 계산기 (엑셀 자동계산)</LeadMagnetItem>
+                    <LeadMagnetItem>📋 가족 여행 완벽 준비 체크리스트</LeadMagnetItem>
+                    <LeadMagnetItem>🎪 2025 여름방학 가족여행 축제 일정표 (광주/전남/전북/충남)</LeadMagnetItem>
                   </LeadMagnetItems>
                 </LeadMagnetContent>
               </LeadMagnetBanner>
@@ -180,7 +179,7 @@ const LandingPage: React.FC = () => {
               <CTAButtonGroup>
                 <PrimaryCTAButton onClick={handleStartTest}>
                   <ButtonText>🎁 19,900원 → 0원! 지금 받아가기</ButtonText>
-                  <ButtonSubtext>⏰ 1분 테스트 후 즉시 다운로드!</ButtonSubtext>
+                  <ButtonSubtext>⏰ 테스트 + 간단 설문 후 즉시 다운로드!</ButtonSubtext>
                 </PrimaryCTAButton>
                 <TrustIndicators>
                   <TrustItem>🔥 오늘 이미 847명이 받아감</TrustItem>
@@ -229,17 +228,16 @@ const LandingPage: React.FC = () => {
 
             <StoryText>
               <strong>📦 19,900원 상당 패키지 내용물:</strong><br />
-              ✅ 우리 가족 맞춤 여행 스타일 진단서 (8페이지)<br />
-              ✅ 빠짐없는 여행 준비 체크리스트 (37페이지 PDF)<br />
-              ✅ 2025 전국 축제 일정표 + 할인 쿠폰 모음<br />
-              ✅ 가족 여행 예산 자동계산 엑셀 파일<br />
+              ✅ 우리 가족 맞춤 여행 스타일 진단서<br />
+              ✅ 빠짐없는 여행 준비 체크리스트<br />
+              ✅ 2025 여름방학 가족여행 축제 일정표 (광주/전남/전북/충남)<br />
               <strong style={{color: '#ff6b6b'}}>⏰ 오늘 자정까지만 100% 무료!</strong>
             </StoryText>
 
 
             <CenteredButtonContainer>
               <CTAButton secondary onClick={handleStartTest}>
-                💸 19,900원 → 0원! 지금 당장 받기 →
+                💸 특별 선물 받으러 가기 →
               </CTAButton>
             </CenteredButtonContainer>
             
@@ -249,42 +247,42 @@ const LandingPage: React.FC = () => {
         {/* Features Section */}
         <FeaturesSection data-section="features">
           <CuriosityHook>
-            💸 19,900원 → 0원! 오늘 하루만!
+            💸 특별 선물이 기다리고 있어요!
           </CuriosityHook>
-          <SectionTitle>📦 패키지에 포함된 3가지 핵심 자료</SectionTitle>
+          <SectionTitle>🎁 특별한 선물을 준비했어요</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
-              <FeatureIcon>📋</FeatureIcon>
-              <FeatureTitle>체크리스트 PDF</FeatureTitle>
+              <FeatureIcon>🎁</FeatureIcon>
+              <FeatureTitle>특별 선물 1</FeatureTitle>
               <FeatureDescription>
-                37페이지 분량<br />
-                준비물 하나도 안 빠뜨려요<br />
-                <strong style={{color: '#ff6b6b'}}>정가 9,900원</strong>
+                우리 가족만을 위한<br />
+                맞춤형 여행 자료<br />
+                <strong style={{color: '#ff6b6b'}}>✨ 테스트 후 공개</strong>
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>🎪</FeatureIcon>
-              <FeatureTitle>2025 축제 일정표</FeatureTitle>
+              <FeatureIcon>🌟</FeatureIcon>
+              <FeatureTitle>특별 선물 2</FeatureTitle>
               <FeatureDescription>
-                전국 어린이 축제 총정리<br />
-                할인 쿠폰까지 포함!<br />
-                <strong style={{color: '#ff6b6b'}}>정가 5,000원</strong>
+                여행을 더 특별하게<br />
+                만들어줄 정보<br />
+                <strong style={{color: '#ff6b6b'}}>✨ 테스트 후 공개</strong>
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>💰</FeatureIcon>
-              <FeatureTitle>예산 계산기</FeatureTitle>
+              <FeatureIcon>🎯</FeatureIcon>
+              <FeatureTitle>특별 선물 3</FeatureTitle>
               <FeatureDescription>
-                엑셀 자동계산 파일<br />
-                숙박/교통/식비 한번에!<br />
-                <strong style={{color: '#ff6b6b'}}>정가 5,000원</strong>
+                가족 여행의 모든 것<br />
+                완벽한 준비를 위해<br />
+                <strong style={{color: '#ff6b6b'}}>✨ 테스트 후 공개</strong>
               </FeatureDescription>
             </FeatureCard>
           </FeatureGrid>
           
           <CenteredButtonContainer>
             <CTAButton onClick={handleStartTest}>
-              💎 총 19,900원 패키지 지금 무료로 받기!
+              💎 총 19,900원 패키지 지금 무료로 받기! (테스트+설문 완료시)
             </CTAButton>
           </CenteredButtonContainer>
 
@@ -306,21 +304,20 @@ const LandingPage: React.FC = () => {
           <FinalLeadMagnet>
             <FinalLeadMagnetTitle>💝 총 19,900원 상당 패키지 구성품</FinalLeadMagnetTitle>
             <FinalLeadMagnetList>
-              <FinalLeadMagnetItem>📋 <strong>가족여행 완벽 체크리스트</strong> (PDF 37페이지) - 정가 9,900원</FinalLeadMagnetItem>
-              <FinalLeadMagnetItem>🎪 <strong>2025 전국 축제 일정표</strong> (엑셀파일) - 정가 5,000원</FinalLeadMagnetItem>
-              <FinalLeadMagnetItem>💰 <strong>여행 예산 자동계산기</strong> (엑셀파일) - 정가 5,000원</FinalLeadMagnetItem>
-              <FinalLeadMagnetItem>🎯 <strong>우리 가족 여행 스타일 진단서</strong> (PDF 8페이지) - 보너스!</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>📋 <strong>가족여행 완벽 체크리스트</strong> - 정가 9,900원</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>🎪 <strong>2025 여름방학 가족여행 축제 일정표</strong> (광주/전남/전북/충남) - 정가 5,000원</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>🎯 <strong>우리 가족 여행 스타일 진단서</strong> - 정가 5,000원</FinalLeadMagnetItem>
             </FinalLeadMagnetList>
             <FinalLeadMagnetNote>
               <span style={{fontSize: '1.2rem', color: '#ff6b6b', fontWeight: 'bold'}}>
-                ⏰ 1분 테스트 완료 즉시 전체 패키지 다운로드!
+                ⏰ 테스트 + 간단한 설문 완료 후 전체 패키지 즉시 제공!
               </span>
             </FinalLeadMagnetNote>
           </FinalLeadMagnet>
           
           <FinalCTAButtonContainer>
             <CTAButton large onClick={handleStartTest}>
-              💝 19,900원 패키지 무료로 받기 (1분 완성!)
+              💝 19,900원 패키지 무료로 받기 (테스트+설문 완료시!)
             </CTAButton>
           </FinalCTAButtonContainer>
         </FinalCTASection>

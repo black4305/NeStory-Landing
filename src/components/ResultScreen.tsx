@@ -7,6 +7,8 @@ import { AxisScore } from '../types';
 import { travelTypes } from '../data/travelTypes';
 import { characters } from '../data/characters';
 import CharacterAvatar from './CharacterAvatar';
+import LeadMagnetModal from './LeadMagnetModal';
+import { SupabaseService } from '../services/supabase';
 
 const Container = styled.div`
   display: flex;
@@ -426,6 +428,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showLeadMagnetModal, setShowLeadMagnetModal] = useState(false);
   const resultCardRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   
@@ -448,7 +451,16 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
-    return () => clearTimeout(timer);
+    
+    // 결과 화면 로드 후 2초 후에 모달 표시
+    const modalTimer = setTimeout(() => {
+      setShowLeadMagnetModal(true);
+    }, 2000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(modalTimer);
+    };
   }, []);
 
 
@@ -479,6 +491,33 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
       alert('이미지 다운로드에 실패했습니다.');
     } finally {
       setIsDownloading(false);
+    }
+  };
+  
+  const handleLeadMagnetSubmit = async (data: { type: 'email' | 'kakao'; value: string; channelAdded?: boolean }) => {
+    try {
+      // Supabase에 리드 정보 저장
+      const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
+      await SupabaseService.saveLeadInfo({
+        visitId,
+        timestamp: Date.now(),
+        leadType: data.type,
+        leadValue: data.value,
+        channelAdded: data.channelAdded || false,
+        typeCode: typeCode,
+        userAgent: navigator.userAgent,
+        referrer: document.referrer
+      });
+      
+      // 모달 닫기
+      setShowLeadMagnetModal(false);
+      
+      // 다운로드 페이지로 이동 또는 자료 다운로드 시작
+      // 여기서는 간단히 알림만 표시
+      alert('🎉 감사합니다! 자료가 공 준비되면 보내드릴게요.');
+    } catch (error) {
+      console.error('리드 정보 저장 실패:', error);
+      alert('오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -722,6 +761,13 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           </Button>
         </ButtonGroup>
       </ResultCard>
+      
+      <LeadMagnetModal
+        isOpen={showLeadMagnetModal}
+        onClose={() => setShowLeadMagnetModal(false)}
+        onSubmit={handleLeadMagnetSubmit}
+        typeCode={typeCode}
+      />
     </Container>
   );
 };

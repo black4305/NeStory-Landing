@@ -9,7 +9,7 @@
 
 ## 🎯 2025-07-10 작업 내용
 
-### 완료된 작업
+### 완료된 작업 (오전)
 1. **랜딩페이지 하단 미니 설문 삭제**
    - MicroCommitment 컴포넌트 완전 제거
    - TwoStepOptinModal 컴포넌트 완전 제거
@@ -35,6 +35,25 @@
 5. **코드 정리 및 최적화**
    - 사용하지 않는 styled components 삭제
    - 불필요한 import 문 제거
+
+### 완료된 작업 (2025-07-10 17:00)
+6. **마케팅 동의 페이지 및 여행지 추천 기능 완전 제거**
+   - UserInfoForm.tsx: 마케팅 동의 관련 코드 모두 제거
+     - marketingConsent state 제거
+     - 마케팅 동의 체크박스 및 관련 UI 제거
+     - 제목 변경: "우리 지역 맞춤 여행지 알아보기" → "추가 정보 입력"
+   - ResultScreen.tsx: 여행지 추천 관련 기능 제거
+     - regionalRecommendations, getRecommendationsByType import 제거
+     - 지역별 여행지 추천 섹션 완전 제거
+     - hasMarketingConsent prop 및 관련 조건부 렌더링 제거
+   - App.tsx: hasMarketingConsent props 전달 코드 제거
+   - types/index.ts: marketingConsent 속성 추가 (기존 코드 호환성 유지)
+
+7. **랜딩페이지 메인 카피 및 리드마그넷 메시지 개선**
+   - 감정적 훅: "엄마, 이번 여행 왜 이렇게 재미없어?"
+   - 가치 제안: "19,900원 → 0원" 가격 강조
+   - 긴급성: "오늘 밤 12시 정각 종료" 시간 제한 명시
+   - 실시간 후기 추가로 신뢰성 강화
 
 ### 해야 할 작업
 1. **결과 페이지에 이메일/카카오톡 수집 모달 추가**
