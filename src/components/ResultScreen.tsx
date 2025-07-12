@@ -502,11 +502,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
         visitId,
         timestamp: Date.now(),
         leadType: data.type,
-        leadValue: data.value,
-        channelAdded: data.channelAdded || false,
-        typeCode: typeCode,
-        userAgent: navigator.userAgent,
-        referrer: document.referrer
+        email: data.type === 'email' ? data.value : undefined,
+        phone: data.type === 'kakao' ? data.value : undefined,
+        marketingConsent: data.channelAdded || false
       });
       
       // 모달 닫기

@@ -409,6 +409,37 @@ export class SupabaseService {
     return await this.getNestoryLandingUserData();
   }
 
+  // 리드 정보 저장 (팝업에서 사용)
+  static async saveLeadInfo(data: {
+    visitId: string;
+    timestamp: number;
+    leadType: string;
+    email?: string;
+    phone?: string;
+    marketingConsent: boolean;
+  }) {
+    try {
+      const { error } = await supabase.rpc('save_nestory_landing_lead_info', {
+        p_visit_id: data.visitId,
+        p_timestamp: data.timestamp,
+        p_lead_type: data.leadType,
+        p_email: data.email || null,
+        p_phone: data.phone || null,
+        p_marketing_consent: data.marketingConsent
+      });
+
+      if (error) {
+        console.error('리드 정보 저장 오류:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('리드 정보 저장 실패:', error);
+      return false;
+    }
+  }
+
   // 디바이스 타입 감지 헬퍼 함수
   private static getDeviceType(): 'mobile' | 'tablet' | 'desktop' {
     const width = window.innerWidth;
