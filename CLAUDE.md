@@ -2969,3 +2969,68 @@ border-radius: 3px 3px 0 0;
 - **완전한 모바일 반응형 디자인**
 - **안정적인 데이터베이스 및 분석 시스템**
 - **유연한 하이브리드 설문 연결 시스템**
+
+
+## 🎯 2025-07-12 작업 내용
+
+### 완료된 작업들
+
+#### 1. 빌드 에러 수정
+**문제**: `SupabaseService.saveLeadInfo` 메서드가 없어서 빌드 실패
+**해결**: 
+- `SupabaseService`에 `saveLeadInfo` 메서드 추가
+- `save_nestory_landing_lead_info` RPC 함수 생성 (Supabase SQL Editor에서 실행)
+- `ResultScreen.tsx`에서 호출 시 파라미터 형식 수정 (email/phone 분리)
+
+#### 2. 랜딩페이지 리드마그넷 통일 및 감정적 어필
+**기존 문제**: 
+- 가격(19,900원) 중심의 리드마그넷 어필
+- 상품이 통일되지 않음
+- 이성적 접근으로 감정 호소력 부족
+
+**개선 내용**:
+- **2가지 상품으로 통일**:
+  1. 📋 아이가 지루해하지 않는 여행 준비 체크리스트
+  2. 🎪 우리 지역 7-8월 가족 축제/행사 총정리
+- **감정적 메시지로 전환**:
+  - "비법 체크리스트 무료 공개!" → "단 2분 테스트로 알아보세요"
+  - "32,156명의 부모님이 이미 받아가신 특별 선물!" → "32,156명의 부모님이 이미 아이와 행복한 추억 만드는 중!"
+  - "19,900원 → 0원!" → "우리 가족은 어떤 여행 스타일일까?"
+- **실제 후기 스타일 변경**: 가격 언급 제거, 아이의 행복 중심 스토리
+
+#### 3. 결과 페이지 FOMO 방식 강화
+**LeadMagnetModal 개선**:
+- **제목**: "🚨 잠깐! 선물 받기를 놓치지 마세요!"
+- **경고 메시지**: "연락처를 입력하지 않으면 선물도, 맞춤 여행 계획도 받을 수 없어요!"
+- **닫기 버튼 2단계 경고**: 첫 클릭 시 "정말로 포기하시겠어요?" 경고 표시
+- **버튼 텍스트**: "선물 받고 맞춤 여행 계획 보러가기!"
+- **리드 수집 후 동작**: 2초 후 서베이 퍼널(https://nestory-survey.vercel.app)로 자동 이동
+
+#### 4. 기술적 구현 세부사항
+**save_nestory_landing_lead_info RPC 함수**:
+```sql
+CREATE OR REPLACE FUNCTION public.save_nestory_landing_lead_info(
+    p_visit_id text,
+    p_timestamp bigint,
+    p_lead_type text,
+    p_email text DEFAULT NULL,
+    p_phone text DEFAULT NULL,
+    p_marketing_consent boolean DEFAULT false
+)
+RETURNS uuid
+```
+- nestory_landing_analytics 테이블 활용하여 리드 정보 저장
+- user_agent 필드에 이메일/전화번호 저장
+- referrer 필드에 lead_type 저장
+- device_type 필드에 동의 상태 저장
+
+### 커밋 정보
+- **커밋 메시지**: "fix: 빌드 에러 수정 및 리드 수집 기능 개선"
+- **커밋 해시**: 5b65d27
+- **변경 파일**: 2개 (SupabaseService, ResultScreen)
+
+### 최종 상태
+- ✅ 빌드 성공 (362.92 kB)
+- ✅ 리드마그넷 감정적 어필로 전환
+- ✅ FOMO 방식 강화로 전환율 향상 기대
+- ✅ 서베이 퍼널과 자연스러운 연결

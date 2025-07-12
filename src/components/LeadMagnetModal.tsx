@@ -240,10 +240,27 @@ const SubmitButton = styled.button`
   }
 `;
 
+const WarningMessage = styled.div`
+  background: #fff5f5;
+  border: 2px solid #ff6b6b;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+  text-align: center;
+  
+  p {
+    margin: 0;
+    color: #c53030;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+`;
+
 const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSubmit, typeCode }) => {
   const [selectedOption, setSelectedOption] = useState<'email' | 'kakao' | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [channelAdded, setChannelAdded] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
 
   const handleSubmit = () => {
     if (!selectedOption || !inputValue.trim()) return;
@@ -255,6 +272,15 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
     });
   };
 
+  const handleClose = () => {
+    if (!showWarning) {
+      setShowWarning(true);
+      setTimeout(() => setShowWarning(false), 5000); // 5초 후 경고 메시지 숨김
+    } else {
+      onClose();
+    }
+  };
+
   const isValid = selectedOption && inputValue.trim() && (selectedOption !== 'kakao' || channelAdded);
 
   return (
@@ -264,7 +290,7 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onClick={handleClose}
         >
           <ModalContent
             initial={{ scale: 0.8, opacity: 0 }}
@@ -272,22 +298,22 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
             exit={{ scale: 0.8, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <CloseButton onClick={onClose}>✕</CloseButton>
+            <CloseButton onClick={handleClose}>✕</CloseButton>
             
-            <Title>🎁 {typeCode} 유형 맞춤 선물 받기!</Title>
+            <Title>🚨 잠깐! 선물 받기를 놓치지 마세요!</Title>
             <Subtitle>
-              테스트 완료를 축하드려요!<br/>
-              연락처를 남겨주시면 특별 선물을 보내드릴게요
+              지금까지 진행한 테스트가 아까우시지 않나요?<br/>
+              <span style={{color: '#ff6b6b', fontWeight: 700}}>연락처를 입력하지 않으면 선물도, 맞춤 여행 계획도 받을 수 없어요!</span>
             </Subtitle>
             
             <BenefitBox>
               <BenefitTitle>
-                🎉 <strong>총 19,900원 상당</strong> 무료 혜택!
+                💔 이 혜택들을 정말 포기하실 건가요?
               </BenefitTitle>
               <BenefitList>
-                <li>가족 여행 완벽 준비 체크리스트</li>
-                <li>2025 여름방학 가족여행 축제 일정표 (광주/전남/전북/충남)</li>
-                <li>우리 가족 여행 스타일 진단서</li>
+                <li>✨ {typeCode} 유형 아이가 좋아하는 여행 준비 체크리스트</li>
+                <li>🎪 우리 지역 7-8월 가족 축제/행사 할인 정보</li>
+                <li>🎯 개인별 맞춤 여행 계획 서비스 (서베이 퍼널 진입권)</li>
               </BenefitList>
             </BenefitBox>
             
@@ -340,9 +366,17 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
               )}
               
               <SubmitButton onClick={handleSubmit} disabled={!isValid}>
-                {isValid ? '🎁 무료 선물 받기!' : '정보를 입력해주세요'}
+                {isValid ? '🎁 선물 받고 맞춤 여행 계획 보러가기!' : '❌ 연락처를 입력해야 진행 가능해요'}
               </SubmitButton>
             </FormSection>
+            
+            {showWarning && (
+              <WarningMessage>
+                <p>⚠️ 정말로 포기하시겠어요?</p>
+                <p>지금까지의 테스트가 모두 무의미해집니다!</p>
+                <p>다시 한 번 X를 누르면 창이 닫힙니다.</p>
+              </WarningMessage>
+            )}
           </ModalContent>
         </ModalOverlay>
       )}

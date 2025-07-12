@@ -138,9 +138,9 @@ const LandingPage: React.FC = () => {
                 <MainTitle>
                   아이가 행복해하는<br />
                   <HighlightText>우리 가족 맞춤 여행</HighlightText><br />
-                  비법 체크리스트 무료 공개!
+                  단 2분 테스트로 알아보세요
                 </MainTitle>
-                <SubText>🔥 32,156명의 부모님이 이미 받아가신 특별 선물!</SubText>
+                <SubText>🔥 32,156명의 부모님이 이미 아이와 행복한 추억 만드는 중!</SubText>
               </motion.div>
             </MainHeadline>
             <motion.div
@@ -168,22 +168,22 @@ const LandingPage: React.FC = () => {
               <LeadMagnetBanner>
                 <LeadMagnetIcon>🎁</LeadMagnetIcon>
                 <LeadMagnetContent>
-                  <LeadMagnetTitle>🚨 오늘만 <strong>100% 무료!</strong> (정가 19,900원)</LeadMagnetTitle>
+                  <LeadMagnetTitle>💝 지금 테스트하면 <strong>특별 선물 2가지</strong> 드려요!</LeadMagnetTitle>
                   <LeadMagnetItems>
-                    <LeadMagnetItem>📋 가족 여행 완벽 준비 체크리스트</LeadMagnetItem>
-                    <LeadMagnetItem>🎪 2025 여름방학 가족여행 축제 일정표 (광주/전남/전북/충남)</LeadMagnetItem>
+                    <LeadMagnetItem>📋 아이가 지루해하지 않는 여행 준비 체크리스트</LeadMagnetItem>
+                    <LeadMagnetItem>🎪 우리 지역 7-8월 가족 축제/행사 총정리</LeadMagnetItem>
                   </LeadMagnetItems>
                 </LeadMagnetContent>
               </LeadMagnetBanner>
 
               <CTAButtonGroup>
                 <PrimaryCTAButton onClick={handleStartTest}>
-                  <ButtonText>🎁 19,900원 → 0원! 지금 받아가기</ButtonText>
-                  <ButtonSubtext>⏰ 테스트 + 간단 설문 후 즉시 다운로드!</ButtonSubtext>
+                  <ButtonText>우리 가족은 어떤 여행 스타일일까?</ButtonText>
+                  <ButtonSubtext>⏰ 2분 테스트로 확인하고 선물도 받기!</ButtonSubtext>
                 </PrimaryCTAButton>
                 <TrustIndicators>
-                  <TrustItem>🔥 오늘 이미 847명이 받아감</TrustItem>
-                  <TrustItem>⭐ "이거 정말 대박이에요!"</TrustItem>
+                  <TrustItem>🔥 오늘 이미 847가족이 행복 찾음</TrustItem>
+                  <TrustItem>⭐ "아이가 다음 여행 언제냐고 물어요!"</TrustItem>
                 </TrustIndicators>
                 
                 {/* 신뢰성 배지 */}
@@ -222,16 +222,15 @@ const LandingPage: React.FC = () => {
 
             <TestimonialBox>
               <TestimonialHeader>💬 어제 받으신 분 실시간 후기</TestimonialHeader>
-              <TestimonialContent>"헐... 이 체크리스트 대박이에요! 제가 평소에 놓치던 것들이 다 있네요. 여행용 구급약, 아이 멀미약, 여벌 속옷, 비닐봉지까지... 진짜 19,900원 주고 사도 아깝지 않은데 무료라니! 남편한테도 자랑했어요ㅋㅋ"</TestimonialContent>
+              <TestimonialContent>"정말 신기해요! 아이가 카시트 가사게 되었다고 휘호틱 타고 싶어하더니, 저희가 '아웃도어 모험가' 유형이래요. 처음엔 그런가 했는데 추천해준 휴휴트레일에서 아이가 세상 행복해하더라고요 ㅠㅠ"</TestimonialContent>
             </TestimonialBox>
 
 
             <StoryText>
-              <strong>📦 19,900원 상당 패키지 내용물:</strong><br />
-              ✅ 우리 가족 맞춤 여행 스타일 진단서<br />
-              ✅ 빠짐없는 여행 준비 체크리스트<br />
-              ✅ 2025 여름방학 가족여행 축제 일정표 (광주/전남/전북/충남)<br />
-              <strong style={{color: '#ff6b6b'}}>⏰ 오늘 자정까지만 100% 무료!</strong>
+              <strong>📝 2분 테스트 후 바로 받으실 수 있어요:</strong><br />
+              ✨ 아이가 "여행 재미없어"라고 말하지 않게 하는 체크리스트<br />
+              🎆 아이가 좋아하는 우리 지역 7-8월 축제/행사 총정리<br />
+              <strong style={{color: '#ff6b6b'}}>💖 테스트만 해도 무료로 드려요!</strong>
             </StoryText>
 
 
@@ -282,7 +281,7 @@ const LandingPage: React.FC = () => {
           
           <CenteredButtonContainer>
             <CTAButton onClick={handleStartTest}>
-              💎 총 19,900원 패키지 지금 무료로 받기! (테스트+설문 완료시)
+              💖 아이와 행복한 여행 만들기 시작하기
             </CTAButton>
           </CenteredButtonContainer>
 
@@ -294,30 +293,33 @@ const LandingPage: React.FC = () => {
           <UrgencyBadge>
             🔥 마감 임박! 오늘 밤 12시 정각 종료
           </UrgencyBadge>
-          <FinalCTATitle>😱 아직도 19,900원짜리를 안 받으셨어요?</FinalCTATitle>
+          <FinalCTATitle>🤔 아직도 우리 아이 여행 스타일을 모르시나요?</FinalCTATitle>
           <FinalCTASubtitle>
-            지금까지 32,156명이 받아간 베스트셀러 패키지<br />
-            <span style={{color: '#ff6b6b', fontWeight: 800}}>오늘이 정말 마지막 무료 배포일입니다!</span>
+            지금까지 32,156 가족이 행복한 여행 만들기 성공<br />
+            <span style={{color: '#ff6b6b', fontWeight: 800}}>단 2분 테스트로 우리 가족도 할 수 있어요!</span>
           </FinalCTASubtitle>
           
           {/* 최종 리드마그넷 어필 */}
           <FinalLeadMagnet>
-            <FinalLeadMagnetTitle>💝 총 19,900원 상당 패키지 구성품</FinalLeadMagnetTitle>
+            <FinalLeadMagnetTitle>💝 지금 테스트하면 받을 수 있는 2가지 선물</FinalLeadMagnetTitle>
             <FinalLeadMagnetList>
-              <FinalLeadMagnetItem>📋 <strong>가족여행 완벽 체크리스트</strong> - 정가 9,900원</FinalLeadMagnetItem>
-              <FinalLeadMagnetItem>🎪 <strong>2025 여름방학 가족여행 축제 일정표</strong> (광주/전남/전북/충남) - 정가 5,000원</FinalLeadMagnetItem>
-              <FinalLeadMagnetItem>🎯 <strong>우리 가족 여행 스타일 진단서</strong> - 정가 5,000원</FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>📋 <strong>아이가 지루해하지 않는 여행 준비 체크리스트</strong><br />
+                <span style={{fontSize: '0.9rem', color: '#666'}}>&nbsp;&nbsp;&nbsp;&nbsp;✓ 연령별 필수 준비물 / ✓ 차 안 놀이 도구 / ✓ 비상 상황 대비 리스트</span>
+              </FinalLeadMagnetItem>
+              <FinalLeadMagnetItem>🎪 <strong>우리 지역 7-8월 가족 축제/행사 총정리</strong><br />
+                <span style={{fontSize: '0.9rem', color: '#666'}}>&nbsp;&nbsp;&nbsp;&nbsp;✓ 아이가 좋아하는 체험 행사 / ✓ 입장료 할인 정보 / ✓ 주차 꿀팁</span>
+              </FinalLeadMagnetItem>
             </FinalLeadMagnetList>
             <FinalLeadMagnetNote>
               <span style={{fontSize: '1.2rem', color: '#ff6b6b', fontWeight: 'bold'}}>
-                ⏰ 테스트 + 간단한 설문 완료 후 전체 패키지 즉시 제공!
+                ⏰ 이 선물로 아이와의 여행이 180도 달라질 거예요!
               </span>
             </FinalLeadMagnetNote>
           </FinalLeadMagnet>
           
           <FinalCTAButtonContainer>
             <CTAButton large onClick={handleStartTest}>
-              💝 19,900원 패키지 무료로 받기 (테스트+설문 완료시!)
+              💝 우리 가족도 행복한 여행 만들기 (2분이면 충분해요!)
             </CTAButton>
           </FinalCTAButtonContainer>
         </FinalCTASection>
