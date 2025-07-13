@@ -351,15 +351,6 @@ interface QuestionCardProps {
   onBack?: () => void;
 }
 
-const getLikertOptions = () => {
-  return [
-    { value: 1, label: '전혀 그렇지 않다', emoji: '😟' },
-    { value: 2, label: '그렇지 않다', emoji: '😐' },
-    { value: 3, label: '보통이다', emoji: '😊' },
-    { value: 4, label: '그렇다', emoji: '😍' },
-    { value: 5, label: '매우 그렇다', emoji: '🤩' }
-  ];
-};
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
@@ -384,7 +375,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   const progress = (currentQuestion / totalQuestions) * 100;
-  const options = getLikertOptions();
 
   return (
     <Container>
@@ -425,18 +415,28 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           )}
           
           <OptionsContainer>
-            {options.map((option) => (
-              <OptionButton
-                key={option.value}
-                selected={selectedScore === option.value}
-                onClick={() => setSelectedScore(option.value)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span style={{ fontSize: '1.2rem' }}>{option.emoji}</span>
-                <span>{option.label}</span>
-              </OptionButton>
-            ))}
+            <OptionButton
+              key="A"
+              selected={selectedScore === 5}
+              isA={true}
+              onClick={() => setSelectedScore(5)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>A</span>
+              <span>{question.optionA}</span>
+            </OptionButton>
+            <OptionButton
+              key="B"
+              selected={selectedScore === 1}
+              isA={false}
+              onClick={() => setSelectedScore(1)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>B</span>
+              <span>{question.optionB}</span>
+            </OptionButton>
           </OptionsContainer>
           
           <ButtonGroup>
