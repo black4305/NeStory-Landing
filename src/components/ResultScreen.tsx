@@ -7,8 +7,6 @@ import { AxisScore } from '../types';
 import { travelTypes } from '../data/travelTypes';
 import { characters } from '../data/characters';
 import CharacterAvatar from './CharacterAvatar';
-import LeadMagnetModal from './LeadMagnetModal';
-import { SupabaseService } from '../services/supabase';
 
 const Container = styled.div`
   display: flex;
@@ -428,7 +426,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [showLeadMagnetModal, setShowLeadMagnetModal] = useState(false);
   const resultCardRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
   
@@ -452,14 +449,8 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
     
-    // 결과 화면 로드 후 2초 후에 모달 표시
-    const modalTimer = setTimeout(() => {
-      setShowLeadMagnetModal(true);
-    }, 2000);
-    
     return () => {
       clearTimeout(timer);
-      clearTimeout(modalTimer);
     };
   }, []);
 
@@ -491,34 +482,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
       alert('이미지 다운로드에 실패했습니다.');
     } finally {
       setIsDownloading(false);
-    }
-  };
-  
-  const handleLeadMagnetSubmit = async (data: { type: 'email' | 'kakao'; value: string; channelAdded?: boolean }) => {
-    try {
-      // Supabase에 리드 정보 저장
-      const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
-      await SupabaseService.saveLeadInfo({
-        visitId,
-        timestamp: Date.now(),
-        leadType: data.type,
-        email: data.type === 'email' ? data.value : undefined,
-        phone: data.type === 'kakao' ? data.value : undefined,
-        marketingConsent: data.channelAdded || false
-      });
-      
-      // 모달 닫기
-      setShowLeadMagnetModal(false);
-      
-      // 서베이 퍼널로 리다이렉트
-      alert('🎉 감사합니다! 잠시 후 맞춤 여행 계획 페이지로 이동합니다.');
-      
-      setTimeout(() => {
-        window.location.href = 'https://nestory-survey.vercel.app';
-      }, 2000);
-    } catch (error) {
-      console.error('리드 정보 저장 실패:', error);
-      alert('오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -715,11 +678,20 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                   여행 중 후회하지 않도록<br/>
                   <span style={{ color: '#fff3cd' }}>경험자들이 직접 만든 완벽한 준비물 리스트</span>
                 </div>
-                <div style={{ fontSize: '0.85rem', lineHeight: '1.5', opacity: '0.9', textAlign: 'left' }}>
-                  ✓ 연령별 맞춤 준비물 (영유아/초등/중고등)<br/>
-                  ✓ 놓치기 쉬운 필수템 50가지<br/>
-                  ✓ 비상 상황 대비 체크리스트<br/>
-                  ✓ 가족 여행 꿀팁 모음
+                <div style={{ 
+                  fontSize: '0.85rem', 
+                  lineHeight: '1.5', 
+                  opacity: '0.9', 
+                  textAlign: 'center',
+                  display: 'inline-block',
+                  margin: '0 auto'
+                }}>
+                  <div style={{ textAlign: 'left', display: 'inline-block' }}>
+                    ✓ 연령별 맞춤 준비물 (영유아/초등/중고등)<br/>
+                    ✓ 놓치기 쉬운 필수템 50가지<br/>
+                    ✓ 비상 상황 대비 체크리스트<br/>
+                    ✓ 가족 여행 꿀팁 모음
+                  </div>
                 </div>
               </div>
             </div>
@@ -727,32 +699,40 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
             <div style={{ textAlign: 'center' }}>
               <Button
                 style={{ 
-                  background: 'linear-gradient(45deg, #28a745, #20c997)',
-                  fontSize: '1.1rem',
+                  background: 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
+                  fontSize: '1rem',
                   fontWeight: '700',
-                  padding: '1.2rem 2.5rem',
-                  boxShadow: '0 8px 25px rgba(40, 167, 69, 0.4)',
-                  border: 'none',
-                  borderRadius: '50px',
-                  color: 'white',
+                  padding: '1rem 2rem',
+                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                  border: '2px solid #28a745',
+                  borderRadius: '12px',
+                  color: '#28a745',
                   cursor: 'pointer',
-                  animation: 'pulse 2s ease-in-out infinite'
+                  transition: 'all 0.3s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
                 }}
                 onClick={() => window.open('https://nestory-survey.vercel.app', '_blank')}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#28a745';
+                  e.currentTarget.style.color = 'white';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(40, 167, 69, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)';
+                  e.currentTarget.style.color = '#28a745';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
+                }}
               >
-🌟 체크리스트 받고 여행 준비 완벽하게! 🌟
+                <span>📋</span>
+                <span style={{ fontWeight: '600' }}>체크리스트 받기</span>
+                <span>→</span>
               </Button>
-              
-              <div style={{ 
-                fontSize: '0.8rem', 
-                marginTop: '1rem', 
-                opacity: '0.9',
-                fontStyle: 'italic'
-              }}>
-                ⏰ 선착순 100명 한정! 지금 바로 신청하세요
-              </div>
             </div>
           </div>
         </RecommendationSection>
@@ -768,13 +748,6 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           </Button>
         </ButtonGroup>
       </ResultCard>
-      
-      <LeadMagnetModal
-        isOpen={showLeadMagnetModal}
-        onClose={() => setShowLeadMagnetModal(false)}
-        onSubmit={handleLeadMagnetSubmit}
-        typeCode={typeCode}
-      />
     </Container>
   );
 };

@@ -6,6 +6,7 @@ import StartScreen from './components/StartScreen';
 import PreTestPage from './components/PreTestPage';
 import QuestionCard from './components/QuestionCard';
 import ResultScreen from './components/ResultScreen';
+import LeadMagnetPage from './components/LeadMagnetPage';
 import AdminLogin from './components/AdminLogin';
 import EnhancedAdminDashboard from './components/EnhancedAdminDashboard';
 import AllTypesScreen from './components/AllTypesScreen';
@@ -86,7 +87,7 @@ const AppContainer = styled.div`
   position: relative;
 `;
 
-type AppState = 'start' | 'pretest' | 'survey' | 'result';
+type AppState = 'start' | 'pretest' | 'survey' | 'leadmagnet' | 'result';
 
 // 관리자 인증 상태 관리
 const AdminRoute: React.FC = () => {
@@ -157,7 +158,7 @@ const SurveyApp: React.FC = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // 모든 질문 완료 - 사용자 정보 입력으로 이동
+      // 모든 질문 완료 - 리드 마그넷 페이지로 이동
       const typeCode = calculateTravelType(newAnswers);
       const axisScores = getAxisScores(newAnswers);
       
@@ -173,10 +174,7 @@ const SurveyApp: React.FC = () => {
         analytics: analyticsData
       });
       
-      // Track completion without user info since we're skipping that step
-      await analytics.trackCompletion(typeCode);
-      
-      setAppState('result');
+      setAppState('leadmagnet');
     }
   };
 
@@ -189,6 +187,14 @@ const SurveyApp: React.FC = () => {
     }
   };
 
+  const handleLeadMagnetComplete = async () => {
+    // Track completion
+    if (result) {
+      await analytics.trackCompletion(result.typeCode);
+    }
+    
+    setAppState('result');
+  };
 
   const handleRestart = () => {
     setAppState('pretest');
@@ -217,6 +223,12 @@ const SurveyApp: React.FC = () => {
         />
       )}
       
+      {appState === 'leadmagnet' && result && (
+        <LeadMagnetPage
+          onComplete={handleLeadMagnetComplete}
+          typeCode={result.typeCode}
+        />
+      )}
       
       {appState === 'result' && result && (
         <ResultScreen
