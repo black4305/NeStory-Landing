@@ -149,34 +149,30 @@ const Input = styled.input`
   }
 `;
 
-const KakaoChannelBox = styled.div`
+const KakaoChannelButton = styled.button`
   background: #fee500;
+  border: none;
   border-radius: 12px;
   padding: 1rem;
   margin-top: 1rem;
+  width: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-`;
-
-const Checkbox = styled.input`
-  width: 20px;
-  height: 20px;
   cursor: pointer;
-`;
-
-const CheckboxLabel = styled.label`
   font-size: 0.95rem;
-  color: #333;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-weight: 600;
+  color: #3a1d1d;
+  transition: all 0.3s ease;
   
-  strong {
-    color: #3a1d1d;
+  &:hover {
+    background: #fada0a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(254, 229, 0, 0.3);
   }
 `;
+
 
 const SubmitButton = styled(motion.button)`
   width: 100%;
@@ -314,17 +310,15 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
               />
               
               {selectedOption === 'kakao' && (
-                <KakaoChannelBox>
-                  <Checkbox
-                    type="checkbox"
-                    id="channelAdd"
-                    checked={channelAdded}
-                    onChange={(e) => setChannelAdded(e.target.checked)}
-                  />
-                  <CheckboxLabel htmlFor="channelAdd">
-                    <strong>카카오톡 채널 친구추가</strong> (필수)
-                  </CheckboxLabel>
-                </KakaoChannelBox>
+                <KakaoChannelButton
+                  onClick={() => {
+                    window.open('http://pf.kakao.com/_YJtTn', '_blank');
+                    setChannelAdded(true);
+                  }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>💬</span>
+                  <span>카카오톡 채널 친구추가 {channelAdded ? '✓' : '(필수)'}</span>
+                </KakaoChannelButton>
               )}
             </InputSection>
           )}
