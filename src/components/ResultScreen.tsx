@@ -715,7 +715,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                   여행 중 후회하지 않도록<br/>
                   <span style={{ color: '#fff3cd' }}>경험자들이 직접 만든 완벽한 준비물 리스트</span>
                 </div>
-                <div style={{ fontSize: '0.85rem', lineHeight: '1.5', opacity: '0.9' }}>
+                <div style={{ fontSize: '0.85rem', lineHeight: '1.5', opacity: '0.9', textAlign: 'left' }}>
                   ✓ 연령별 맞춤 준비물 (영유아/초등/중고등)<br/>
                   ✓ 놓치기 쉬운 필수템 50가지<br/>
                   ✓ 비상 상황 대비 체크리스트<br/>
@@ -742,7 +742,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-🌟 완벽한 맞춤 여행 계획 무료로 받기 🌟
+🌟 체크리스트 받고 여행 준비 완벽하게! 🌟
               </Button>
               
               <div style={{ 

@@ -394,7 +394,7 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
           >
             <CloseButton onClick={handleClose}>✕</CloseButton>
             
-            <Title>{showWarning ? '🚨 잠깐! 선물 받기를 놓치지 마세요!' : typeContent.headline}</Title>
+            <Title>{showWarning ? '🚨 잠깐! 선물 받기를 놓치지 마세요!' : '두근두근... 우리 가족의 여행 유형을 분석하고 있습니다!'}</Title>
             <Subtitle>
               {showWarning ? (
                 <>
@@ -403,21 +403,27 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
                 </>
               ) : (
                 <>
-                  {typeContent.typeName} 유형 분석 완료!<br/>
-                  <span style={{color: '#667eea', fontWeight: 700}}>{typeContent.description}</span>
+                  분석이 거의 다 끝났어요!<br/>
+                  <span style={{color: '#667eea', fontWeight: 700}}>8가지 여행 유형 중 우리 가족의 유형은 무엇일까요?</span>
                 </>
               )}
             </Subtitle>
             
             <BenefitBox>
               <BenefitTitle>
-                {showWarning ? '💔 이 혜택들을 정말 포기하실 건가요?' : '🎯 지금 받을 수 있는 혜택'}
+                {showWarning ? '💔 이 혜택들을 정말 포기하실 건가요?' : '지금 결과를 확인하시면, 우리 가족 유형에 대한 상세 분석과 함께'}
               </BenefitTitle>
-              <BenefitList>
-                <li>{typeContent.benefit}</li>
-                <li>📍 광주, 전남, 전북, 충남 지역 특화 정보</li>
-                <li>🎯 개인별 맞춤 여행 계획 서비스 (서베이 퍼널 진입권)</li>
-              </BenefitList>
+              <div style={{ fontSize: '1rem', color: '#667eea', fontWeight: 700, marginBottom: '1rem' }}>
+                [2025 여름 여행지/축제 완전 정복 가이드]도 함께 보내드릴게요.
+              </div>
+              <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                분석 결과가 사라지지 않게, 그리고 보너스 가이드북을 놓치지 않도록<br/>
+                아래에 가장 자주 쓰는 연락처를 남겨주세요.
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#888' }}>
+                버튼을 누르는 즉시 결과 페이지로 이동하며,<br/>
+                가이드북은 이메일 또는 카카오톡으로 자동 발송됩니다.
+              </div>
             </BenefitBox>
             
             <FormSection>
@@ -469,7 +475,7 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
               )}
               
               <SubmitButton onClick={handleSubmit} disabled={!isValid}>
-                {isValid ? `🎁 ${typeContent.buttonText}` : '📝 연락처를 입력해주세요'}
+                {isValid ? '🎁 내 여행 유형 결과 확인하고, 무료 가이드북 받기!' : '📝 연락처를 입력해주세요'}
               </SubmitButton>
             </FormSection>
             
