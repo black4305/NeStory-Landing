@@ -669,7 +669,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           
           <div style={{ position: 'relative', zIndex: 1 }}>
             <RecommendationTitle style={{ color: 'white', fontSize: '1.5rem', marginBottom: '1.5rem' }}>
-              🎯 ${typeCode} 유형만을 위한 특별 혜택!
+              💔 이대로 떠나시면... 정말 괜찮으신가요?
             </RecommendationTitle>
             
             <div style={{ 
@@ -683,8 +683,10 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 marginBottom: '1rem',
                 textShadow: '0 2px 4px rgba(0,0,0,0.3)'
               }}>
-                🎯 당신 가족만을 위한<br/>
-                <span style={{ fontSize: '1.5rem', color: '#fff3cd' }}>개인 맞춤 여행 계획</span>을 제작해드립니다!
+                "엄마, 우리 언제 또 여행가?"<br/>
+                <span style={{ fontSize: '1.1rem', color: '#fff3cd', fontWeight: 'normal' }}>
+                  아이의 이 한마디에 가슴이 뭉클하셨나요?
+                </span>
               </div>
               
               <div style={{ 
@@ -693,8 +695,8 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 marginBottom: '1.5rem',
                 opacity: '0.95'
               }}>
-                💫 일반적인 추천이 아닌, <strong>오직 당신 가족만</strong>을 위한<br/>
-                세상에 단 하나뿐인 맞춤형 여행 일정을 만들어드려요!
+                매번 계획만 세우다 흐지부지되는 가족여행...<br/>
+                <strong>이번만큼은 다르게 만들어드릴게요!</strong>
               </div>
               
               <div style={{
@@ -705,15 +707,19 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(255, 255, 255, 0.3)'
               }}>
-                <div style={{ fontSize: '0.95rem', marginBottom: '1rem', fontWeight: '600' }}>
-                  🎁 지금 신청하면 무료로 받을 수 있어요!
+                <div style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: '700' }}>
+                  🎁 가족 여행 준비 100점 체크리스트
                 </div>
-                <div style={{ fontSize: '0.85rem', lineHeight: '1.5' }}>
-                  ✅ {typeCode} 유형 특화 명소 추천 (맞춤 명소 수십 곳)<br/>
-                  ✅ 가족 구성원별 맞춤 액티비티 & 체험 프로그램<br/>
-                  ✅ 실제 이동 경로 및 시간별 상세 일정표<br/>
-                  ✅ 숨은 맛집 & 인스타 포토스팟 정보<br/>
-                  ✅ 예산별 숙박 및 교통수단 추천
+                <div style={{ fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1rem' }}>
+                  <strong>"아... 이것까지 챙겨야 했구나!"</strong><br/>
+                  여행 중 후회하지 않도록<br/>
+                  <span style={{ color: '#fff3cd' }}>경험자들이 직접 만든 완벽한 준비물 리스트</span>
+                </div>
+                <div style={{ fontSize: '0.85rem', lineHeight: '1.5', opacity: '0.9' }}>
+                  ✓ 연령별 맞춤 준비물 (영유아/초등/중고등)<br/>
+                  ✓ 놓치기 쉬운 필수템 50가지<br/>
+                  ✓ 비상 상황 대비 체크리스트<br/>
+                  ✓ 가족 여행 꿀팁 모음
                 </div>
               </div>
             </div>

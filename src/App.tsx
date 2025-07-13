@@ -6,8 +6,6 @@ import StartScreen from './components/StartScreen';
 import PreTestPage from './components/PreTestPage';
 import QuestionCard from './components/QuestionCard';
 import ResultScreen from './components/ResultScreen';
-import UserInfoForm from './components/UserInfoForm';
-import ThankYouScreen from './components/ThankYouScreen';
 import AdminLogin from './components/AdminLogin';
 import EnhancedAdminDashboard from './components/EnhancedAdminDashboard';
 import AllTypesScreen from './components/AllTypesScreen';
@@ -15,7 +13,7 @@ import LandingPage from './components/LandingPage';
 import { questions } from './data/questions';
 import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
-import { Answer, UserInfo } from './types';
+import { Answer } from './types';
 
 
 const GlobalStyle = createGlobalStyle`
@@ -88,7 +86,7 @@ const AppContainer = styled.div`
   position: relative;
 `;
 
-type AppState = 'start' | 'pretest' | 'survey' | 'userInfo' | 'thankYou' | 'result';
+type AppState = 'start' | 'pretest' | 'survey' | 'result';
 
 // 관리자 인증 상태 관리
 const AdminRoute: React.FC = () => {
@@ -120,7 +118,6 @@ const SurveyApp: React.FC = () => {
     axisScores: any;
     analytics: any;
   } | null>(null);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
     // 페이지 이탈 시 분석 데이터 전송
@@ -144,7 +141,7 @@ const SurveyApp: React.FC = () => {
     setAppState('start');
   };
 
-  const handleAnswer = (score: number, timeSpent: number) => {
+  const handleAnswer = async (score: number, timeSpent: number) => {
     const currentQuestion = questions[currentQuestionIndex];
     const newAnswer: Answer = {
       questionId: currentQuestion.id,
@@ -176,7 +173,10 @@ const SurveyApp: React.FC = () => {
         analytics: analyticsData
       });
       
-      setAppState('userInfo');
+      // Track completion without user info since we're skipping that step
+      await analytics.trackCompletion(typeCode);
+      
+      setAppState('result');
     }
   };
 
@@ -189,31 +189,12 @@ const SurveyApp: React.FC = () => {
     }
   };
 
-  const handleUserInfoSubmit = async (info: UserInfo) => {
-    setUserInfo(info);
-    if (result) {
-      await analytics.trackCompletion(result.typeCode, info);
-    }
-    setAppState('thankYou');
-  };
-
-  const handleSkipUserInfo = async () => {
-    if (result) {
-      await analytics.trackCompletion(result.typeCode);
-    }
-    setAppState('thankYou');
-  };
-
-  const handleThankYouComplete = () => {
-    setAppState('result');
-  };
 
   const handleRestart = () => {
     setAppState('pretest');
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setResult(null);
-    setUserInfo(null);
   };
 
   return (
@@ -236,19 +217,6 @@ const SurveyApp: React.FC = () => {
         />
       )}
       
-      {appState === 'userInfo' && (
-        <UserInfoForm
-          onSubmit={handleUserInfoSubmit}
-          onSkip={handleSkipUserInfo}
-        />
-      )}
-      
-      {appState === 'thankYou' && (
-        <ThankYouScreen
-          userName={userInfo?.name}
-          onComplete={handleThankYouComplete}
-        />
-      )}
       
       {appState === 'result' && result && (
         <ResultScreen
@@ -256,7 +224,6 @@ const SurveyApp: React.FC = () => {
           axisScores={result.axisScores}
           analytics={result.analytics}
           onRestart={handleRestart}
-          userRegion={userInfo?.region}
         />
       )}
     </>

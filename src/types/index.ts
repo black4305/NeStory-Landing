@@ -4,6 +4,8 @@ export interface Question {
   description?: string; // 밸런스 게임용 상세 설명
   axis: 'A' | 'C' | 'F';
   isReverse?: boolean;
+  optionA?: string; // A/B 선택형 옵션 A
+  optionB?: string; // A/B 선택형 옵션 B
 }
 
 export interface Answer {

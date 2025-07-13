@@ -134,13 +134,12 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <EmotionalHook>"엄마, 이번 여행 왜 이렇게 재미없어?"</EmotionalHook>
+                <EmotionalHook>여행만 가면 싸우는 우리 가족,</EmotionalHook>
                 <MainTitle>
-                  아이가 행복해하는<br />
-                  <HighlightText>우리 가족 맞춤 여행</HighlightText><br />
-                  단 2분 테스트로 알아보세요
+                  혹시 <HighlightText>'여행 스타일'이 안 맞아서</HighlightText><br />
+                  아닐까요?
                 </MainTitle>
-                <SubText>🔥 32,156명의 부모님이 이미 아이와 행복한 추억 만드는 중!</SubText>
+                <SubText>단 10개의 질문으로 우리 가족의 숨은 여행 궁합을 찾아보세요.<br />서로의 성향만 알아도 여행 계획이 3배 더 쉬워집니다.</SubText>
               </motion.div>
             </MainHeadline>
             <motion.div
@@ -151,11 +150,11 @@ const LandingPage: React.FC = () => {
               <EmotionalBenefits>
                 <BenefitItem>
                   <BenefitEmoji>😍</BenefitEmoji>
-                  <BenefitText>"아이들이 계속 웃는 여행 루트"</BenefitText>
+                  <BenefitText>"나에게 딱 맞는 여행 코스 추천"</BenefitText>
                 </BenefitItem>
                 <BenefitItem>
                   <BenefitEmoji>🎁</BenefitEmoji>
-                  <BenefitText>"준비물 하나도 안 빠뜨리는 체크리스트"</BenefitText>
+                  <BenefitText>"여행 준비부터 일정까지 한 번에"</BenefitText>
                 </BenefitItem>
               </EmotionalBenefits>
             </motion.div>
@@ -168,22 +167,22 @@ const LandingPage: React.FC = () => {
               <LeadMagnetBanner>
                 <LeadMagnetIcon>🎁</LeadMagnetIcon>
                 <LeadMagnetContent>
-                  <LeadMagnetTitle>💝 지금 테스트하면 <strong>특별 선물 2가지</strong> 드려요!</LeadMagnetTitle>
+                  <LeadMagnetTitle>💝 지금 테스트하면 <strong>특별 선물</strong> 드려요!</LeadMagnetTitle>
                   <LeadMagnetItems>
-                    <LeadMagnetItem>📋 아이가 지루해하지 않는 여행 준비 체크리스트</LeadMagnetItem>
-                    <LeadMagnetItem>🎪 우리 지역 7-8월 가족 축제/행사 총정리</LeadMagnetItem>
+                    <LeadMagnetItem>🎪 가족과 함께! 2025 여름 가족여행 완전 정복 가이드</LeadMagnetItem>
+                    <LeadMagnetItem style={{fontSize: '0.9rem', color: '#666'}}>※ 광주, 전남, 전북, 충남 지역 한정</LeadMagnetItem>
                   </LeadMagnetItems>
                 </LeadMagnetContent>
               </LeadMagnetBanner>
 
               <CTAButtonGroup>
                 <PrimaryCTAButton onClick={handleStartTest}>
-                  <ButtonText>우리 가족은 어떤 여행 스타일일까?</ButtonText>
-                  <ButtonSubtext>⏰ 2분 테스트로 확인하고 선물도 받기!</ButtonSubtext>
+                  <ButtonText>우리 가족 여행 유형, 무료로 진단하기</ButtonText>
+                  <ButtonSubtext>⏰ 단 2분! 서로를 이해하는 첫걸음</ButtonSubtext>
                 </PrimaryCTAButton>
                 <TrustIndicators>
-                  <TrustItem>🔥 오늘 이미 847가족이 행복 찾음</TrustItem>
-                  <TrustItem>⭐ "아이가 다음 여행 언제냐고 물어요!"</TrustItem>
+                  <TrustItem>🔥 오늘 이미 847명이 참여</TrustItem>
+                  <TrustItem>⭐ "내 스타일을 정확히 알아맞췄!"</TrustItem>
                 </TrustIndicators>
                 
                 {/* 신뢰성 배지 */}
@@ -216,21 +215,21 @@ const LandingPage: React.FC = () => {
             </SolutionSection>
             
             <EmotionalStory>
-              <StoryQuote>"이 체크리스트 진짜 신의 한 수였어요! 비상약, 여벌옷, 아이들 간식까지... 하나도 안 빠뜨리고 다 챙겼더니 여행이 이렇게 편할 수가! 남편이 '당신 천재야?'라고 했어요ㅋㅋ"</StoryQuote>
-              <StoryAuthor>- 8살, 6살 자매 엄마 김○○님 (부산)</StoryAuthor>
+              <StoryQuote>"그러다 우연히 <strong>'가족 여행 스타일 테스트'</strong>를 해보게 되었어요. 저는 '충분한 휴식'을 원하는 <strong>힐링형(R)</strong>인데, 남편은 '다양한 체험'을 중시하는 <strong>활동형(A)</strong>이라는 걸 처음 알게 된 거죠. 그 후로는 서로의 성향을 존중하며 계획을 짜니, 신기하게 다툼이 사라졌어요. "이번엔 아빠가 좋아하는 액티비티 했으니, 내일은 엄마랑 예쁜 카페 가서 쉬자!" 같은 대화가 가능해졌죠."</StoryQuote>
+              <StoryAuthor>- 두 아이의 엄마 박○○님 (광주)</StoryAuthor>
             </EmotionalStory>
 
             <TestimonialBox>
               <TestimonialHeader>💬 어제 받으신 분 실시간 후기</TestimonialHeader>
-              <TestimonialContent>"정말 신기해요! 아이가 카시트 가사게 되었다고 휘호틱 타고 싶어하더니, 저희가 '아웃도어 모험가' 유형이래요. 처음엔 그런가 했는데 추천해준 휴휴트레일에서 아이가 세상 행복해하더라고요 ㅠㅠ"</TestimonialContent>
+              <TestimonialContent>"우리 가족이 '도시 미식 탐험가' 유형이래요. 남편은 활동적이고 저는 휴식파인데, 맛집이라는 공통점을 찾았어요! 이제는 서로 좋아하는 걸 번갈아가며 계획 짜니까 여행이 훨씬 즐거워졌어요."</TestimonialContent>
             </TestimonialBox>
 
 
             <StoryText>
               <strong>📝 2분 테스트 후 바로 받으실 수 있어요:</strong><br />
-              ✨ 아이가 "여행 재미없어"라고 말하지 않게 하는 체크리스트<br />
-              🎆 아이가 좋아하는 우리 지역 7-8월 축제/행사 총정리<br />
-              <strong style={{color: '#ff6b6b'}}>💖 테스트만 해도 무료로 드려요!</strong>
+              ✨ 나만의 여행 스타일 분석 결과<br />
+              🎆 가족과 함께! 2025 여름 가족여행 완전 정복 가이드<br />
+              <strong style={{color: '#ff6b6b'}}>💖 8/31까지만 특별 혜택 제공!</strong>
             </StoryText>
 
 
@@ -248,40 +247,46 @@ const LandingPage: React.FC = () => {
           <CuriosityHook>
             💸 특별 선물이 기다리고 있어요!
           </CuriosityHook>
-          <SectionTitle>🎁 특별한 선물을 준비했어요</SectionTitle>
+          <SectionTitle>테스트를 마치면, 이런 결과를 받게 돼요!</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
-              <FeatureIcon>🎁</FeatureIcon>
-              <FeatureTitle>특별 선물 1</FeatureTitle>
-              <FeatureDescription>
-                우리 가족만을 위한<br />
-                맞춤형 여행 자료<br />
-                <strong style={{color: '#ff6b6b'}}>✨ 테스트 후 공개</strong>
-              </FeatureDescription>
-            </FeatureCard>
-            <FeatureCard>
-              <FeatureIcon>🌟</FeatureIcon>
-              <FeatureTitle>특별 선물 2</FeatureTitle>
-              <FeatureDescription>
-                여행을 더 특별하게<br />
-                만들어줄 정보<br />
-                <strong style={{color: '#ff6b6b'}}>✨ 테스트 후 공개</strong>
-              </FeatureDescription>
-            </FeatureCard>
-            <FeatureCard>
               <FeatureIcon>🎯</FeatureIcon>
-              <FeatureTitle>특별 선물 3</FeatureTitle>
+              <FeatureTitle>나의 유형 확인</FeatureTitle>
               <FeatureDescription>
-                가족 여행의 모든 것<br />
-                완벽한 준비를 위해<br />
-                <strong style={{color: '#ff6b6b'}}>✨ 테스트 후 공개</strong>
+                [8가지 유형 중 우리 가족 유형 확인]<br />
+                활동형일까? 휴식형일까?<br />
+                8가지 유형 중 우리 가족은<br />
+                어디에 속하는지, 귀여운 캐릭터와<br />
+                함께 결과를 확인하세요.
+              </FeatureDescription>
+            </FeatureCard>
+            <FeatureCard>
+              <FeatureIcon>📖</FeatureIcon>
+              <FeatureTitle>맞춤 상세 설명</FeatureTitle>
+              <FeatureDescription>
+                [유형별 상세 행동 패턴 및 추천 여행 스타일]<br />
+                왜 우리 가족이 여행지에서<br />
+                그런 행동을 했는지, 서로를<br />
+                이해하게 되는 상세한 설명을<br />
+                읽어보세요.
+              </FeatureDescription>
+            </FeatureCard>
+            <FeatureCard>
+              <FeatureIcon>💝</FeatureIcon>
+              <FeatureTitle>정직한 개인화 혜택 예고</FeatureTitle>
+              <FeatureDescription>
+                [내 유형을 위한 '여름 여행 가이드' 활용 꿀팁 제공]<br />
+                테스트 참여자 전원에게 드리는<br />
+                '여름 여행 가이드'를, 나의 여행<br />
+                스타일에 맞춰 200% 활용할 수<br />
+                있는 특별한 꿀팁을 함께 알려드립니다.
               </FeatureDescription>
             </FeatureCard>
           </FeatureGrid>
           
           <CenteredButtonContainer>
             <CTAButton onClick={handleStartTest}>
-              💖 아이와 행복한 여행 만들기 시작하기
+              💖 우리 가족 여행 유형 테스트 시작하기
             </CTAButton>
           </CenteredButtonContainer>
 
@@ -293,33 +298,32 @@ const LandingPage: React.FC = () => {
           <UrgencyBadge>
             🔥 마감 임박! 오늘 밤 12시 정각 종료
           </UrgencyBadge>
-          <FinalCTATitle>🤔 아직도 우리 아이 여행 스타일을 모르시나요?</FinalCTATitle>
+          <FinalCTATitle>🤔 아직도 내 여행 스타일을 모르시나요?</FinalCTATitle>
           <FinalCTASubtitle>
-            지금까지 32,156 가족이 행복한 여행 만들기 성공<br />
-            <span style={{color: '#ff6b6b', fontWeight: 800}}>단 2분 테스트로 우리 가족도 할 수 있어요!</span>
+            지금까지 32,156명이 자신만의 여행 스타일 발견<br />
+            <span style={{color: '#ff6b6b', fontWeight: 800}}>8/31까지만 특별 혜택을 받을 수 있어요!</span>
           </FinalCTASubtitle>
           
           {/* 최종 리드마그넷 어필 */}
           <FinalLeadMagnet>
-            <FinalLeadMagnetTitle>💝 지금 테스트하면 받을 수 있는 2가지 선물</FinalLeadMagnetTitle>
+            <FinalLeadMagnetTitle>💝 8/31까지만 받을 수 있는 특별 선물</FinalLeadMagnetTitle>
             <FinalLeadMagnetList>
-              <FinalLeadMagnetItem>📋 <strong>아이가 지루해하지 않는 여행 준비 체크리스트</strong><br />
-                <span style={{fontSize: '0.9rem', color: '#666'}}>&nbsp;&nbsp;&nbsp;&nbsp;✓ 연령별 필수 준비물 / ✓ 차 안 놀이 도구 / ✓ 비상 상황 대비 리스트</span>
-              </FinalLeadMagnetItem>
-              <FinalLeadMagnetItem>🎪 <strong>우리 지역 7-8월 가족 축제/행사 총정리</strong><br />
-                <span style={{fontSize: '0.9rem', color: '#666'}}>&nbsp;&nbsp;&nbsp;&nbsp;✓ 아이가 좋아하는 체험 행사 / ✓ 입장료 할인 정보 / ✓ 주차 꿀팁</span>
+              <FinalLeadMagnetItem>🎪 <strong>가족과 함께! 2025 여름 가족여행 완전 정복 가이드</strong><br />
+                <span style={{fontSize: '0.9rem', color: '#666'}}>&nbsp;&nbsp;&nbsp;&nbsp;✓ 광주, 전남, 전북, 충남 지역 특화 가이드<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;✓ 내 여행 스타일에 맞는 코스 추천<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;✓ 가족 모두가 만족하는 여행 팁</span>
               </FinalLeadMagnetItem>
             </FinalLeadMagnetList>
             <FinalLeadMagnetNote>
               <span style={{fontSize: '1.2rem', color: '#ff6b6b', fontWeight: 'bold'}}>
-                ⏰ 이 선물로 아이와의 여행이 180도 달라질 거예요!
+                ⏰ 8월 31일까지만 제공되는 특별 혜택!
               </span>
             </FinalLeadMagnetNote>
           </FinalLeadMagnet>
           
           <FinalCTAButtonContainer>
             <CTAButton large onClick={handleStartTest}>
-              💝 우리 가족도 행복한 여행 만들기 (2분이면 충분해요!)
+              💝 내 여행 스타일 찾고 특별 가이드 받기
             </CTAButton>
           </FinalCTAButtonContainer>
         </FinalCTASection>

@@ -262,6 +262,100 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
   const [channelAdded, setChannelAdded] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
 
+  // typeCode에 따른 맞춤 문구 설정
+  const getTypeContent = () => {
+    switch (typeCode) {
+      case 'ENFJ':
+        return {
+          typeName: '사교적 리더형',
+          headline: '🌟 사교적 리더형 가족을 위한 특별한 선물!',
+          description: '모두가 즐거운 가족 여행의 비밀을 담았어요',
+          benefit: '👫 가족 화합을 이끄는 여행 리더십 가이드',
+          buttonText: '우리 가족 화합 여행 가이드 받기'
+        };
+      case 'INFP':
+        return {
+          typeName: '낭만적 모험가형',
+          headline: '🦄 낭만적 모험가형 가족을 위한 특별한 선물!',
+          description: '특별한 추억을 만드는 감성 여행법을 공개해요',
+          benefit: '✨ 감성 충만한 가족 추억 만들기 가이드',
+          buttonText: '우리 가족 감성 여행 가이드 받기'
+        };
+      case 'ESTJ':
+        return {
+          typeName: '효율적 계획가형',
+          headline: '📋 효율적 계획가형 가족을 위한 특별한 선물!',
+          description: '완벽한 여행 계획의 모든 것을 준비했어요',
+          benefit: '🎯 시간/비용 최적화 여행 계획 템플릿',
+          buttonText: '우리 가족 완벽 계획 가이드 받기'
+        };
+      case 'ISTP':
+        return {
+          typeName: '실용적 탐험가형',
+          headline: '🔧 실용적 탐험가형 가족을 위한 특별한 선물!',
+          description: '실속 있는 가족 여행의 핵심을 담았어요',
+          benefit: '🏕️ 액티비티 중심 실속 여행 가이드',
+          buttonText: '우리 가족 실속 여행 가이드 받기'
+        };
+      case 'ESFP':
+        return {
+          typeName: '즉흥적 엔터테이너형',
+          headline: '🎉 즉흥적 엔터테이너형 가족을 위한 특별한 선물!',
+          description: '신나고 재미있는 가족 여행의 모든 것!',
+          benefit: '🎊 즉흥 여행도 즐거운 플레이 가이드',
+          buttonText: '우리 가족 신나는 여행 가이드 받기'
+        };
+      case 'INTJ':
+        return {
+          typeName: '전략적 사색가형',
+          headline: '♟️ 전략적 사색가형 가족을 위한 특별한 선물!',
+          description: '깊이 있는 가족 여행의 정수를 담았어요',
+          benefit: '🎓 교육적 가치가 있는 여행 기획 가이드',
+          buttonText: '우리 가족 심화 여행 가이드 받기'
+        };
+      case 'ISFJ':
+        return {
+          typeName: '세심한 보호자형',
+          headline: '🛡️ 세심한 보호자형 가족을 위한 특별한 선물!',
+          description: '안전하고 편안한 가족 여행의 모든 팁!',
+          benefit: '🏥 안전 제일! 가족 안심 여행 가이드',
+          buttonText: '우리 가족 안심 여행 가이드 받기'
+        };
+      case 'ENTP':
+        return {
+          typeName: '혁신적 도전자형',
+          headline: '🚀 혁신적 도전자형 가족을 위한 특별한 선물!',
+          description: '남다른 가족 여행 경험을 위한 특별 가이드!',
+          benefit: '💡 창의적이고 독특한 여행 아이디어 북',
+          buttonText: '우리 가족 특별 여행 가이드 받기'
+        };
+      default:
+        return {
+          typeName: typeCode,
+          headline: '🎁 축하합니다! 특별한 선물을 준비했어요',
+          description: '당신의 가족 여행 스타일에 맞는 완벽한 가이드!',
+          benefit: '🎯 맞춤형 가족 여행 완전 정복 가이드',
+          buttonText: '맞춤 여행 가이드 받기'
+        };
+    }
+  };
+
+  const typeContent = getTypeContent();
+
+  // 모달이 열릴 때 배경 스크롤 방지
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // 컴포넌트가 언마운트될 때 스타일 복원
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const handleSubmit = () => {
     if (!selectedOption || !inputValue.trim()) return;
     
@@ -300,19 +394,28 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
           >
             <CloseButton onClick={handleClose}>✕</CloseButton>
             
-            <Title>🚨 잠깐! 선물 받기를 놓치지 마세요!</Title>
+            <Title>{showWarning ? '🚨 잠깐! 선물 받기를 놓치지 마세요!' : typeContent.headline}</Title>
             <Subtitle>
-              지금까지 진행한 테스트가 아까우시지 않나요?<br/>
-              <span style={{color: '#ff6b6b', fontWeight: 700}}>연락처를 입력하지 않으면 선물도, 맞춤 여행 계획도 받을 수 없어요!</span>
+              {showWarning ? (
+                <>
+                  지금까지 진행한 테스트가 아까우시지 않나요?<br/>
+                  <span style={{color: '#ff6b6b', fontWeight: 700}}>연락처를 입력하지 않으면 선물도, 맞춤 여행 계획도 받을 수 없어요!</span>
+                </>
+              ) : (
+                <>
+                  {typeContent.typeName} 유형 분석 완료!<br/>
+                  <span style={{color: '#667eea', fontWeight: 700}}>{typeContent.description}</span>
+                </>
+              )}
             </Subtitle>
             
             <BenefitBox>
               <BenefitTitle>
-                💔 이 혜택들을 정말 포기하실 건가요?
+                {showWarning ? '💔 이 혜택들을 정말 포기하실 건가요?' : '🎯 지금 받을 수 있는 혜택'}
               </BenefitTitle>
               <BenefitList>
-                <li>✨ {typeCode} 유형 아이가 좋아하는 여행 준비 체크리스트</li>
-                <li>🎪 우리 지역 7-8월 가족 축제/행사 할인 정보</li>
+                <li>{typeContent.benefit}</li>
+                <li>📍 광주, 전남, 전북, 충남 지역 특화 정보</li>
                 <li>🎯 개인별 맞춤 여행 계획 서비스 (서베이 퍼널 진입권)</li>
               </BenefitList>
             </BenefitBox>
@@ -366,7 +469,7 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ isOpen, onClose, onSu
               )}
               
               <SubmitButton onClick={handleSubmit} disabled={!isValid}>
-                {isValid ? '🎁 선물 받고 맞춤 여행 계획 보러가기!' : '❌ 연락처를 입력해야 진행 가능해요'}
+                {isValid ? `🎁 ${typeContent.buttonText}` : '📝 연락처를 입력해주세요'}
               </SubmitButton>
             </FormSection>
             

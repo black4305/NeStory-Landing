@@ -186,36 +186,41 @@ const QuestionDescription = styled.p`
 
 const OptionsContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 0.8rem;
+    gap: 1rem;
   }
 `;
 
-const OptionButton = styled(motion.button)<{ selected: boolean }>`
+const OptionButton = styled(motion.button)<{ selected: boolean; isA?: boolean }>`
   background: ${props => props.selected 
-    ? 'linear-gradient(45deg, #667eea, #764ba2)' 
+    ? props.isA 
+      ? 'linear-gradient(45deg, #ff6b6b, #ff8e53)' 
+      : 'linear-gradient(45deg, #667eea, #764ba2)'
     : 'linear-gradient(45deg, #f8f9fa, #e9ecef)'};
   color: ${props => props.selected ? 'white' : '#495057'};
-  border: 2px solid ${props => props.selected ? '#667eea' : '#e9ecef'};
-  border-radius: 12px;
-  padding: 1rem 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border: 3px solid ${props => props.selected 
+    ? props.isA ? '#ff6b6b' : '#667eea' 
+    : '#e9ecef'};
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 70px;
+  min-height: 120px;
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.4;
   word-break: keep-all;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  position: relative;
   
   &:hover {
     transform: translateY(-2px);
