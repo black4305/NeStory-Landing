@@ -222,6 +222,11 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
   const handleSubmit = async () => {
     if (!selectedOption || !inputValue.trim()) return;
     
+    if (selectedOption === 'kakao' && !channelAdded) {
+      alert('카카오톡 채널을 먼저 추가해주세요!');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -236,7 +241,84 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
         marketingConsent: selectedOption === 'kakao' ? channelAdded : false
       });
       
+      // 웹훅 URL (환경 변수에서 가져오기)
+      const webhookUrl = process.env.REACT_APP_WEBHOOK_URL;
+      
+      if (webhookUrl) {
+        try {
+          // 디바이스 정보 파싱
+          const getDeviceInfo = () => {
+            const ua = navigator.userAgent;
+            let device = '알 수 없음';
+            
+            // 모바일 체크
+            if (/iPhone|iPad|iPod/.test(ua)) {
+              device = 'iOS';
+              if (/iPhone/.test(ua)) device = 'iPhone';
+              else if (/iPad/.test(ua)) device = 'iPad';
+            } else if (/Android/.test(ua)) {
+              device = 'Android';
+            } else if (/Windows/.test(ua)) {
+              device = 'Windows PC';
+            } else if (/Mac/.test(ua)) {
+              device = 'Mac';
+            } else if (/Linux/.test(ua)) {
+              device = 'Linux';
+            }
+            
+            return device;
+          };
+          
+          // IP 주소 가져오기 (외부 API 사용)
+          let ipInfo = { ip: '알 수 없음', city: '알 수 없음', country: '알 수 없음' };
+          try {
+            const ipResponse = await fetch('https://ipapi.co/json/');
+            if (ipResponse.ok) {
+              const data = await ipResponse.json();
+              ipInfo = {
+                ip: data.ip || '알 수 없음',
+                city: data.city || '알 수 없음',
+                country: data.country_name || '알 수 없음'
+              };
+            }
+          } catch (e) {
+            console.log('IP 정보 가져오기 실패');
+          }
+          
+          // 웹훅으로 데이터 전송
+          const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              timestamp: new Date().toISOString(),
+              type: selectedOption,
+              value: inputValue.trim(),
+              channelAdded: selectedOption === 'kakao' ? channelAdded : undefined,
+              device: getDeviceInfo(),
+              ip: ipInfo.ip,
+              location: `${ipInfo.city}, ${ipInfo.country}`,
+              pageUrl: window.location.href
+            })
+          });
+          
+          if (!response.ok) {
+            console.error('웹훅 전송 실패:', response.status);
+          }
+        } catch (error) {
+          console.error('웹훅 전송 중 오류:', error);
+          // 웹훅 실패해도 사용자 경험에 영향 없도록 계속 진행
+        }
+      }
+      
       // 완료 후 결과 페이지로 이동
+      // 사용자에게 확인 메시지 (선택사항)
+      if (selectedOption === 'email') {
+        console.log('이메일로 가이드북이 발송될 예정입니다.');
+      } else {
+        console.log('카카오톡으로 가이드북이 발송될 예정입니다.');
+      }
       onComplete();
     } catch (error) {
       console.error('리드 정보 저장 실패:', error);

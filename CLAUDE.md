@@ -405,3 +405,80 @@ const { data } = await supabase.storage
    - 클릭 후 "(필수)" → "✓" 체크 표시로 변경
    - 노란색 카카오 브랜드 컬러 적용
    - 호버 효과 추가 (살짝 떠오르는 애니메이션)
+
+## 🎯 2025-07-24 작업 내용 - 웹훅 자동화 구현
+
+### 완료된 작업
+
+1. **웹훅을 통한 리드 정보 자동화 시스템 구축**
+   - LeadMagnetPage.tsx에 웹훅 호출 기능 추가
+   - 환경 변수로 웹훅 URL 관리 (REACT_APP_WEBHOOK_URL)
+   - 폼 제출 시 Make 웹훅으로 데이터 전송
+
+2. **전송 데이터 최적화**
+   - 불필요한 여행 유형 정보 제거
+   - 필수 정보만 전송:
+     - timestamp: 제출 시간
+     - type: "email" 또는 "kakao"
+     - value: 이메일 주소 또는 카톡 별명
+     - channelAdded: 카톡 채널 추가 여부
+     - device: 장치명 (iPhone, Android, Mac 등)
+     - ip: IP 주소
+     - location: 위치 (도시, 국가)
+     - pageUrl: 페이지 URL
+
+3. **장치 정보 및 위치 추적 구현**
+   - User Agent 파싱으로 장치명 감지
+   - ipapi.co API를 통한 IP 주소 및 위치 정보 수집
+   - 브라우저 보안 정책 내에서 최대한의 정보 수집
+
+4. **Make + Telegram 알림 시스템 구성**
+   - Make 웹훅 생성 및 데이터 구조 설정
+   - Telegram Bot 연동으로 실시간 알림
+   - 한국 시간(KST) 기준 타임스탬프 표시
+   - 간단명료한 알림 메시지 포맷:
+     ```
+     🔔 2024-01-24 23:49:35 KST
+     
+     📧 이메일: test@example.com
+     📱 Mac
+     📍 Seoul, South Korea
+     🌐 123.456.789.0
+     ```
+
+5. **보안 및 에러 처리**
+   - 웹훅 실패 시에도 사용자 경험에 영향 없음
+   - 환경 변수로 민감한 정보 관리
+   - IP 정보 수집 실패 시 graceful fallback
+
+### 기술적 구현 사항
+
+#### 웹훅 데이터 전송 코드 (LeadMagnetPage.tsx)
+- fetch API를 사용한 POST 요청
+- 장치 정보 파싱 함수 구현
+- 외부 IP API 연동 (ipapi.co)
+- 비동기 처리로 UX 저하 방지
+
+#### Make 시나리오 구성
+```
+[Webhook] → [Telegram Bot: Send a Text Message]
+```
+- 단일 웹훅으로 이메일/카카오톡 구분 처리
+- 조건부 메시지 포맷팅
+- 실시간 실행 (스케줄 설정 불필요)
+
+### 환경 변수 설정
+```env
+# .env 파일
+REACT_APP_WEBHOOK_URL=https://hook.us2.make.com/...
+```
+
+### 향후 자동화 확장 방안
+1. **이메일 자동 발송**: Make + Gmail 연동
+2. **Google Sheets 백업**: 리드 정보 자동 저장
+3. **카카오 알림톡**: 사업자 등록 후 API 연동 가능
+
+### 주의사항
+- 클라이언트 사이드에서 웹훅 URL이 노출되므로 프로덕션에서는 서버리스 함수 활용 권장
+- Vercel Functions, Netlify Functions, Supabase Edge Functions 등 고려
+- 현재는 MVP를 위한 빠른 구현에 초점
