@@ -406,7 +406,7 @@ const { data } = await supabase.storage
    - 노란색 카카오 브랜드 컬러 적용
    - 호버 효과 추가 (살짝 떠오르는 애니메이션)
 
-## 🎯 2025-07-24 작업 내용 - 웹훅 자동화 구현
+## 🎯 2025-07-24 12:10 작업 내용 - 웹훅 자동화 구현
 
 ### 완료된 작업
 
@@ -482,3 +482,25 @@ REACT_APP_WEBHOOK_URL=https://hook.us2.make.com/...
 - 클라이언트 사이드에서 웹훅 URL이 노출되므로 프로덕션에서는 서버리스 함수 활용 권장
 - Vercel Functions, Netlify Functions, Supabase Edge Functions 등 고려
 - 현재는 MVP를 위한 빠른 구현에 초점
+
+## 🎯 2025-07-27 16:00 작업 내용
+
+### 완료된 작업
+
+1. **구글 서치 콘솔 인증 메타 태그 추가**
+   - `public/index.html` 파일의 head 섹션에 구글 서치 콘솔 인증용 메타 태그 추가
+   - `<meta name="google-site-verification" content="2GPYOGI6oSrkY48VxSUaCwzIE4FpQBsdoa6IG4L2TSs" />`
+   - SEO 최적화 및 검색엔진 등록을 위한 필수 설정 완료
+
+2. **서베이 퍼널 URL 업데이트**
+   - 기존 URL: `https://nestory-survey.vercel.app`
+   - 신규 URL: `https://survey.nestory.co.kr`
+   - 수정된 파일:
+     - `src/components/ResultScreen.tsx:716` - 버튼 클릭 시 새 창에서 열리는 URL 변경
+     - `SURVEY_INTEGRATION_ANALYSIS.md` - 문서의 모든 URL 참조 변경 (6곳)
+   - 브랜드 도메인 통일화 및 사용자 경험 일관성 확보
+
+### 기술적 변경사항
+- HTML head 섹션 메타 태그 구조 최적화
+- 외부 서비스 연동 URL 일관성 유지
+- 문서 동기화로 개발팀 정보 공유 효율성 향상

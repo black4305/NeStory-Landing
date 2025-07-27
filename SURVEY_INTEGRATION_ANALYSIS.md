@@ -1,7 +1,7 @@
 # 📋 Survey 퍼널 통합 방안 분석 및 권고사항
 
 ## 🔗 외부 설문 URL 분석
-**외부 설문**: https://nestory-survey.vercel.app
+**외부 설문**: https://survey.nestory.co.kr
 - **제목**: "NeStory 가족여행 설문조사"
 - **플랫폼**: Vercel 호스팅
 - **기술**: JavaScript 기반 (React/Next.js 추정)
@@ -41,7 +41,7 @@
 - **진행률 시각화**: 설문 과정에서 더 명확한 프로그레스 바
 - **중간 이탈 방지**: 각 단계별 후킹 요소 추가
 
-### Option B: 외부 설문 연결 (nestory-survey.vercel.app)
+### Option B: 외부 설문 연결 (survey.nestory.co.kr)
 **기존 NeStory 설문과 랜딩 페이지 연결**
 
 #### 장점
@@ -51,7 +51,7 @@
 - ✅ **독립적 운영**: 각각 독립적으로 업데이트 가능
 
 #### 단점
-- ❌ **도메인 분산**: family-travel-test → nestory-survey 이동
+- ❌ **도메인 분산**: family-travel-test → survey.nestory.co.kr 이동
 - ❌ **데이터 분석 분리**: 랜딩과 설문 데이터 통합 어려움
 - ❌ **사용자 경험 단절**: 도메인 변경으로 인한 이탈 위험
 - ❌ **후킹 요소 연계 제한**: 랜딩 페이지 최적화 효과 감소
@@ -60,7 +60,7 @@
 ## 🚀 권고사항: 하이브리드 접근법 (단계적 통합)
 
 ### 현실적 고려사항
-1. **기존 투자 보호**: nestory-survey.vercel.app 이미 구축됨
+1. **기존 투자 보호**: survey.nestory.co.kr 이미 구축됨
 2. **개발 리소스**: 중복 개발보다 연결 최적화가 효율적
 3. **시장 검증**: 외부 설문이 이미 검증된 상태일 가능성
 4. **브랜드 통일성**: 동일한 NeStory 브랜드로 일관성 확보 가능
@@ -83,7 +83,7 @@ const handleMicroCommitmentComplete = () => {
   });
   
   // 새 창이 아닌 같은 창에서 전환 (뒤로가기 가능)
-  window.location.href = `https://nestory-survey.vercel.app?${params}`;
+  window.location.href = `https://survey.nestory.co.kr?${params}`;
 };
 ```
 
@@ -99,7 +99,7 @@ const handleMicroCommitmentComplete = () => {
 ```typescript
 // 랜딩에서 생성한 세션 ID를 설문에 전달
 const sessionId = generateUniqueSessionId();
-const surveyUrl = `https://nestory-survey.vercel.app?sessionId=${sessionId}&source=landing`;
+const surveyUrl = `https://survey.nestory.co.kr?sessionId=${sessionId}&source=landing`;
 ```
 
 2. **통합 분석 대시보드**

@@ -713,7 +713,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
-                onClick={() => window.open('https://nestory-survey.vercel.app', '_blank')}
+                onClick={() => window.open('https://survey.nestory.co.kr', '_blank')}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onMouseEnter={(e) => {
