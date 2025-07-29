@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -8,6 +8,7 @@ import TrustBadges from './TrustBadges';
 import ExitIntentPopup from './ExitIntentPopup';
 import { SupabaseService } from '../services/supabase';
 import usePageTracking from '../hooks/usePageTracking';
+import { detailedAnalytics } from '../utils/detailedAnalytics';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +16,26 @@ const LandingPage: React.FC = () => {
   
   // 페이지 추적 훅 사용
   const { metrics, trackCTAClick, trackSectionView } = usePageTracking('landing');
+
+  // 상세 분석 추적 시작
+  useEffect(() => {
+    const initTracking = async () => {
+      await detailedAnalytics.trackPageEnter('/', {
+        page: 'landing',
+        title: '가족 여행 테스트 랜딩페이지',
+        utmSource: new URLSearchParams(window.location.search).get('utm_source'),
+        utmMedium: new URLSearchParams(window.location.search).get('utm_medium'),
+        utmCampaign: new URLSearchParams(window.location.search).get('utm_campaign')
+      });
+    };
+
+    initTracking();
+
+    // 페이지 이탈 시 추적
+    return () => {
+      detailedAnalytics.trackPageExit();
+    };
+  }, []);
 
   React.useEffect(() => {
     const visitId = Date.now().toString();
@@ -118,7 +139,15 @@ const LandingPage: React.FC = () => {
 
   // 각 CTA 버튼별 고유한 추적 함수
   const handleMainCTA = async () => {
-    await trackCTAClick('메인 CTA - 무료 진단', 'https://survey.nestory.co.kr');
+    await trackCTAClick('메인 CTA - 무료 진단', '/info');
+    
+    // 상세 추적
+    detailedAnalytics.trackCTAClick('메인 CTA', '/info', {
+      position: 'hero_section',
+      buttonText: '무료 진단 시작하기',
+      sectionName: 'hero'
+    });
+    
     const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
     SupabaseService.saveLandingAnalytics({
       visitId,
@@ -128,27 +157,43 @@ const LandingPage: React.FC = () => {
       deviceType: getDeviceType(),
       ctaClicked: true
     });
-    window.open('https://survey.nestory.co.kr', '_blank');
+    navigate('/info');
   };
 
   const handleFeaturesCTA = async () => {
-    await trackCTAClick('특징 섹션 CTA', 'https://survey.nestory.co.kr');
-    window.open('https://survey.nestory.co.kr', '_blank');
+    await trackCTAClick('특징 섹션 CTA', '/info');
+    detailedAnalytics.trackCTAClick('특징 섹션 CTA', '/info', {
+      position: 'features_section',
+      buttonText: '지금 시작하기',
+      sectionName: 'features'
+    });
+    navigate('/info');
   };
 
   const handleFinalCTA = async () => {
-    await trackCTAClick('최종 CTA - 여행 스타일 찾기', 'https://survey.nestory.co.kr');
-    window.open('https://survey.nestory.co.kr', '_blank');
+    await trackCTAClick('최종 CTA - 여행 스타일 찾기', '/info');
+    detailedAnalytics.trackCTAClick('최종 CTA', '/info', {
+      position: 'final_section',
+      buttonText: '여행 스타일 찾기',
+      sectionName: 'final_cta'
+    });
+    navigate('/info');
   };
 
   const handleExitIntentAccept = async () => {
     setShowExitIntent(false);
     
     // 페이지 추적 - Exit Intent CTA 클릭
-    await trackCTAClick('Exit Intent CTA', 'https://survey.nestory.co.kr');
+    await trackCTAClick('Exit Intent CTA', '/info');
+    detailedAnalytics.trackCTAClick('Exit Intent CTA', '/info', {
+      position: 'exit_intent_popup',
+      buttonText: '무료 테스트 받기',
+      sectionName: 'exit_intent',
+      trigger: 'exit_intent'
+    });
     
-    // 서베이 퍼널로 이동
-    window.open('https://survey.nestory.co.kr', '_blank');
+    // 테스트 안내 페이지로 이동
+    navigate('/info');
   };
 
   return (
@@ -234,6 +279,15 @@ const LandingPage: React.FC = () => {
           </HeroContent>
         </HeroSection>
 
+        {/* 스크롤 힌트 */}
+        <ScrollHint
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.8 }}
+        >
+          <ScrollArrow>↓</ScrollArrow>
+          <ScrollText>더 많은 혜택 확인하기</ScrollText>
+        </ScrollHint>
 
         {/* Features Section */}
         <FeaturesSection data-section="features">
@@ -1435,6 +1489,45 @@ const SolutionTitle = styled.h3`
   @media (max-width: 768px) {
     font-size: 1.3rem;
   }
+`;
+
+// 스크롤 힌트 스타일
+const ScrollHint = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem 0;
+  opacity: 0.8;
+  
+  @media (min-width: 769px) {
+    display: none; /* 데스크톱에서는 숨김 */
+  }
+`;
+
+const ScrollArrow = styled.div`
+  font-size: 2rem;
+  color: white;
+  animation: bounce 2s infinite;
+  margin-bottom: 0.5rem;
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+`;
+
+const ScrollText = styled.p`
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
 `;
 
 export default LandingPage;

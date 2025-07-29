@@ -110,32 +110,21 @@ const AdminRoute: React.FC = () => {
 
 // 메인 설문 컴포넌트
 const SurveyApp: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>('pretest');
+  const navigate = useNavigate();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
-  const [result, setResult] = useState<{
-    typeCode: string;
-    axisScores: any;
-    analytics: any;
-  } | null>(null);
 
   useEffect(() => {
     // 페이지 이탈 시 분석 데이터 전송
     const handleBeforeUnload = async () => {
-      if (appState === 'survey' && answers.length > 0) {
+      if (answers.length > 0) {
         await analytics.trackAbandon();
       }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [appState, answers]);
-
-  const handlePreTestStart = () => {
-    setAppState('survey');
-    setCurrentQuestionIndex(0);
-    setAnswers([]);
-  };
+  }, [answers]);
 
 
   const handleAnswer = async (score: number, timeSpent: number) => {
@@ -164,13 +153,15 @@ const SurveyApp: React.FC = () => {
         completionRate: analytics.getCompletionRate()
       };
 
-      setResult({
+      // 결과를 sessionStorage에 저장
+      sessionStorage.setItem('testResult', JSON.stringify({
         typeCode,
         axisScores,
         analytics: analyticsData
-      });
+      }));
       
-      setAppState('leadmagnet');
+      // /squeeze 페이지로 리디렉션
+      navigate(`/squeeze?type=${typeCode}`);
     }
   };
 
@@ -183,54 +174,15 @@ const SurveyApp: React.FC = () => {
     }
   };
 
-  const handleLeadMagnetComplete = async () => {
-    // Track completion
-    if (result) {
-      await analytics.trackCompletion(result.typeCode);
-    }
-    
-    setAppState('result');
-  };
-
-  const handleRestart = () => {
-    setAppState('pretest');
-    setCurrentQuestionIndex(0);
-    setAnswers([]);
-    setResult(null);
-  };
 
   return (
-    <>
-      {appState === 'pretest' && (
-        <PreTestPage onStart={handlePreTestStart} />
-      )}
-      
-      {appState === 'survey' && (
-        <QuestionCard
-          question={questions[currentQuestionIndex]}
-          currentQuestion={currentQuestionIndex + 1}
-          totalQuestions={questions.length}
-          onAnswer={handleAnswer}
-          onBack={handleBack}
-        />
-      )}
-      
-      {appState === 'leadmagnet' && result && (
-        <LeadMagnetPage
-          onComplete={handleLeadMagnetComplete}
-          typeCode={result.typeCode}
-        />
-      )}
-      
-      {appState === 'result' && result && (
-        <ResultScreen
-          typeCode={result.typeCode}
-          axisScores={result.axisScores}
-          analytics={result.analytics}
-          onRestart={handleRestart}
-        />
-      )}
-    </>
+    <QuestionCard
+      question={questions[currentQuestionIndex]}
+      currentQuestion={currentQuestionIndex + 1}
+      totalQuestions={questions.length}
+      onAnswer={handleAnswer}
+      onBack={handleBack}
+    />
   );
 };
 
@@ -326,6 +278,31 @@ const SharedResult: React.FC = () => {
       isSharedView={true}
     />
   );
+};
+
+// 안내 페이지 래퍼 컴포넌트
+const InfoPageWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  
+  const handleStart = () => {
+    navigate('/nestoryti');
+  };
+  
+  return <PreTestPage onStart={handleStart} />;
+};
+
+// 리드마그넷 페이지 래퍼 컴포넌트
+const SqueezePageWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const typeCode = searchParams.get('type') || 'ANE';
+  
+  const handleComplete = () => {
+    navigate(`/result?type=${typeCode}`);
+  };
+  
+  return <LeadMagnetPage onComplete={handleComplete} typeCode={typeCode} />;
 };
 
 // 고유 ID 기반 공유 결과 표시 컴포넌트
@@ -453,6 +430,9 @@ function App() {
       <GlobalStyles />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/info" element={<InfoPageWrapper />} />
+        <Route path="/nestoryti" element={<SurveyApp />} />
+        <Route path="/squeeze" element={<SqueezePageWrapper />} />
         <Route path="/result" element={<SharedResult />} />
         <Route path="/share/:shareId" element={<UniqueSharedResult />} />
         <Route path="/all-types" element={<AllTypesRoute />} />

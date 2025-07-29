@@ -798,4 +798,189 @@ export class SupabaseService {
     if (width <= 1024) return 'tablet';
     return 'desktop';
   }
+
+  // 상세 이벤트 저장
+  static async saveDetailedEvents(events: any[]) {
+    try {
+      const { data, error } = await supabase
+        .from('nestory_landing_detailed_events')
+        .insert(events);
+
+      if (error) {
+        console.error('상세 이벤트 저장 오류:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('상세 이벤트 저장 실패:', error);
+      return false;
+    }
+  }
+
+  // 페이지 세션 저장
+  static async savePageSessions(sessions: any[]) {
+    try {
+      const { data, error } = await supabase
+        .from('nestory_landing_page_sessions')
+        .insert(sessions);
+
+      if (error) {
+        console.error('페이지 세션 저장 오류:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('페이지 세션 저장 실패:', error);
+      return false;
+    }
+  }
+
+  // 사용자 여정 분석 데이터 조회
+  static async getUserJourneyAnalytics(sessionId?: string) {
+    try {
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('nestory_landing_detailed_events')
+        .select('*')
+        .eq(sessionId ? 'sessionId' : 'sessionId', sessionId || '')
+        .order('timestamp', { ascending: true });
+
+      const { data: sessionsData, error: sessionsError } = await supabase
+        .from('nestory_landing_page_sessions')
+        .select('*')
+        .eq(sessionId ? 'sessionId' : 'sessionId', sessionId || '')
+        .order('enterTime', { ascending: true });
+
+      if (eventsError || sessionsError) {
+        console.error('사용자 여정 데이터 조회 오류:', eventsError || sessionsError);
+        return null;
+      }
+
+      return {
+        events: eventsData || [],
+        sessions: sessionsData || []
+      };
+    } catch (error) {
+      console.error('사용자 여정 데이터 조회 실패:', error);
+      return null;
+    }
+  }
+
+  // 라우트별 통계 조회
+  static async getRouteAnalytics() {
+    try {
+      const { data, error } = await supabase
+        .from('nestory_landing_page_sessions')
+        .select('route, duration, interactions, scrollDepth, ctaClicks, errors')
+        .order('enterTime', { ascending: false });
+
+      if (error) {
+        console.error('라우트 통계 조회 오류:', error);
+        return null;
+      }
+
+      // 라우트별 집계
+      const routeStats = data?.reduce((acc: any, session: any) => {
+        if (!acc[session.route]) {
+          acc[session.route] = {
+            route: session.route,
+            totalSessions: 0,
+            avgDuration: 0,
+            avgInteractions: 0,
+            avgScrollDepth: 0,
+            totalCtaClicks: 0,
+            totalErrors: 0,
+            bounceRate: 0
+          };
+        }
+
+        const stats = acc[session.route];
+        stats.totalSessions++;
+        stats.avgDuration = (stats.avgDuration + (session.duration || 0)) / stats.totalSessions;
+        stats.avgInteractions = (stats.avgInteractions + session.interactions) / stats.totalSessions;
+        stats.avgScrollDepth = (stats.avgScrollDepth + session.scrollDepth) / stats.totalSessions;
+        stats.totalCtaClicks += session.ctaClicks || 0;
+        stats.totalErrors += session.errors?.length || 0;
+        
+        // 바운스 레이트 계산 (5초 미만 + 인터랙션 없음)
+        if ((session.duration || 0) < 5000 && session.interactions === 0) {
+          stats.bounceRate++;
+        }
+
+        return acc;
+      }, {});
+
+      // 바운스 레이트를 퍼센티지로 변환
+      Object.values(routeStats || {}).forEach((stats: any) => {
+        stats.bounceRate = (stats.bounceRate / stats.totalSessions) * 100;
+      });
+
+      return Object.values(routeStats || {});
+    } catch (error) {
+      console.error('라우트 통계 조회 실패:', error);
+      return null;
+    }
+  }
+
+  // 전환율 분석 (퍼널 분석)
+  static async getFunnelAnalytics() {
+    try {
+      const { data, error } = await supabase
+        .from('nestory_landing_page_sessions')
+        .select('sessionId, route, enterTime, ctaClicks')
+        .order('sessionId, enterTime', { ascending: true });
+
+      if (error) {
+        console.error('퍼널 분석 조회 오류:', error);
+        return null;
+      }
+
+      // 세션별로 그룹핑하여 여정 분석
+      const sessionJourneys = data?.reduce((acc: any, session: any) => {
+        if (!acc[session.sessionId]) {
+          acc[session.sessionId] = [];
+        }
+        acc[session.sessionId].push(session);
+        return acc;
+      }, {});
+
+      const funnelSteps = ['/', '/info', '/nestoryti', '/squeeze', '/result'];
+      const funnelData = funnelSteps.map((step, index) => ({
+        step,
+        stepName: ['랜딩페이지', '안내페이지', '테스트페이지', '고객정보페이지', '결과페이지'][index],
+        users: 0,
+        dropoffRate: 0,
+        conversionRate: 0
+      }));
+
+      // 세션별 여정 분석
+      const totalSessions = Object.keys(sessionJourneys || {}).length;
+      Object.values(sessionJourneys || {}).forEach((journey: any) => {
+        journey.forEach((session: any) => {
+          const stepIndex = funnelSteps.indexOf(session.route);
+          if (stepIndex !== -1) {
+            funnelData[stepIndex].users++;
+          }
+        });
+      });
+
+      // 전환율 및 이탈률 계산
+      funnelData.forEach((step, index) => {
+        if (index === 0) {
+          step.conversionRate = 100;
+          step.dropoffRate = 0;
+        } else {
+          const prevStepUsers = funnelData[index - 1].users;
+          step.conversionRate = prevStepUsers > 0 ? (step.users / prevStepUsers) * 100 : 0;
+          step.dropoffRate = 100 - step.conversionRate;
+        }
+      });
+
+      return funnelData;
+    } catch (error) {
+      console.error('퍼널 분석 실패:', error);
+      return null;
+    }
+  }
 }

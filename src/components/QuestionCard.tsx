@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Question } from '../types';
 import NeStoryTILogo from './NeStoryTILogo';
+import { detailedAnalytics } from '../utils/detailedAnalytics';
 
 const Container = styled.div`
   display: flex;
@@ -10,20 +11,35 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh; /* 동적 뷰포트 높이 사용 */
+  height: 100%;
   padding: 1rem;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  width: 100%;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
   
   @media (max-width: 768px) {
-    min-height: auto;
-    padding: 2rem 1rem;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 1rem;
     touch-action: manipulation;
+    justify-content: center;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
   }
   
   @media (max-width: 480px) {
-    padding: 1.5rem 0.5rem;
+    padding: 1rem 0.5rem;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
   }
 `;
 
@@ -67,28 +83,34 @@ const Card = styled(motion.div)`
   justify-content: space-between;
   
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: 1.5rem;
     border-radius: 15px;
-    max-width: 100%;
-    width: 100%;
-    margin: 0;
-    height: 100%;
-    max-height: 100%;
+    max-width: 90%;
+    width: 90%;
+    margin: auto;
+    min-height: auto;
+    max-height: 80vh;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-self: center;
   }
   
   @media (max-width: 480px) {
-    padding: 0.8rem;
+    padding: 1.2rem;
     border-radius: 12px;
+    max-width: 95%;
+    width: 95%;
+    max-height: 85vh;
   }
   
   @media (max-width: 375px) {
-    padding: 0.6rem;
+    padding: 1rem;
     border-radius: 10px;
     font-size: 0.95rem;
+    max-width: 95%;
+    width: 95%;
   }
 `;
 
@@ -365,11 +387,53 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   useEffect(() => {
     setStartTime(Date.now());
     setSelectedScore(null);
-  }, [question.id]);
+    
+    // 페이지 추적 (첫 번째 문제일 때만)
+    if (currentQuestion === 1) {
+      const initTestTracking = async () => {
+        await detailedAnalytics.trackPageEnter('/nestoryti', {
+          page: 'test',
+          title: 'MBTI 테스트 페이지',
+          step: 3,
+          funnel: 'test_taking',
+          totalQuestions
+        });
+      };
+      initTestTracking();
+    }
+    
+    // 문제별 추적
+    detailedAnalytics.trackCustomEvent('question_displayed', {
+      questionId: question.id,
+      questionNumber: currentQuestion,
+      totalQuestions,
+      questionText: question.text?.slice(0, 50),
+      optionA: question.optionA?.slice(0, 30),
+      optionB: question.optionB?.slice(0, 30)
+    });
+  }, [question.id, currentQuestion, totalQuestions]);
 
   const handleAnswer = () => {
     if (selectedScore !== null) {
       const totalTime = Date.now() - startTime;
+      
+      // 답변 추적
+      detailedAnalytics.trackTestAnswer(question.id, selectedScore, totalTime);
+      detailedAnalytics.trackCustomEvent('question_answered', {
+        questionId: question.id,
+        questionNumber: currentQuestion,
+        selectedScore,
+        selectedOption: selectedScore === 5 ? 'A' : 'B',
+        responseTime: totalTime,
+        isLastQuestion: currentQuestion === totalQuestions,
+        progress: (currentQuestion / totalQuestions) * 100
+      });
+      
+      // 마지막 문제인 경우 페이지 이탈 추적
+      if (currentQuestion === totalQuestions) {
+        detailedAnalytics.trackPageExit();
+      }
+      
       onAnswer(selectedScore, totalTime);
     }
   };
@@ -419,7 +483,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               key="A"
               selected={selectedScore === 5}
               isA={true}
-              onClick={() => setSelectedScore(5)}
+              onClick={() => {
+                setSelectedScore(5);
+                detailedAnalytics.trackCustomEvent('option_selected', {
+                  questionId: question.id,
+                  questionNumber: currentQuestion,
+                  selectedOption: 'A',
+                  optionText: question.optionA?.slice(0, 30),
+                  timeToSelect: Date.now() - startTime
+                });
+              }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -430,7 +503,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               key="B"
               selected={selectedScore === 1}
               isA={false}
-              onClick={() => setSelectedScore(1)}
+              onClick={() => {
+                setSelectedScore(1);
+                detailedAnalytics.trackCustomEvent('option_selected', {
+                  questionId: question.id,
+                  questionNumber: currentQuestion,
+                  selectedOption: 'B',
+                  optionText: question.optionB?.slice(0, 30),
+                  timeToSelect: Date.now() - startTime
+                });
+              }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { SupabaseService } from '../services/supabase';
 import usePageTracking from '../hooks/usePageTracking';
+import { detailedAnalytics } from '../utils/detailedAnalytics';
 
 interface LeadMagnetPageProps {
   onComplete: () => void;
@@ -223,15 +224,56 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
   // 페이지 추적 훅 사용
   const { linkUserInfo } = usePageTracking('leadmagnet');
 
+  useEffect(() => {
+    const initTracking = async () => {
+      await detailedAnalytics.trackPageEnter('/squeeze', {
+        page: 'leadmagnet',
+        title: '고객 정보 수집 페이지',
+        step: 4,
+        funnel: 'conversion',
+        typeCode,
+        testResult: sessionStorage.getItem('testResult')
+      });
+    };
+
+    initTracking();
+
+    return () => {
+      detailedAnalytics.trackPageExit();
+    };
+  }, [typeCode]);
+
   const handleSubmit = async () => {
-    if (!selectedOption || !inputValue.trim()) return;
+    if (!selectedOption || !inputValue.trim()) {
+      detailedAnalytics.trackError('form_validation', 'Missing required fields', {
+        selectedOption,
+        inputValueLength: inputValue.length,
+        page: 'leadmagnet'
+      });
+      return;
+    }
     
     if (selectedOption === 'kakao' && !channelAdded) {
+      detailedAnalytics.trackError('form_validation', 'Kakao channel not added', {
+        selectedOption,
+        channelAdded,
+        page: 'leadmagnet'
+      });
       alert('카카오톡 채널을 먼저 추가해주세요!');
       return;
     }
     
     setIsSubmitting(true);
+    
+    // 폼 제출 추적
+    detailedAnalytics.trackFormSubmit('lead_capture', {
+      leadType: selectedOption,
+      hasInput: !!inputValue.trim(),
+      channelAdded: selectedOption === 'kakao' ? channelAdded : null,
+      typeCode,
+      step: 4,
+      funnel: 'conversion'
+    });
     
     try {
       // Supabase에 리드 정보 저장
@@ -374,7 +416,15 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
         <FormSection>
           <OptionButton
             selected={selectedOption === 'email'}
-            onClick={() => setSelectedOption('email')}
+            onClick={() => {
+              setSelectedOption('email');
+              detailedAnalytics.trackCustomEvent('option_selected', {
+                optionType: 'contact_method',
+                selectedValue: 'email',
+                page: 'leadmagnet',
+                step: 4
+              });
+            }}
           >
             <OptionIcon>📧</OptionIcon>
             <OptionText>
@@ -385,7 +435,15 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
           
           <OptionButton
             selected={selectedOption === 'kakao'}
-            onClick={() => setSelectedOption('kakao')}
+            onClick={() => {
+              setSelectedOption('kakao');
+              detailedAnalytics.trackCustomEvent('option_selected', {
+                optionType: 'contact_method',
+                selectedValue: 'kakao',
+                page: 'leadmagnet',
+                step: 4
+              });
+            }}
           >
             <OptionIcon>💬</OptionIcon>
             <OptionText>

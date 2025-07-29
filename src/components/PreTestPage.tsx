@@ -1,12 +1,41 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { detailedAnalytics } from '../utils/detailedAnalytics';
 
 interface PreTestPageProps {
   onStart: () => void;
 }
 
 const PreTestPage: React.FC<PreTestPageProps> = ({ onStart }) => {
+  useEffect(() => {
+    const initTracking = async () => {
+      await detailedAnalytics.trackPageEnter('/info', {
+        page: 'pretest',
+        title: 'MBTI 테스트 안내 페이지',
+        step: 2,
+        funnel: 'onboarding'
+      });
+    };
+
+    initTracking();
+
+    return () => {
+      detailedAnalytics.trackPageExit();
+    };
+  }, []);
+
+  const handleStartClick = () => {
+    detailedAnalytics.trackCTAClick('테스트 시작 버튼', '/nestoryti', {
+      position: 'pretest_main',
+      buttonText: '🚀 테스트 시작하기',
+      sectionName: 'start_button',
+      step: 2,
+      funnel: 'onboarding'
+    });
+    onStart();
+  };
+
   return (
     <Container>
       <ContentCard
@@ -66,7 +95,7 @@ const PreTestPage: React.FC<PreTestPageProps> = ({ onStart }) => {
         </ImportantNote>
         
         <StartButton
-          onClick={onStart}
+          onClick={handleStartClick}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
