@@ -440,6 +440,357 @@ export class SupabaseService {
     }
   }
 
+  // 페이지 분석 데이터 저장
+  static async savePageAnalytics(data: {
+    page: string;
+    timestamp: number;
+    sessionId: string;
+    visitId: string;
+    duration?: number;
+    scrollDepth?: number;
+    interactions?: number;
+    exitPoint?: string;
+    deviceType: string;
+    userAgent: string;
+    referrer: string;
+    viewportWidth: number;
+    viewportHeight: number;
+  }) {
+    try {
+      const { error } = await supabase
+        .from('nestory_landing_page_analytics')
+        .insert({
+          page: data.page,
+          timestamp: new Date(data.timestamp).toISOString(),
+          session_id: data.sessionId,
+          visit_id: data.visitId,
+          duration: data.duration,
+          scroll_depth: data.scrollDepth,
+          interactions: data.interactions,
+          exit_point: data.exitPoint,
+          device_type: data.deviceType,
+          user_agent: data.userAgent,
+          referrer: data.referrer,
+          viewport_width: data.viewportWidth,
+          viewport_height: data.viewportHeight
+        });
+
+      if (error) {
+        console.error('페이지 분석 데이터 저장 오류:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('페이지 분석 데이터 저장 실패:', error);
+      return false;
+    }
+  }
+
+  // 페이지별 분석 데이터 조회
+  static async getPageAnalytics(page?: string) {
+    try {
+      let query = supabase
+        .from('nestory_landing_page_analytics')
+        .select('*')
+        .order('timestamp', { ascending: false });
+      
+      if (page) {
+        query = query.eq('page', page);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('페이지 분석 데이터 조회 오류:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('페이지 분석 데이터 조회 실패:', error);
+      return [];
+    }
+  }
+
+  // CTA 클릭 추적
+  static async saveCTAClick(data: {
+    page: string;
+    ctaName: string;
+    ctaTarget?: string;
+    sessionId: string;
+    visitId: string;
+    timestamp: number;
+    deviceType: string;
+    userAgent: string;
+    scrollDepth: number;
+    timeOnPage: number;
+  }) {
+    try {
+      const { error } = await supabase
+        .from('nestory_landing_cta_clicks')
+        .insert({
+          page: data.page,
+          cta_name: data.ctaName,
+          cta_target: data.ctaTarget,
+          session_id: data.sessionId,
+          visit_id: data.visitId,
+          timestamp: new Date(data.timestamp).toISOString(),
+          device_type: data.deviceType,
+          user_agent: data.userAgent,
+          scroll_depth: data.scrollDepth,
+          time_on_page: data.timeOnPage
+        });
+
+      if (error) {
+        console.error('CTA 클릭 추적 오류:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('CTA 클릭 추적 실패:', error);
+      return false;
+    }
+  }
+
+  // 섹션 조회 추적
+  static async saveSectionView(data: {
+    page: string;
+    section: string;
+    sessionId: string;
+    visitId: string;
+    timestamp: number;
+    scrollDepth: number;
+    timeOnPage: number;
+  }) {
+    try {
+      const { error } = await supabase
+        .from('nestory_landing_section_views')
+        .insert({
+          page: data.page,
+          section: data.section,
+          session_id: data.sessionId,
+          visit_id: data.visitId,
+          timestamp: new Date(data.timestamp).toISOString(),
+          scroll_depth: data.scrollDepth,
+          time_on_page: data.timeOnPage
+        });
+
+      if (error) {
+        console.error('섹션 조회 추적 오류:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('섹션 조회 추적 실패:', error);
+      return false;
+    }
+  }
+
+  // CTA 클릭 데이터 조회
+  static async getCTAAnalytics(page?: string) {
+    try {
+      let query = supabase
+        .from('nestory_landing_cta_clicks')
+        .select('*')
+        .order('timestamp', { ascending: false });
+      
+      if (page) {
+        query = query.eq('page', page);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('CTA 분석 데이터 조회 오류:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('CTA 분석 데이터 조회 실패:', error);
+      return [];
+    }
+  }
+
+  // 섹션 조회 데이터 조회
+  static async getSectionAnalytics(page?: string) {
+    try {
+      let query = supabase
+        .from('nestory_landing_section_views')
+        .select('*')
+        .order('timestamp', { ascending: false });
+      
+      if (page) {
+        query = query.eq('page', page);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('섹션 분석 데이터 조회 오류:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('섹션 분석 데이터 조회 실패:', error);
+      return [];
+    }
+  }
+
+  // 사용자 정보를 세션에 연결
+  static async linkUserInfoToSession(data: {
+    sessionId: string;
+    visitId: string;
+    userInfo: {
+      email?: string;
+      phone?: string;
+      name?: string;
+      marketingConsent?: boolean;
+    };
+    timestamp: number;
+  }) {
+    try {
+      // 기존 페이지 분석 데이터에 사용자 정보 업데이트
+      const { error: pageError } = await supabase
+        .from('nestory_landing_page_analytics')
+        .update({
+          user_email: data.userInfo.email,
+          user_phone: data.userInfo.phone,
+          user_name: data.userInfo.name,
+          marketing_consent: data.userInfo.marketingConsent,
+          identified_at: new Date(data.timestamp).toISOString()
+        })
+        .eq('session_id', data.sessionId);
+
+      // CTA 클릭 데이터에도 사용자 정보 업데이트
+      const { error: ctaError } = await supabase
+        .from('nestory_landing_cta_clicks')
+        .update({
+          user_email: data.userInfo.email,
+          user_phone: data.userInfo.phone,
+          user_name: data.userInfo.name,
+          marketing_consent: data.userInfo.marketingConsent
+        })
+        .eq('session_id', data.sessionId);
+
+      // 섹션 조회 데이터에도 사용자 정보 업데이트
+      const { error: sectionError } = await supabase
+        .from('nestory_landing_section_views')
+        .update({
+          user_email: data.userInfo.email,
+          user_phone: data.userInfo.phone,
+          user_name: data.userInfo.name
+        })
+        .eq('session_id', data.sessionId);
+
+      // 사용자 정보 테이블에 별도 저장
+      const { error: userError } = await supabase
+        .from('nestory_landing_users')
+        .upsert({
+          session_id: data.sessionId,
+          visit_id: data.visitId,
+          email: data.userInfo.email,
+          phone: data.userInfo.phone,
+          name: data.userInfo.name,
+          marketing_consent: data.userInfo.marketingConsent,
+          identified_at: new Date(data.timestamp).toISOString()
+        }, {
+          onConflict: 'session_id'
+        });
+
+      if (pageError || ctaError || sectionError || userError) {
+        console.error('사용자 정보 연결 오류:', { pageError, ctaError, sectionError, userError });
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('사용자 정보 연결 실패:', error);
+      return false;
+    }
+  }
+
+  // 식별된 사용자와 익명 사용자 통계 조회
+  static async getUserIdentificationStats() {
+    try {
+      const { data: pageData, error } = await supabase
+        .from('nestory_landing_page_analytics')
+        .select('session_id, user_email, user_phone, identified_at')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.error('사용자 식별 통계 조회 오류:', error);
+        return {
+          total: 0,
+          identified: 0,
+          anonymous: 0,
+          identificationRate: 0
+        };
+      }
+
+      const total = pageData?.length || 0;
+      const identified = pageData?.filter(item => item.user_email || item.user_phone).length || 0;
+      const anonymous = total - identified;
+      const identificationRate = total > 0 ? Math.round((identified / total) * 100) : 0;
+
+      return {
+        total,
+        identified,
+        anonymous,
+        identificationRate,
+        identifiedUsers: pageData?.filter(item => item.user_email || item.user_phone) || []
+      };
+    } catch (error) {
+      console.error('사용자 식별 통계 조회 실패:', error);
+      return {
+        total: 0,
+        identified: 0,
+        anonymous: 0,
+        identificationRate: 0
+      };
+    }
+  }
+
+  // 사용자별 상세 KPI 조회
+  static async getUserDetailedKPI(sessionId: string) {
+    try {
+      // 페이지 분석 데이터
+      const { data: pageData } = await supabase
+        .from('nestory_landing_page_analytics')
+        .select('*')
+        .eq('session_id', sessionId);
+
+      // CTA 클릭 데이터
+      const { data: ctaData } = await supabase
+        .from('nestory_landing_cta_clicks')
+        .select('*')
+        .eq('session_id', sessionId);
+
+      // 섹션 조회 데이터
+      const { data: sectionData } = await supabase
+        .from('nestory_landing_section_views')
+        .select('*')
+        .eq('session_id', sessionId);
+
+      return {
+        pageAnalytics: pageData || [],
+        ctaClicks: ctaData || [],
+        sectionViews: sectionData || []
+      };
+    } catch (error) {
+      console.error('사용자 상세 KPI 조회 실패:', error);
+      return {
+        pageAnalytics: [],
+        ctaClicks: [],
+        sectionViews: []
+      };
+    }
+  }
+
   // 디바이스 타입 감지 헬퍼 함수
   private static getDeviceType(): 'mobile' | 'tablet' | 'desktop' {
     const width = window.innerWidth;

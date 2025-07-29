@@ -21,6 +21,7 @@ import { questions } from '../data/questions';
 import { DataManager } from '../utils/dataManager';
 import { useSupabaseData, useSupabaseStatus } from '../hooks/useSupabaseData';
 import LandingAnalytics from './LandingAnalytics';
+import DetailedKPISection from './DetailedKPISection';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -385,6 +386,7 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<AnalyticsData | null>(null);
+  const [timeRange, setTimeRange] = useState<'today' | '7days' | '30days' | 'all'>('all');
 
   const handleDeleteUser = async (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1308,6 +1310,13 @@ const EnhancedAdminDashboard: React.FC<EnhancedAdminDashboardProps> = () => {
           🚪 로그아웃
         </LogoutButton>
       </Header>
+
+      {/* 상세 KPI 섹션 추가 */}
+      <DetailedKPISection 
+        analyticsData={analyticsData}
+        timeRange={timeRange}
+        onTimeRangeChange={setTimeRange}
+      />
 
       <TabContainer>
         <Tab

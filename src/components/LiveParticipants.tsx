@@ -124,13 +124,6 @@ const LiveParticipants: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [recentCompletions, setRecentCompletions] = useState<any[]>([]);
 
-  // 실제 한국 이름 목록 (백업용)
-  const koreanNames = [
-    '김민수', '이영희', '박철수', '최수진', '정민호', '강지은', '윤세영', '임도현',
-    '한소영', '오준혁', '신예린', '배현우', '노은정', '송지훈', '전미래', '조현석',
-    '홍유진', '문성호', '서다은', '황민준', '양수아', '백도윤', '권서연', '남태영',
-    '고은비', '안준서', '유채원', '장민석', '현지우', '마서진'
-  ];
 
   // 실제 설문 완료 데이터 가져오기
   const loadRecentCompletions = async () => {
@@ -175,9 +168,9 @@ const LiveParticipants: React.FC = () => {
       { text: '결과를 공유했습니다', icon: '📤' },
       { text: '가족 유형을 발견했습니다', icon: '💖' }
     ];
-    const messages = [];
+    const messages: string[] = [];
     
-    // 실제 완료 데이터가 있으면 사용
+    // 실제 완료 데이터가 있으면만 사용
     if (recentCompletions.length > 0) {
       recentCompletions.forEach((completion, index) => {
         if (index < 6) { // 최대 6개까지만
@@ -188,13 +181,6 @@ const LiveParticipants: React.FC = () => {
           messages.push(`${action.icon} ${displayName}님이 ${result} 유형으로 ${action.text}`);
         }
       });
-    }
-    
-    // 실제 데이터가 부족하면 가짜 데이터로 채우기
-    while (messages.length < 6) {
-      const randomName = koreanNames[Math.floor(Math.random() * koreanNames.length)];
-      const randomAction = actions[Math.floor(Math.random() * actions.length)];
-      messages.push(`${randomAction.icon} ${maskName(randomName)}님이 ${randomAction.text}`);
     }
     
     return messages;
@@ -217,7 +203,8 @@ const LiveParticipants: React.FC = () => {
     console.log('LiveParticipants 마운트됨, isVisible:', !isHidden);
   }, []);
 
-  if (!isVisible) return null;
+  // 실제 데이터가 없거나 비가시 상태이면 렌더링 안함
+  if (!isVisible || recentCompletions.length === 0) return null;
 
   return (
     <AnimatePresence>

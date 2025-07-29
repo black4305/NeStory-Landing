@@ -7,10 +7,14 @@ import LiveParticipants from './LiveParticipants';
 import TrustBadges from './TrustBadges';
 import ExitIntentPopup from './ExitIntentPopup';
 import { SupabaseService } from '../services/supabase';
+import usePageTracking from '../hooks/usePageTracking';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [showExitIntent, setShowExitIntent] = useState(false);
+  
+  // 페이지 추적 훅 사용
+  const { metrics, trackCTAClick, trackSectionView } = usePageTracking('landing');
 
   React.useEffect(() => {
     const visitId = Date.now().toString();
@@ -35,8 +39,30 @@ const LandingPage: React.FC = () => {
       deviceType: visit.deviceType
     });
 
-    // 실시간 활성 사용자 추적 - 이 기능은 현재 SupabaseService에 없으므로 제거합니다
-    // 필요시 별도 구현 필요
+    // 섹션별 조회 추적을 위한 Intersection Observer
+    const observeSection = (selector: string, sectionName: string) => {
+      const element = document.querySelector(selector);
+      if (!element) return;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            trackSectionView(sectionName);
+            observer.unobserve(entry.target); // 한 번만 추적
+          }
+        });
+      }, { threshold: 0.5 }); // 50% 이상 보일 때 추적
+
+      observer.observe(element);
+      return observer;
+    };
+
+    // 각 섹션 관찰 시작
+    const observers = [
+      observeSection('[data-section=\"hero\"]', 'Hero Section'),
+      observeSection('[data-section=\"features\"]', 'Features Section'),
+      observeSection('[data-section=\"final-cta\"]', 'Final CTA Section')
+    ].filter(Boolean);
 
     // 스크롤 깊이 추적
     let maxScrollDepth = 0;
@@ -78,8 +104,10 @@ const LandingPage: React.FC = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('scroll', trackScrollDepth);
       document.removeEventListener('mouseleave', handleMouseLeave);
+      // Observer 정리
+      observers.forEach(observer => observer?.disconnect());
     };
-  }, []);
+  }, [trackSectionView]);
 
   const getDeviceType = (): 'mobile' | 'tablet' | 'desktop' => {
     const width = window.innerWidth;
@@ -88,8 +116,9 @@ const LandingPage: React.FC = () => {
     return 'desktop';
   };
 
-  const handleStartTest = () => {
-    // CTA 클릭 이벤트 기록
+  // 각 CTA 버튼별 고유한 추적 함수
+  const handleMainCTA = async () => {
+    await trackCTAClick('메인 CTA - 무료 진단', 'https://survey.nestory.co.kr');
     const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
     SupabaseService.saveLandingAnalytics({
       visitId,
@@ -99,15 +128,27 @@ const LandingPage: React.FC = () => {
       deviceType: getDeviceType(),
       ctaClicked: true
     });
-
-    // 바로 테스트 시작
-    navigate('/landing');
+    window.open('https://survey.nestory.co.kr', '_blank');
   };
 
-  const handleExitIntentAccept = () => {
+  const handleFeaturesCTA = async () => {
+    await trackCTAClick('특징 섹션 CTA', 'https://survey.nestory.co.kr');
+    window.open('https://survey.nestory.co.kr', '_blank');
+  };
+
+  const handleFinalCTA = async () => {
+    await trackCTAClick('최종 CTA - 여행 스타일 찾기', 'https://survey.nestory.co.kr');
+    window.open('https://survey.nestory.co.kr', '_blank');
+  };
+
+  const handleExitIntentAccept = async () => {
     setShowExitIntent(false);
-    // 바로 테스트 시작
-    navigate('/landing');
+    
+    // 페이지 추적 - Exit Intent CTA 클릭
+    await trackCTAClick('Exit Intent CTA', 'https://survey.nestory.co.kr');
+    
+    // 서베이 퍼널로 이동
+    window.open('https://survey.nestory.co.kr', '_blank');
   };
 
   return (
@@ -134,12 +175,12 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <EmotionalHook>여행만 가면 싸우는 우리 가족,</EmotionalHook>
+                <EmotionalHook>가족 여행, 늘 계획이 복잡하셨나요?</EmotionalHook>
                 <MainTitle>
-                  혹시 <HighlightText>'여행 스타일'이 안 맞아서</HighlightText><br />
-                  아닐까요?
+                  이제 <HighlightText>NeStory</HighlightText>와 함께<br />
+                  우리 가족 맞춤 여행을 찾아보세요
                 </MainTitle>
-                <SubText>단 10개의 질문으로 우리 가족의 숨은 여행 궁합을 찾아보세요.<br />서로의 성향만 알아도 여행 계획이 3배 더 쉬워집니다.</SubText>
+                <SubText>10가지 간단한 질문으로 가족의 여행 스타일을 파악하여<br />맞춤형 여행 계획을 세워보세요.</SubText>
               </motion.div>
             </MainHeadline>
             <motion.div
@@ -167,16 +208,16 @@ const LandingPage: React.FC = () => {
               <LeadMagnetBanner>
                 <LeadMagnetIcon>🎁</LeadMagnetIcon>
                 <LeadMagnetContent>
-                  <LeadMagnetTitle>💝 지금 테스트하면 <strong>특별 선물</strong> 드려요!</LeadMagnetTitle>
+                  <LeadMagnetTitle>🎪 <strong>가족과 함께!</strong> 2025 여름 가족여행 정리한 곳</LeadMagnetTitle>
                   <LeadMagnetItems>
-                    <LeadMagnetItem>🎪 가족과 함께! 2025 여름 가족여행 완전 정복 가이드</LeadMagnetItem>
-                    <LeadMagnetItem style={{fontSize: '0.9rem', color: '#666'}}>※ 광주, 전남, 전북, 충남 지역 한정</LeadMagnetItem>
+                    <LeadMagnetItem>✨ 가족 모두가 만족하는 맞춤 여행 가이드</LeadMagnetItem>
+                    <LeadMagnetItem style={{fontSize: '0.9rem', color: '#666'}}>※ 광주, 전남, 전북, 충남 지역 특화</LeadMagnetItem>
                   </LeadMagnetItems>
                 </LeadMagnetContent>
               </LeadMagnetBanner>
 
               <CTAButtonGroup>
-                <PrimaryCTAButton onClick={handleStartTest}>
+                <PrimaryCTAButton onClick={handleMainCTA}>
                   <ButtonText>우리 가족 여행 유형, 무료로 진단하기</ButtonText>
                   <ButtonSubtext>⏰ 단 2분! 서로를 이해하는 첫걸음</ButtonSubtext>
                 </PrimaryCTAButton>
@@ -193,100 +234,37 @@ const LandingPage: React.FC = () => {
           </HeroContent>
         </HeroSection>
 
-        {/* Story Section */}
-        <StorySection data-section="story">
-          <StoryContent>
-            <HookingBadge>
-              🆘 작년 여름, 제주도에서 일어난 일
-            </HookingBadge>
-            <SectionTitle>
-              💔 "엄마, 우리 왜 여행 왔어? 집이 더 재밌어..."
-            </SectionTitle>
-            <ProblemList>
-              <ProblemItem>😭 "3박 4일 내내 아이들은 핸드폰만 봤어요"</ProblemItem>
-              <ProblemItem>🤯 "준비물 빠뜨려서 현지에서 20만원 추가 지출"</ProblemItem>
-              <ProblemItem>😰 "유명 맛집 2시간 대기... 아이들은 짜증만"</ProblemItem>
-            </ProblemList>
-            
-            <SolutionSection>
-              <SolutionTitle>
-                ✨ 하지만 이제 해결책이 있습니다!
-              </SolutionTitle>
-            </SolutionSection>
-            
-            <EmotionalStory>
-              <StoryQuote>"그러다 우연히 <strong>'가족 여행 스타일 테스트'</strong>를 해보게 되었어요. 저는 '충분한 휴식'을 원하는 <strong>힐링형(R)</strong>인데, 남편은 '다양한 체험'을 중시하는 <strong>활동형(A)</strong>이라는 걸 처음 알게 된 거죠. 그 후로는 서로의 성향을 존중하며 계획을 짜니, 신기하게 다툼이 사라졌어요. "이번엔 아빠가 좋아하는 액티비티 했으니, 내일은 엄마랑 예쁜 카페 가서 쉬자!" 같은 대화가 가능해졌죠."</StoryQuote>
-              <StoryAuthor>- 두 아이의 엄마 박○○님 (광주)</StoryAuthor>
-            </EmotionalStory>
-
-            <TestimonialBox>
-              <TestimonialHeader>💬 어제 받으신 분 실시간 후기</TestimonialHeader>
-              <TestimonialContent>"우리 가족이 '도시 미식 탐험가' 유형이래요. 남편은 활동적이고 저는 휴식파인데, 맛집이라는 공통점을 찾았어요! 이제는 서로 좋아하는 걸 번갈아가며 계획 짜니까 여행이 훨씬 즐거워졌어요."</TestimonialContent>
-            </TestimonialBox>
-
-
-            <StoryText>
-              <strong>📝 2분 테스트 후 바로 받으실 수 있어요:</strong><br />
-              ✨ 나만의 여행 스타일 분석 결과<br />
-              🎆 가족과 함께! 2025 여름 가족여행 완전 정복 가이드<br />
-              <strong style={{color: '#ff6b6b'}}>💖 8/31까지만 특별 혜택 제공!</strong>
-            </StoryText>
-
-
-            <CenteredButtonContainer>
-              <CTAButton secondary onClick={handleStartTest}>
-                💸 특별 선물 받으러 가기 →
-              </CTAButton>
-            </CenteredButtonContainer>
-            
-          </StoryContent>
-        </StorySection>
 
         {/* Features Section */}
         <FeaturesSection data-section="features">
-          <CuriosityHook>
-            💸 특별 선물이 기다리고 있어요!
-          </CuriosityHook>
-          <SectionTitle>테스트를 마치면, 이런 결과를 받게 돼요!</SectionTitle>
+          <SectionTitle>🎪 가족과 함께하는 2025 여름여행 가이드</SectionTitle>
           <FeatureGrid>
             <FeatureCard>
               <FeatureIcon>🎯</FeatureIcon>
-              <FeatureTitle>나의 유형 확인</FeatureTitle>
+              <FeatureTitle>우리 가족 여행 유형</FeatureTitle>
               <FeatureDescription>
-                [8가지 유형 중 우리 가족 유형 확인]<br />
-                활동형일까? 휴식형일까?<br />
-                8가지 유형 중 우리 가족은<br />
-                어디에 속하는지, 귀여운 캐릭터와<br />
-                함께 결과를 확인하세요.
+                8가지 유형 중 우리 가족만의 특별한 여행 스타일을 찾아보세요
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
-              <FeatureIcon>📖</FeatureIcon>
-              <FeatureTitle>맞춤 상세 설명</FeatureTitle>
+              <FeatureIcon>📋</FeatureIcon>
+              <FeatureTitle>맞춤 여행 가이드</FeatureTitle>
               <FeatureDescription>
-                [유형별 상세 행동 패턴 및 추천 여행 스타일]<br />
-                왜 우리 가족이 여행지에서<br />
-                그런 행동을 했는지, 서로를<br />
-                이해하게 되는 상세한 설명을<br />
-                읽어보세요.
+                우리 지역 특화 여행 정보와 가족 모두가 만족할 코스 추천
               </FeatureDescription>
             </FeatureCard>
             <FeatureCard>
               <FeatureIcon>💝</FeatureIcon>
-              <FeatureTitle>정직한 개인화 혜택 예고</FeatureTitle>
+              <FeatureTitle>특별 혜택</FeatureTitle>
               <FeatureDescription>
-                [내 유형을 위한 '여름 여행 가이드' 활용 꿀팁 제공]<br />
-                테스트 참여자 전원에게 드리는<br />
-                '여름 여행 가이드'를, 나의 여행<br />
-                스타일에 맞춰 200% 활용할 수<br />
-                있는 특별한 꿀팁을 함께 알려드립니다.
+                가족 여행 체크리스트와 실용적인 여행 팁까지 한번에
               </FeatureDescription>
             </FeatureCard>
           </FeatureGrid>
           
           <CenteredButtonContainer>
-            <CTAButton onClick={handleStartTest}>
-              💖 우리 가족 여행 유형 테스트 시작하기
+            <CTAButton onClick={handleFeaturesCTA}>
+              🎪 가족 여행 스타일 찾아보기
             </CTAButton>
           </CenteredButtonContainer>
 
@@ -295,35 +273,26 @@ const LandingPage: React.FC = () => {
 
         {/* Final CTA */}
         <FinalCTASection>
-          <UrgencyBadge>
-            🔥 마감 임박! 오늘 밤 12시 정각 종료
-          </UrgencyBadge>
-          <FinalCTATitle>🤔 아직도 내 여행 스타일을 모르시나요?</FinalCTATitle>
+          <FinalCTATitle>💝 NeStory와 함께 특별한 가족여행 만들어보세요</FinalCTATitle>
           <FinalCTASubtitle>
-            지금까지 32,156명이 자신만의 여행 스타일 발견<br />
-            <span style={{color: '#ff6b6b', fontWeight: 800}}>8/31까지만 특별 혜택을 받을 수 있어요!</span>
+            32,156 가족이 이미 자신만의 여행 스타일을 발견했어요<br />
           </FinalCTASubtitle>
           
           {/* 최종 리드마그넷 어필 */}
           <FinalLeadMagnet>
-            <FinalLeadMagnetTitle>💝 8/31까지만 받을 수 있는 특별 선물</FinalLeadMagnetTitle>
+            <FinalLeadMagnetTitle>🎪 가족과 함께! 2025 여름 가족여행 정리한 곳</FinalLeadMagnetTitle>
             <FinalLeadMagnetList>
-              <FinalLeadMagnetItem>🎪 <strong>가족과 함께! 2025 여름 가족여행 완전 정복 가이드</strong><br />
+              <FinalLeadMagnetItem>✨ <strong>우리 가족 맞춤 여행 스타일 분석</strong><br />
                 <span style={{fontSize: '0.9rem', color: '#666'}}>&nbsp;&nbsp;&nbsp;&nbsp;✓ 광주, 전남, 전북, 충남 지역 특화 가이드<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;✓ 내 여행 스타일에 맞는 코스 추천<br />
-                &nbsp;&nbsp;&nbsp;&nbsp;✓ 가족 모두가 만족하는 여행 팁</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;✓ 가족 모두가 만족하는 여행 코스<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;✓ 실용적인 여행 준비 체크리스트</span>
               </FinalLeadMagnetItem>
             </FinalLeadMagnetList>
-            <FinalLeadMagnetNote>
-              <span style={{fontSize: '1.2rem', color: '#ff6b6b', fontWeight: 'bold'}}>
-                ⏰ 8월 31일까지만 제공되는 특별 혜택!
-              </span>
-            </FinalLeadMagnetNote>
           </FinalLeadMagnet>
           
           <FinalCTAButtonContainer>
-            <CTAButton large onClick={handleStartTest}>
-              💝 내 여행 스타일 찾고 특별 가이드 받기
+            <CTAButton large onClick={handleFinalCTA}>
+              🎪 우리 가족 여행 스타일 찾아보기
             </CTAButton>
           </FinalCTAButtonContainer>
         </FinalCTASection>
@@ -384,10 +353,13 @@ const VideoBackground = styled.video`
 const ContentOverlay = styled.div`
   position: relative;
   z-index: 2;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 50%, rgba(241, 245, 249, 0.98) 100%);
+  background: #faf9f6;
   color: #1a202c;
   width: 100%;
   overflow-x: hidden;
+  
+  /* 다크모드 방지 */
+  color-scheme: light;
   
   @media (max-width: 768px) {
     /* 모바일에서 스크롤 보장 */

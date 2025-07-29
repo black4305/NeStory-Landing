@@ -226,22 +226,38 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ onClose, onAccept }) 
       >
         <CloseButton onClick={onClose}>×</CloseButton>
         
-        <Title>🎁 무료 선물을 정말 포기하시나요?</Title>
+        <Title>💔 이대로 떠나시는데... 정말 괜찮으신가요?</Title>
         <Subtitle>
-          지금 나가시면 23,847명이 받아간<br/>
-          <strong style={{color: '#ff6b6b'}}>여행 준비 체크리스트</strong>를 받을 수 없어요!
+          "엄마, 우리 언제 또 여행가?"<br/>
+          아이의 이 한마디에 가슴이 뫕클하셨나요?<br/>
+          매번 계획만 세우다 흐지부지되는 가족여행...<br/>
+          이번만큼은 다르게 만들어드릴게요!
         </Subtitle>
         
         <SpecialOffer>
-          ⚡ 2분 테스트 후 즉시 다운로드 가능!
+          🎁 가족 여행 준비 100점 체크리스트<br/>
+          "엄마, 이번 여행 정말 재밌었어!"<br/>
+          아이들이 환하게 박수치는 그 순간...<br/>
+          내년에도 그런 추억을 만들어주세요
         </SpecialOffer>
+        
+        <div style={{marginTop: '20px', fontSize: '14px', color: '#666', lineHeight: '1.6'}}>
+          ✨ 아이들이 여행 내내 웃음소리가 끊이지 않는 마법<br/>
+          ✨ 준비물 빠뜨려서 낙담하는 일 없이 완벽한 하루<br/>
+          ✨ "엄마 정말 대단해!" 가족들의 인정과 고마움<br/>
+          ✨ 내년에도 계속 생각날 소중한 가족 추억
+        </div>
         
         <CTAButton
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onAccept}
+          onClick={() => {
+            window.open('https://survey.nestory.co.kr', '_blank');
+            onAccept();
+          }}
+          style={{marginTop: '25px', width: '100%', fontSize: '16px'}}
         >
-          🎁 선물 받고 시작하기
+          📋 체크리스트 받기 →
         </CTAButton>
         
         <SecondaryButton
@@ -249,7 +265,7 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ onClose, onAccept }) 
           whileTap={{ scale: 0.98 }}
           onClick={onClose}
         >
-          선물 필요 없어요
+          다음에 할게요
         </SecondaryButton>
       </PopupContainer>
     </Overlay>

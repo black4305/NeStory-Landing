@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import styled, { createGlobalStyle } from 'styled-components';
 import { GlobalStyles } from './styles/GlobalStyles';
-import StartScreen from './components/StartScreen';
 import PreTestPage from './components/PreTestPage';
 import QuestionCard from './components/QuestionCard';
 import ResultScreen from './components/ResultScreen';
@@ -87,7 +86,7 @@ const AppContainer = styled.div`
   position: relative;
 `;
 
-type AppState = 'start' | 'pretest' | 'survey' | 'leadmagnet' | 'result';
+type AppState = 'pretest' | 'survey' | 'leadmagnet' | 'result';
 
 // 관리자 인증 상태 관리
 const AdminRoute: React.FC = () => {
@@ -132,15 +131,12 @@ const SurveyApp: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [appState, answers]);
 
-  const handleStart = () => {
+  const handlePreTestStart = () => {
     setAppState('survey');
     setCurrentQuestionIndex(0);
     setAnswers([]);
   };
 
-  const handlePreTestStart = () => {
-    setAppState('start');
-  };
 
   const handleAnswer = async (score: number, timeSpent: number) => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -207,10 +203,6 @@ const SurveyApp: React.FC = () => {
     <>
       {appState === 'pretest' && (
         <PreTestPage onStart={handlePreTestStart} />
-      )}
-      
-      {appState === 'start' && (
-        <StartScreen onStart={handleStart} />
       )}
       
       {appState === 'survey' && (
@@ -461,11 +453,10 @@ function App() {
       <GlobalStyles />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/landing" element={<SurveyApp />} />
         <Route path="/result" element={<SharedResult />} />
         <Route path="/share/:shareId" element={<UniqueSharedResult />} />
         <Route path="/all-types" element={<AllTypesRoute />} />
-        <Route path="/admin" element={<AdminRoute />} />
+        <Route path="/landing_admin" element={<AdminRoute />} />
       </Routes>
     </AppContainer>
   );

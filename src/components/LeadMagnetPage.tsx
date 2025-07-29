@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { SupabaseService } from '../services/supabase';
+import usePageTracking from '../hooks/usePageTracking';
 
 interface LeadMagnetPageProps {
   onComplete: () => void;
@@ -218,6 +219,9 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
   const [inputValue, setInputValue] = useState('');
   const [channelAdded, setChannelAdded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 페이지 추적 훅 사용
+  const { linkUserInfo } = usePageTracking('leadmagnet');
 
   const handleSubmit = async () => {
     if (!selectedOption || !inputValue.trim()) return;
@@ -238,6 +242,14 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
         leadType: selectedOption,
         email: selectedOption === 'email' ? inputValue.trim() : undefined,
         phone: selectedOption === 'kakao' ? inputValue.trim() : undefined,
+        marketingConsent: selectedOption === 'kakao' ? channelAdded : false
+      });
+
+      // KPI 시스템과 사용자 정보 연결
+      await linkUserInfo({
+        email: selectedOption === 'email' ? inputValue.trim() : undefined,
+        phone: selectedOption === 'kakao' ? inputValue.trim() : undefined,
+        name: selectedOption === 'kakao' ? inputValue.trim() : undefined, // 카톡의 경우 별명을 이름으로
         marketingConsent: selectedOption === 'kakao' ? channelAdded : false
       });
       
