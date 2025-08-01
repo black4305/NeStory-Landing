@@ -276,7 +276,19 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
     });
     
     try {
-      // Supabase에 리드 정보 저장
+      // 새로운 PostgreSQL 기반 리드 추적 시스템
+      await detailedAnalytics.trackLeadCapture(
+        selectedOption as 'email' | 'kakao',
+        inputValue.trim(),
+        typeCode,
+        {
+          marketingConsent: selectedOption === 'kakao' ? channelAdded : false,
+          privacyConsent: true,
+          kakaoChannelAdded: selectedOption === 'kakao' ? channelAdded : false
+        }
+      );
+
+      // 기존 Supabase 시스템과의 호환성 유지 (나중에 제거 예정)
       const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
       await SupabaseService.saveLeadInfo({
         visitId,
@@ -369,9 +381,9 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
       // 완료 후 결과 페이지로 이동
       // 사용자에게 확인 메시지 (선택사항)
       if (selectedOption === 'email') {
-        console.log('이메일로 가이드북이 발송될 예정입니다.');
+        console.log('이메일로 템플릿이 발송될 예정입니다.');
       } else {
-        console.log('카카오톡으로 가이드북이 발송될 예정입니다.');
+        console.log('카카오톡으로 템플릿이 발송될 예정입니다.');
       }
       onComplete();
     } catch (error) {
@@ -404,12 +416,12 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
             [2025 여름 여행지/축제 완전 정복 가이드]도 함께 보내드릴게요.
           </div>
           <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-            분석 결과가 사라지지 않게, 그리고 보너스 가이드북을 놓치지 않도록<br/>
+            분석 결과가 사라지지 않게, 그리고 무료 템플릿을 놓치지 않도록<br/>
             아래에 가장 자주 쓰는 연락처를 남겨주세요.
           </div>
           <div style={{ fontSize: '0.85rem', color: '#888' }}>
             버튼을 누르는 즉시 결과 페이지로 이동하며,<br/>
-            가이드북은 이메일 또는 카카오톡으로 자동 발송됩니다.
+            템플릿은 이메일 또는 카카오톡으로 자동 발송됩니다.
           </div>
         </BenefitBox>
         
@@ -481,7 +493,7 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
             whileHover={{ scale: isValid && !isSubmitting ? 1.02 : 1 }}
             whileTap={{ scale: isValid && !isSubmitting ? 0.98 : 1 }}
           >
-            {isSubmitting ? '⏳ 처리 중...' : isValid ? '🎁 내 여행 유형 결과 확인하고, 무료 가이드북 받기!' : '📝 연락처를 입력해주세요'}
+            {isSubmitting ? '⏳ 처리 중...' : isValid ? '🎁 내 여행 유형 결과 확인하고, 무료 템플릿 받기!' : '📝 연락처를 입력해주세요'}
           </SubmitButton>
           
           <div style={{ textAlign: 'center' }}>

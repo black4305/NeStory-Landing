@@ -90,6 +90,23 @@ export interface ComprehensiveDeviceInfo {
     installedFonts: string[];
     canvasFingerprint: string;
     audioFingerprint: string;
+    
+    // 추가 정보
+    sessionDuration?: number; // 세션 지속 시간
+    visitCount?: number; // 방문 횟수
+    lastVisit?: string; // 마지막 방문
+    adBlock?: boolean; // 광고 차단기 사용 여부
+    cpuClass?: string; // CPU 클래스
+    oscpu?: string; // OS CPU
+    buildID?: string; // 빌드 ID
+    product?: string; // 제품명
+    productSub?: string; // 제품 서브
+    vendor?: string; // 벤더
+    vendorSub?: string; // 벤더 서브
+    webdriver?: boolean; // 웹드라이버 사용 여부
+    pdfViewerEnabled?: boolean; // PDF 뷰어 지원
+    mozApps?: boolean; // Firefox 앱 지원
+    mozConnection?: boolean; // Firefox 연결 지원
   };
 }
 
@@ -98,8 +115,8 @@ class DeviceDetection {
 
   // User Agent 파싱하여 디바이스 정보 추출
   private parseUserAgent(ua: string): ComprehensiveDeviceInfo['device'] {
-    const device = {
-      type: 'desktop' as const,
+    const device: ComprehensiveDeviceInfo['device'] = {
+      type: 'desktop',
       brand: 'Unknown',
       model: 'Unknown',
       os: 'Unknown',
@@ -282,7 +299,7 @@ class DeviceDetection {
     // WebGL 확인
     try {
       const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const gl = canvas.getContext('webgl') as WebGLRenderingContext || canvas.getContext('experimental-webgl') as WebGLRenderingContext;
       if (gl) {
         capabilities.webGL = true;
         const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
@@ -524,6 +541,65 @@ class DeviceDetection {
     return {};
   }
 
+  // 광고 차단기 감지
+  private async detectAdBlocker(): Promise<boolean> {
+    try {
+      // 광고 관련 요소 생성 테스트
+      const adElement = document.createElement('div');
+      adElement.innerHTML = '&nbsp;';
+      adElement.className = 'adsbox';
+      adElement.style.position = 'absolute';
+      adElement.style.left = '-10000px';
+      document.body.appendChild(adElement);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const detected = adElement.offsetHeight === 0;
+      document.body.removeChild(adElement);
+      
+      return detected;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 방문 기록 관리
+  private getVisitInfo(): { visitCount: number; lastVisit?: string; sessionDuration: number } {
+    const sessionStart = sessionStorage.getItem('sessionStart') || Date.now().toString();
+    const visitCount = parseInt(localStorage.getItem('visitCount') || '0') + 1;
+    const lastVisit = localStorage.getItem('lastVisit');
+    
+    // 현재 방문 정보 저장
+    localStorage.setItem('visitCount', visitCount.toString());
+    localStorage.setItem('lastVisit', new Date().toISOString());
+    sessionStorage.setItem('sessionStart', sessionStart);
+    
+    return {
+      visitCount,
+      lastVisit: lastVisit || undefined,
+      sessionDuration: Date.now() - parseInt(sessionStart)
+    };
+  }
+
+  // 추가 브라우저 정보 수집
+  private getExtendedBrowserInfo(): Partial<ComprehensiveDeviceInfo['misc']> {
+    const nav = navigator as any;
+    
+    return {
+      cpuClass: nav.cpuClass,
+      oscpu: nav.oscpu,
+      buildID: nav.buildID,
+      product: nav.product,
+      productSub: nav.productSub,
+      vendor: nav.vendor,
+      vendorSub: nav.vendorSub,
+      webdriver: nav.webdriver,
+      pdfViewerEnabled: nav.pdfViewerEnabled,
+      mozApps: !!nav.mozApps,
+      mozConnection: !!nav.mozConnection
+    };
+  }
+
   // 종합 디바이스 정보 수집
   public async getComprehensiveDeviceInfo(): Promise<ComprehensiveDeviceInfo> {
     if (this.deviceInfo) {
@@ -531,11 +607,15 @@ class DeviceDetection {
     }
 
     const ua = navigator.userAgent;
-    const [capabilities, location, battery] = await Promise.all([
+    const [capabilities, location, battery, adBlock] = await Promise.all([
       this.getCapabilities(),
       this.getLocationInfo(),
-      this.getBatteryInfo()
+      this.getBatteryInfo(),
+      this.detectAdBlocker()
     ]);
+
+    const visitInfo = this.getVisitInfo();
+    const extendedInfo = this.getExtendedBrowserInfo();
 
     this.deviceInfo = {
       userAgent: ua,
@@ -558,7 +638,14 @@ class DeviceDetection {
         batteryCharging: battery.charging,
         installedFonts: this.getInstalledFonts(),
         canvasFingerprint: this.getCanvasFingerprint(),
-        audioFingerprint: this.getAudioFingerprint()
+        audioFingerprint: this.getAudioFingerprint(),
+        
+        // 추가 정보
+        sessionDuration: visitInfo.sessionDuration,
+        visitCount: visitInfo.visitCount,
+        lastVisit: visitInfo.lastVisit,
+        adBlock,
+        ...extendedInfo
       }
     };
 

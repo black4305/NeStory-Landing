@@ -7,6 +7,7 @@ import { AxisScore } from '../types';
 import { travelTypes } from '../data/travelTypes';
 import { characters } from '../data/characters';
 import CharacterAvatar from './CharacterAvatar';
+import { detailedAnalytics } from '../utils/detailedAnalytics';
 
 const Container = styled.div`
   display: flex;
@@ -671,12 +672,12 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 border: '1px solid rgba(255, 255, 255, 0.3)'
               }}>
                 <div style={{ fontSize: '1.1rem', marginBottom: '1rem', fontWeight: '700' }}>
-                  🎁 가족 여행 준비 100점 체크리스트
+                  🎁 [NeStory] 스트레스 제로! 국내 가족여행 완벽 준비 템플릿
                 </div>
                 <div style={{ fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1rem' }}>
-                  <strong>"아... 이것까지 챙겨야 했구나!"</strong><br/>
-                  여행 중 후회하지 않도록<br/>
-                  <span style={{ color: '#fff3cd' }}>경험자들이 직접 만든 완벽한 준비물 리스트</span>
+                  <strong>"가족여행, 이제 스트레스 받지 말고!"</strong><br/>
+                  계획부터 준비까지 모든 것을<br/>
+                  <span style={{ color: '#fff3cd' }}>한 번에 해결하는 완벽한 템플릿</span>
                 </div>
                 <div style={{ 
                   fontSize: '0.85rem', 
@@ -687,10 +688,10 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                   margin: '0 auto'
                 }}>
                   <div style={{ textAlign: 'left', display: 'inline-block' }}>
-                    ✓ 연령별 맞춤 준비물 (영유아/초등/중고등)<br/>
-                    ✓ 놓치기 쉬운 필수템 50가지<br/>
-                    ✓ 비상 상황 대비 체크리스트<br/>
-                    ✓ 가족 여행 꿀팁 모음
+                    ✓ 가족 여행 계획 단계별 가이드<br/>
+                    ✓ 스트레스 없는 여행 준비 체크리스트<br/>
+                    ✓ 연령별 맞춤 준비물 리스트<br/>
+                    ✓ 가족 모두가 만족하는 여행 팁
                   </div>
                 </div>
               </div>
@@ -713,7 +714,12 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
-                onClick={() => window.open('https://survey.nestory.co.kr', '_blank')}
+                onClick={() => {
+                  const sessionInfo = detailedAnalytics.getSessionInfo();
+                  const surveyUrl = process.env.REACT_APP_SURVEY_URL || 'https://survey.nestory.co.kr';
+                  const urlWithParams = `${surveyUrl}?landing_session=${sessionInfo.sessionId}&ref=landing_result`;
+                  window.open(urlWithParams, '_blank');
+                }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onMouseEnter={(e) => {
@@ -730,7 +736,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                 }}
               >
                 <span>📋</span>
-                <span style={{ fontWeight: '600' }}>체크리스트 받기</span>
+                <span style={{ fontWeight: '600' }}>템플릿 받기</span>
                 <span>→</span>
               </Button>
             </div>

@@ -7,12 +7,13 @@ import QuestionCard from './components/QuestionCard';
 import ResultScreen from './components/ResultScreen';
 import LeadMagnetPage from './components/LeadMagnetPage';
 import AdminLogin from './components/AdminLogin';
-import EnhancedAdminDashboard from './components/EnhancedAdminDashboard';
+import AdvancedAdminDashboard from './components/AdvancedAdminDashboard';
 import AllTypesScreen from './components/AllTypesScreen';
 import LandingPage from './components/LandingPage';
 import { questions } from './data/questions';
 import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
+import { detailedAnalytics } from './utils/detailedAnalytics';
 import { Answer } from './types';
 
 
@@ -105,7 +106,12 @@ const AdminRoute: React.FC = () => {
     setIsAuthenticated(true);
   };
 
-  return isAuthenticated ? <EnhancedAdminDashboard /> : <AdminLogin onLogin={handleLogin} />;
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuthenticated');
+    setIsAuthenticated(false);
+  };
+
+  return isAuthenticated ? <AdvancedAdminDashboard onLogout={handleLogout} /> : <AdminLogin onLogin={handleLogin} />;
 };
 
 // 메인 설문 컴포넌트
@@ -152,6 +158,9 @@ const SurveyApp: React.FC = () => {
         averageResponseTime: analytics.getAverageResponseTime(),
         completionRate: analytics.getCompletionRate()
       };
+
+      // 새로운 PostgreSQL 기반 테스트 완료 추적
+      await detailedAnalytics.trackTestCompletion(typeCode, axisScores, analyticsData);
 
       // 결과를 sessionStorage에 저장
       sessionStorage.setItem('testResult', JSON.stringify({

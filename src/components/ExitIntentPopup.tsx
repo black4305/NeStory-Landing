@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
+import { detailedAnalytics } from '../utils/detailedAnalytics';
 
 const Overlay = styled(motion.div)`
   position: fixed;
@@ -235,7 +236,7 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ onClose, onAccept }) 
         </Subtitle>
         
         <SpecialOffer>
-          🎁 가족 여행 준비 100점 체크리스트<br/>
+          🎁 [NeStory] 스트레스 제로! 국내 가족여행 완벽 준비 템플릿<br/>
           "엄마, 이번 여행 정말 재밌었어!"<br/>
           아이들이 환하게 박수치는 그 순간...<br/>
           내년에도 그런 추억을 만들어주세요
@@ -252,12 +253,15 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ onClose, onAccept }) 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {
-            window.open('https://survey.nestory.co.kr', '_blank');
+            const sessionInfo = detailedAnalytics.getSessionInfo();
+            const surveyUrl = process.env.REACT_APP_SURVEY_URL || 'https://survey.nestory.co.kr';
+            const urlWithParams = `${surveyUrl}?landing_session=${sessionInfo.sessionId}&ref=exit_intent`;
+            window.open(urlWithParams, '_blank');
             onAccept();
           }}
           style={{marginTop: '25px', width: '100%', fontSize: '16px'}}
         >
-          📋 체크리스트 받기 →
+          📋 템플릿 받기 →
         </CTAButton>
         
         <SecondaryButton

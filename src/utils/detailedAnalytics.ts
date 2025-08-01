@@ -1,5 +1,5 @@
 import React from 'react';
-import { SupabaseService } from '../services/supabase';
+import PostgresService, { PageVisit, UserEvent, SurveyResponse, TestResult, Lead } from '../services/postgresService';
 import { deviceDetection, ComprehensiveDeviceInfo } from './deviceDetection';
 
 // 상세 추적 이벤트 타입 정의
@@ -48,8 +48,10 @@ class DetailedAnalytics {
   private events: DetailedEvent[] = [];
   private pageSessions: PageSession[] = [];
   private currentPageSession: PageSession | null = null;
+  private currentPageVisitId: string | null = null;
   private isTracking: boolean = true;
   private deviceInfo: ComprehensiveDeviceInfo | null = null;
+  private isSessionSaved: boolean = false;
 
   constructor() {
     this.sessionId = this.generateSessionId();
@@ -66,8 +68,23 @@ class DetailedAnalytics {
         isp: this.deviceInfo.location.isp,
         ip: this.deviceInfo.location.ip
       });
+
+      // 익명 세션을 PostgreSQL에 저장
+      await this.saveSession();
     } catch (error) {
       console.error('❌ 디바이스 정보 수집 실패:', error);
+    }
+  }
+
+  // 익명 세션 저장
+  private async saveSession(): Promise<void> {
+    if (!this.deviceInfo || this.isSessionSaved) return;
+
+    try {
+      const success = await PostgresService.createOrUpdateSession(this.deviceInfo, this.sessionId);
+      this.isSessionSaved = success;
+    } catch (error) {
+      console.error('❌ 세션 저장 실패:', error);
     }
   }
 
@@ -290,7 +307,26 @@ class DetailedAnalytics {
     const deviceInfo = await this.getDeviceInfoForEvent();
     const deviceSummary = await deviceDetection.getDeviceSummary();
 
-    // 새 페이지 세션 시작
+    // PostgreSQL에 페이지 방문 기록
+    const visitData: PageVisit = {
+      session_id: this.sessionId,
+      route,
+      page_title: document.title,
+      url_params: Object.fromEntries(new URLSearchParams(window.location.search)),
+      enter_time: new Date().toISOString(),
+      scroll_depth_percent: 0,
+      click_count: 0,
+      interaction_count: 0,
+      cta_clicks: 0,
+      form_interactions: 0,
+      bounce: false,
+      exit_intent_triggered: false,
+      load_time_ms: performance.now()
+    };
+
+    this.currentPageVisitId = await PostgresService.recordPageVisit(visitData);
+
+    // 새 페이지 세션 시작 (기존 로직 유지)
     this.currentPageSession = {
       sessionId: this.sessionId,
       route,
@@ -308,15 +344,30 @@ class DetailedAnalytics {
   }
 
   // 페이지 이탈 추적
-  public trackPageExit(): void {
-    if (!this.currentPageSession) return;
+  public async trackPageExit(): Promise<void> {
+    if (!this.currentPageSession || !this.currentPageVisitId) return;
 
     const exitTime = Date.now();
     const duration = exitTime - this.currentPageSession.enterTime;
 
+    // PostgreSQL에 페이지 이탈 정보 업데이트
+    const exitData: Partial<PageVisit> = {
+      exit_time: new Date().toISOString(),
+      duration_ms: duration,
+      scroll_depth_percent: this.currentPageSession.scrollDepth,
+      click_count: this.currentPageSession.interactions,
+      interaction_count: this.currentPageSession.interactions,
+      cta_clicks: this.currentPageSession.ctaClicks,
+      form_interactions: Object.keys(this.currentPageSession.formInputs).length,
+      bounce: duration < 30000 && this.currentPageSession.interactions === 0,
+      exit_type: 'navigation'
+    };
+
+    await PostgresService.updatePageVisitExit(this.currentPageVisitId, exitData);
+
+    // 기존 로직 유지
     this.currentPageSession.exitTime = exitTime;
     this.currentPageSession.duration = duration;
-
     this.pageSessions.push({ ...this.currentPageSession });
 
     this.trackEvent('page_exit', {
@@ -330,6 +381,7 @@ class DetailedAnalytics {
     });
 
     this.currentPageSession = null;
+    this.currentPageVisitId = null;
   }
 
   // CTA 클릭 추적 (기존 호환성)
@@ -352,7 +404,27 @@ class DetailedAnalytics {
   }
 
   // 테스트 답변 추적
-  public trackTestAnswer(questionId: number, answer: string | number, timeSpent: number): void {
+  public async trackTestAnswer(questionId: number, answer: string | number, timeSpent: number, questionData?: any): Promise<void> {
+    // PostgreSQL에 설문 응답 저장
+    if (questionData) {
+      const surveyResponse: SurveyResponse = {
+        session_id: this.sessionId,
+        question_number: questionId,
+        question_id: questionId,
+        question_text: questionData.text,
+        option_a: questionData.optionA,
+        option_b: questionData.optionB,
+        selected_option: typeof answer === 'string' ? answer : (answer >= 3 ? 'A' : 'B'),
+        selected_score: typeof answer === 'number' ? answer : 0,
+        response_time_ms: timeSpent,
+        confidence_score: timeSpent < 3000 ? 0.9 : (timeSpent > 10000 ? 0.3 : 0.6),
+        answered_at: new Date().toISOString()
+      };
+      
+      await PostgresService.saveSurveyResponse(surveyResponse);
+    }
+
+    // 기존 이벤트 추적
     this.trackEvent('click', {
       elementType: 'test_answer',
       elementId: `question_${questionId}`,
@@ -382,12 +454,133 @@ class DetailedAnalytics {
     });
   }
 
+  // 테스트 완료 추적
+  public async trackTestCompletion(travelTypeCode: string, axisScores: Record<string, number>, analytics: any): Promise<void> {
+    try {
+      const testResult: TestResult = {
+        session_id: this.sessionId,
+        travel_type_code: travelTypeCode,
+        axis_scores: axisScores,
+        total_response_time_ms: analytics.totalTime || 0,
+        average_response_time_ms: analytics.averageResponseTime || 0,
+        completion_rate: analytics.completionRate || 100,
+        consistency_score: this.calculateConsistencyScore(axisScores),
+        started_at: new Date(Date.now() - (analytics.totalTime || 0)).toISOString(),
+        completed_at: new Date().toISOString(),
+        share_id: this.generateShareId(),
+        shared_count: 0
+      };
+      
+      await PostgresService.saveTestResult(testResult);
+      console.log('✅ 테스트 완료 결과 저장:', travelTypeCode);
+    } catch (error) {
+      console.error('❌ 테스트 완료 저장 실패:', error);
+    }
+  }
+
+  // 리드 정보 저장
+  public async trackLeadCapture(contactType: 'email' | 'kakao', contactValue: string, travelType?: string, additionalData?: any): Promise<void> {
+    try {
+      const lead: Lead = {
+        session_id: this.sessionId,
+        contact_type: contactType,
+        contact_value: contactValue,
+        marketing_consent: additionalData?.marketingConsent || false,
+        privacy_consent: additionalData?.privacyConsent || true,
+        kakao_channel_added: additionalData?.kakaoChannelAdded || false,
+        lead_source: this.getLeadSource(),
+        travel_type: travelType,
+        lead_score: this.calculateLeadScore(contactType, additionalData),
+        webhook_sent: false,
+        created_at: new Date().toISOString()
+      };
+      
+      await PostgresService.saveLead(lead);
+      console.log('✅ 리드 정보 저장 완료:', contactType);
+      
+      // 익명 사용자를 식별된 사용자로 전환
+      await this.linkUserIdentity(contactType, contactValue);
+    } catch (error) {
+      console.error('❌ 리드 정보 저장 실패:', error);
+    }
+  }
+
+  // 사용자 신원 연결 (익명 -> 식별)
+  private async linkUserIdentity(contactType: string, contactValue: string): Promise<void> {
+    // 이후 이 세션의 모든 활동을 식별된 사용자로 연결할 수 있도록 플래그 설정
+    localStorage.setItem('userIdentified', 'true');
+    localStorage.setItem('userContactType', contactType);
+    localStorage.setItem('userContactValue', contactValue);
+    
+    console.log('✅ 사용자 신원 연결 완료:', contactType);
+  }
+
+  // 보조 함수들
+  private calculateConsistencyScore(axisScores: Record<string, number>): number {
+    // 축별 점수의 일관성을 0-1 사이로 계산
+    const scores = Object.values(axisScores);
+    const avg = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+    const variance = scores.reduce((sum, score) => sum + Math.pow(score - avg, 2), 0) / scores.length;
+    return Math.max(0, 1 - (variance / 25)); // 분산이 낮을수록 일관성 높음
+  }
+
+  private generateShareId(): string {
+    return `share_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+  }
+
+  private getLeadSource(): string {
+    const referrer = document.referrer;
+    if (!referrer || referrer.includes(window.location.hostname)) return 'organic';
+    if (referrer.includes('google.com')) return 'google';
+    if (referrer.includes('facebook.com') || referrer.includes('instagram.com')) return 'social';
+    return 'referral';
+  }
+
+  private calculateLeadScore(contactType: string, additionalData?: any): number {
+    let score = 50; // 베이스 점수
+    
+    // 연락처 타입에 따른 점수
+    if (contactType === 'email') score += 20;
+    if (contactType === 'kakao') score += 15;
+    
+    // 추가 정보에 따른 점수
+    if (additionalData?.marketingConsent) score += 15;
+    if (additionalData?.kakaoChannelAdded) score += 10;
+    
+    // 세션 품질에 따른 점수
+    if (this.currentPageSession) {
+      if (this.currentPageSession.interactions > 5) score += 10;
+      if (this.currentPageSession.scrollDepth > 80) score += 5;
+    }
+    
+    return Math.min(100, score);
+  }
+
   // 이벤트 데이터 저장
   private async saveEvents(): Promise<void> {
     if (this.events.length === 0) return;
 
     try {
-      await SupabaseService.saveDetailedEvents(this.events);
+      // DetailedEvent를 UserEvent 형식으로 변환
+      const userEvents: UserEvent[] = this.events.map(event => ({
+        session_id: event.sessionId,
+        page_visit_id: this.currentPageVisitId || undefined,
+        event_type: event.eventType,
+        element_id: event.elementId,
+        element_type: event.elementType,
+        element_text: event.elementText,
+        element_value: typeof event.value === 'string' ? event.value : String(event.value || ''),
+        click_x: event.position?.x,
+        click_y: event.position?.y,
+        scroll_position: event.scrollPosition,
+        viewport_width: window.innerWidth,
+        viewport_height: window.innerHeight,
+        timestamp_ms: event.timestamp,
+        time_on_page_ms: event.timeOnPage,
+        metadata: event.metadata
+      }));
+
+      await PostgresService.recordUserEvents(userEvents);
       console.log(`✅ ${this.events.length}개 상세 이벤트 저장 완료`);
       this.events = []; // 저장 후 초기화
     } catch (error) {
