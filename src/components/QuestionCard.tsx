@@ -411,7 +411,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       optionA: question.optionA?.slice(0, 30),
       optionB: question.optionB?.slice(0, 30)
     });
-  }, [question.id, currentQuestion, totalQuestions]);
+  }, [question.id, currentQuestion, totalQuestions, question.text, question.optionA, question.optionB]);
 
   const handleAnswer = () => {
     if (selectedScore !== null) {

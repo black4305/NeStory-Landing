@@ -87,7 +87,7 @@ const AppContainer = styled.div`
   position: relative;
 `;
 
-type AppState = 'pretest' | 'survey' | 'leadmagnet' | 'result';
+// type AppState = 'pretest' | 'survey' | 'leadmagnet' | 'result';
 
 // 관리자 인증 상태 관리
 const AdminRoute: React.FC = () => {
@@ -160,7 +160,7 @@ const SurveyApp: React.FC = () => {
       };
 
       // 새로운 PostgreSQL 기반 테스트 완료 추적
-      await detailedAnalytics.trackTestCompletion(typeCode, axisScores, analyticsData);
+      await detailedAnalytics.trackTestCompletion(typeCode, axisScores as unknown as Record<string, number>, analyticsData);
 
       // 결과를 sessionStorage에 저장
       sessionStorage.setItem('testResult', JSON.stringify({

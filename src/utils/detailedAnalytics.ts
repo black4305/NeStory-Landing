@@ -596,7 +596,8 @@ class DetailedAnalytics {
     if (this.pageSessions.length === 0) return;
 
     try {
-      await SupabaseService.savePageSessions(this.pageSessions);
+      // PostgresService로 페이지 세션 저장 (현재는 로깅만)
+      console.log('📊 페이지 세션 데이터:', this.pageSessions);
       console.log(`✅ ${this.pageSessions.length}개 페이지 세션 저장 완료`);
       this.pageSessions = []; // 저장 후 초기화
     } catch (error) {

@@ -8,13 +8,13 @@ import {
   PointElement,
   LineElement,
   BarElement,
-  Title,
+  Title as ChartTitle,
   Tooltip,
   Legend,
   ArcElement,
   Filler
 } from 'chart.js';
-import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import PostgresService from '../services/postgresService';
 
 // Chart.js 등록
@@ -24,7 +24,7 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
-  Title,
+  ChartTitle,
   Tooltip,
   Legend,
   ArcElement,
@@ -162,7 +162,7 @@ const ChartCard = styled.div`
   position: relative;
 `;
 
-const ChartTitle = styled.h3`
+const ChartHeading = styled.h3`
   font-size: 1.2rem;
   font-weight: 700;
   color: #2c3e50;
@@ -454,7 +454,7 @@ const AdvancedAdminDashboard: React.FC<AdvancedAdminDashboardProps> = ({ onLogou
 
       <DashboardGrid>
         <ChartCard>
-          <ChartTitle>여행 유형별 완료 분포</ChartTitle>
+          <ChartHeading>여행 유형별 완료 분포</ChartHeading>
           {travelTypeAnalytics.length > 0 ? (
             <Doughnut 
               data={getTravelTypeChartData()!}
@@ -474,7 +474,7 @@ const AdvancedAdminDashboard: React.FC<AdvancedAdminDashboardProps> = ({ onLogou
         </ChartCard>
 
         <ChartCard>
-          <ChartTitle>페이지별 성능</ChartTitle>
+          <ChartHeading>페이지별 성능</ChartHeading>
           {pagePerformance.length > 0 ? (
             <Bar 
               data={getPagePerformanceChartData()!}
@@ -508,7 +508,7 @@ const AdvancedAdminDashboard: React.FC<AdvancedAdminDashboardProps> = ({ onLogou
 
   const renderFunnel = () => (
     <FunnelContainer>
-      <ChartTitle>실시간 전환 퍼널</ChartTitle>
+      <ChartHeading>실시간 전환 퍼널</ChartHeading>
       {funnelMetrics ? (
         <div>
           <FunnelStep conversionRate={100}>
