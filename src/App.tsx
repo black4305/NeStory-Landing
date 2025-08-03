@@ -126,7 +126,7 @@ const SqueezePageWrapper: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const typeCode = searchParams.get('type') || 'ACFBK';
+  const typeCode = searchParams.get('type') || 'ACF';
   
   return (
     <LeadMagnetPage 
@@ -137,12 +137,25 @@ const SqueezePageWrapper: React.FC = () => {
 };
 const SharedResult: React.FC = () => {
   const navigate = useNavigate();
-  // 기본값 설정
+  
+  // sessionStorage에서 테스트 결과 가져오기
+  const savedResult = sessionStorage.getItem('testResult');
+  let resultData;
+  
+  if (savedResult) {
+    try {
+      resultData = JSON.parse(savedResult);
+    } catch (error) {
+      console.error('저장된 결과 파싱 오류:', error);
+    }
+  }
+  
+  // 기본값 설정 (sessionStorage 결과가 있으면 사용)
   const defaultProps = {
-    typeCode: 'ACFBK',
-    axisScores: { A: 50, C: 50, F: 50 },
+    typeCode: resultData?.typeCode || 'ACF',
+    axisScores: resultData?.axisScores || { A: 12, C: 9, F: 9 },
     onRestart: () => navigate('/'),
-    analytics: { totalTime: 0, averageResponseTime: 0, completionRate: 100 }
+    analytics: resultData?.analytics || { totalTime: 0, averageResponseTime: 0, completionRate: 100 }
   };
   
   return <ResultScreen {...defaultProps} />;
@@ -153,8 +166,8 @@ const UniqueSharedResult: React.FC = () => {
   const navigate = useNavigate();
   
   const defaultProps = {
-    typeCode: 'ACFBK',
-    axisScores: { A: 50, C: 50, F: 50 },
+    typeCode: 'ACF',
+    axisScores: { A: 12, C: 9, F: 9 },
     onRestart: () => navigate('/'),
     analytics: { totalTime: 0, averageResponseTime: 0, completionRate: 100 },
     shareId

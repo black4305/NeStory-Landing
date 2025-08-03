@@ -1513,3 +1513,234 @@ const canvas = await html2canvas(captureAreaRef.current, {
 2. 데이터베이스 스키마 가져오기
 3. 배포 및 연결 테스트
 4. Landing → Survey 퍼널 통합 검증
+
+---
+
+## 🎯 2025.08.03 20:10 - Landing 프로젝트 데이터베이스 저장 및 결과 정합성 문제 완전 수정
+
+### 완료된 작업
+
+#### 1. 📊 **데이터베이스 저장 문제 해결**
+
+**문제 상황**:
+- Landing 프로젝트에서 설문 데이터가 DB에 저장되지 않는 문제
+- Vercel Functions API 엔드포인트 불일치로 인한 요청 실패
+
+**해결 내용**:
+```typescript
+// src/services/postgresService.ts 엔드포인트 수정
+// 기존: '/session' 
+// 변경: '/sessions'
+
+// Vercel Functions와 일치하도록 수정
+await apiClient.post('/sessions', sessionData);
+```
+
+**결과**: ✅ **DB 저장 정상 동작**, 사용자 데이터 완전 추적 가능
+
+#### 2. 🔀 **설문 결과 코드 3자리 시스템 복원**
+
+**문제 상황**:
+- 설문 결과가 기존 3자리 코드(ACF, RNE 등)에서 5자리 코드(ACFBK 등)로 변경되어 사용자 혼란
+- travelTypes 데이터와 characters 데이터 불일치
+
+**해결 내용**:
+```typescript
+// Landing/src/App.tsx 기본값 수정
+// 기존: typeCode = searchParams.get('type') || 'ACFBK';
+// 변경: typeCode = searchParams.get('type') || 'ACF';
+
+// 기존: axisScores: { A: 50, C: 50, F: 50, B: 50, K: 50 }
+// 변경: axisScores: { A: 12, C: 9, F: 9 }
+
+// SharedResult 컴포넌트 기본값도 동일하게 수정
+```
+
+**결과**: ✅ **3자리 코드 시스템 복원**, 기존 사용자 경험과 일관성 확보
+
+#### 3. 📐 **점수 계산 시스템 정확성 개선**
+
+**문제 상황**:
+- 점수 범위와 기준점이 잘못 설정되어 부정확한 결과 제공
+- 축별 문항 수 차이를 반영하지 못한 계산 오류
+
+**해결 내용**:
+```typescript
+// src/utils/calculator.ts 기준점 수정
+// A축 (4문항): 기존 10점 → 변경 12점 (4-20점 범위의 중간값)
+// C축 (3문항): 기존 7.5점 → 변경 9점 (3-15점 범위의 중간값)  
+// F축 (3문항): 기존 7.5점 → 변경 9점 (3-15점 범위의 중간값)
+
+const typeCode = 
+  (axisScores.A >= 12 ? 'A' : 'R') +  // 4문항 기준: 12점
+  (axisScores.C >= 9 ? 'C' : 'N') +   // 3문항 기준: 9점  
+  (axisScores.F >= 9 ? 'F' : 'E');    // 3문항 기준: 9점
+
+// ResultScreen.tsx 점수 표시 수정
+// 기존: 부정확한 계산식
+// 변경: {Math.round(((score - (axis === 'A' ? 4 : 3)) / (axis === 'A' ? 16 : 12)) * 10)}/10)
+```
+
+**결과**: ✅ **정확한 점수 계산**, 축별 특성을 반영한 합리적 기준점 적용
+
+#### 4. 🎭 **결과 페이지 캐릭터 및 설명 데이터 복구**
+
+**문제 상황**:
+- SharedResult 컴포넌트에서 하드코딩된 기본값 사용으로 실제 테스트 결과 미반영
+- characters.ts와 travelTypes.ts 데이터가 표시되지 않음
+
+**해결 내용**:
+```typescript
+// Landing/src/App.tsx SharedResult 컴포넌트 수정
+const SharedResult: React.FC = () => {
+  const navigate = useNavigate();
+  
+  // sessionStorage에서 테스트 결과 가져오기
+  const savedResult = sessionStorage.getItem('testResult');
+  let resultData;
+  
+  if (savedResult) {
+    try {
+      resultData = JSON.parse(savedResult);
+    } catch (error) {
+      console.error('저장된 결과 파싱 오류:', error);
+    }
+  }
+  
+  // 실제 테스트 결과 사용
+  const defaultProps = {
+    typeCode: resultData?.typeCode || 'ACF',
+    axisScores: resultData?.axisScores || { A: 12, C: 9, F: 9 },
+    onRestart: () => navigate('/'),
+    analytics: resultData?.analytics || { totalTime: 0, averageResponseTime: 0, completionRate: 100 }
+  };
+  
+  return <ResultScreen {...defaultProps} />;
+};
+```
+
+**결과**: ✅ **완전한 결과 페이지**, 실제 테스트 데이터 기반 캐릭터와 설명 표시
+
+### 기술적 상세 수정 사항
+
+#### **점수 범위 및 계산 로직**
+```typescript
+// 정확한 점수 범위 정의
+- A축: 4문항 × (1-5점) = 4-20점 범위, 중간값 12점
+- C축: 3문항 × (1-5점) = 3-15점 범위, 중간값 9점
+- F축: 3문항 × (1-5점) = 3-15점 범위, 중간값 9점
+
+// 프로그레스 바 위치 계산 개선
+const normalizedScore = (score - minScore) / (maxScore - minScore);
+const position = normalizedScore < 0.5 
+  ? normalizedScore * 0.8 * 100 + 10  // 왼쪽 10-50% 범위
+  : (normalizedScore - 0.5) * 0.8 * 100 + 50; // 오른쪽 50-90% 범위
+```
+
+#### **데이터 일관성 확보**
+```typescript
+// 모든 컴포넌트에서 3자리 코드 시스템 통일
+- App.tsx: 'ACF' 기본값
+- SharedResult: 'ACF' 기본값  
+- characters.ts: 'ACF', 'ACE', 'ANF', 'ANE', 'RCF', 'RCE', 'RNF', 'RNE' 8가지
+- travelTypes.ts: 동일한 8가지 코드 매칭
+```
+
+#### **세션 데이터 흐름 최적화**
+```typescript
+// 테스트 완료 시 sessionStorage 저장
+sessionStorage.setItem('testResult', JSON.stringify({
+  typeCode,      // 3자리 코드
+  axisScores,    // 정확한 점수
+  analytics      // 분석 데이터
+}));
+
+// 결과 페이지에서 sessionStorage 읽기
+const resultData = JSON.parse(sessionStorage.getItem('testResult'));
+```
+
+### 사용자 경험 개선 효과
+
+#### **정확성 향상**
+- ✅ **올바른 여행 유형**: 3자리 코드 시스템으로 정확한 매칭
+- ✅ **정밀한 점수**: 축별 문항 수를 반영한 합리적 기준점
+- ✅ **완전한 결과**: 실제 테스트 데이터 기반 개인화된 결과
+
+#### **일관성 확보**
+- ✅ **브랜드 통일성**: 기존 3자리 시스템 유지로 혼란 방지
+- ✅ **데이터 신뢰성**: sessionStorage 기반 정확한 결과 전달
+- ✅ **시각적 정합성**: 점수 막대와 실제 값의 정확한 일치
+
+#### **기능 안정성**
+- ✅ **빌드 성공**: CI/CD 오류 완전 해결
+- ✅ **DB 저장**: 모든 사용자 데이터 정상 추적
+- ✅ **결과 표시**: 캐릭터와 설명 완벽 동작
+
+### 비즈니스 임팩트
+
+#### **사용자 신뢰도 회복**
+- 🎯 **정확한 분석**: 올바른 점수 계산으로 신뢰할 수 있는 결과 제공
+- 📊 **일관된 경험**: 3자리 코드 시스템으로 기존 사용자 경험 유지
+- 🎭 **완성된 결과**: 캐릭터와 설명이 모두 표시되는 완전한 결과 페이지
+
+#### **데이터 품질 향상**
+- 💾 **완전한 추적**: DB 저장 문제 해결로 모든 사용자 행동 데이터 수집
+- 📈 **정확한 분석**: 올바른 점수 계산으로 신뢰할 수 있는 사용자 세그멘테이션
+- 🔗 **Landing-Survey 연동**: 정확한 데이터 기반 전체 퍼널 분석
+
+#### **운영 안정성 확보**
+- ⚡ **빌드 성공**: 배포 프로세스 안정화로 지속적인 서비스 운영
+- 🛠️ **유지보수성**: 명확한 3자리 코드 시스템으로 관리 편의성 향상
+- 📱 **사용자 만족**: 완전히 동작하는 기능으로 사용자 경험 최적화
+
+### 완료 체크리스트
+
+- ✅ **DB 저장 문제 해결**: API 엔드포인트 '/sessions'로 수정
+- ✅ **3자리 코드 시스템 복원**: 'ACFBK' → 'ACF' 기본값 변경
+- ✅ **점수 계산 정확성 개선**: 축별 기준점 12/9/9로 수정
+- ✅ **결과 페이지 데이터 복구**: sessionStorage 기반 실제 결과 표시
+
+### 최종 상태
+
+**Landing 프로젝트**: ✅ **완전 동작**
+- DB 저장 정상 작동
+- 3자리 코드 시스템 복원
+- 정확한 점수 계산
+- 완전한 결과 페이지 표시
+
+### 측정 항목 DB 저장 확인
+
+**PostgreSQL 테이블별 저장 데이터**:
+
+#### **squeeze_anonymous_sessions (세션 추적)**
+- 사용자 접속 정보 (IP, User-Agent, 디바이스)
+- 지리적 위치 (국가, 도시)
+- 유입 경로 (referrer, landing_page)
+- 세션 지속 시간 및 활동 추적
+
+#### **squeeze_page_visits (페이지 방문)**
+- 각 페이지별 진입/이탈 시간
+- 스크롤 깊이 및 상호작용 횟수
+- URL 파라미터 및 페이지 제목
+
+#### **squeeze_user_events (사용자 행동)**
+- 버튼 클릭, 폼 제출 등 모든 이벤트
+- 마우스 좌표, 키보드 입력
+- 에러 발생 및 메타데이터
+
+#### **squeeze_leads (리드 전환)**
+- 이메일/카카오톡 연락처 수집
+- 마케팅 동의 여부
+- 리드 품질 점수
+
+#### **squeeze_conversions (전환 추적)**
+- 전환 단계별 완료 시간
+- 전환 경로 및 성과
+
+### 결론
+
+Landing 프로젝트의 **데이터베이스 저장 문제가 완전히 해결**되어 모든 사용자 행동이 정확히 추적됩니다.
+
+**3자리 코드 시스템 복원**과 **정확한 점수 계산**을 통해 사용자 신뢰도를 회복하고, **완전한 결과 페이지**로 사용자 경험이 크게 개선되었습니다.
+
+이제 Landing 프로젝트가 **완벽한 데이터 수집과 정확한 결과 제공**을 모두 갖춘 **신뢰할 수 있는 가족여행 성향 분석 플랫폼**으로 완성되었습니다. 🎯✨

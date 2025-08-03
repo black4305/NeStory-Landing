@@ -539,13 +539,16 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
             {Object.entries(axisScores).map(([axisKey, score]) => {
               const axis = axisKey as keyof typeof axisConfig;
               const config = axisConfig[axis];
-              // 10점 만점 기준으로 위치 계산
-              const normalizedScore = (score - 2) / 8; // 0~1 사이 값 (2점~10점 범위)
+              // 실제 점수 범위 기준으로 위치 계산
+              const minScore = axis === 'A' ? 4 : 3; // 최소 점수
+              const maxScore = axis === 'A' ? 20 : 15; // 최대 점수
+              const midScore = axis === 'A' ? 12 : 9; // 중간 점수 (기준점)
+              const normalizedScore = (score - minScore) / (maxScore - minScore); // 0~1 사이 값
               const enhancedPosition = normalizedScore < 0.5 
                 ? normalizedScore * 0.8 * 100 + 10  // 왼쪽: 10~50% 범위
                 : (normalizedScore - 0.5) * 0.8 * 100 + 50; // 오른쪽: 50~90% 범위
               const position = Math.max(10, Math.min(90, enhancedPosition));
-              const isRight = score >= 6; // 10점 만점 기준 6점 이상
+              const isRight = score >= midScore; // 중간 점수 이상
               const resultType = isRight ? config.right : config.left;
               
               return (
@@ -553,7 +556,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
                   <AxisLabel>
                     <AxisName>{config.name}</AxisName>
                     <AxisResult isLeft={!isRight}>
-                      {resultType.korean} ({Math.round((score / (axis === 'A' ? 20 : 15)) * 10)}/10)
+                      {resultType.korean} ({Math.round(((score - (axis === 'A' ? 4 : 3)) / (axis === 'A' ? 16 : 12)) * 10)}/10)
                     </AxisResult>
                   </AxisLabel>
                   

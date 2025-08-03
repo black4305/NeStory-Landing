@@ -133,7 +133,7 @@ export class PostgresService {
         landing_page: window.location.href,
       };
 
-      const response = await apiClient.post('/session', sessionData);
+      const response = await apiClient.post('/sessions', sessionData);
 
       if (response.status === 201) {
         console.log('✅ 익명 세션 저장 완료:', sessionId);

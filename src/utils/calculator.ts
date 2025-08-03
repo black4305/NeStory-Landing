@@ -23,9 +23,9 @@ export const calculateTravelType = (answers: Answer[]): string => {
 
   // 각 축별 유형 결정 (A축 4문항, C/F축 3문항, 5점 척도)
   const typeCode = 
-    (axisScores.A >= 10 ? 'A' : 'R') +  // 4문항 기준점: 10점 (4*2.5)
-    (axisScores.C >= 7.5 ? 'C' : 'N') + // 3문항 기준점: 7.5점 (3*2.5)
-    (axisScores.F >= 7.5 ? 'F' : 'E');  // 3문항 기준점: 7.5점 (3*2.5)
+    (axisScores.A >= 12 ? 'A' : 'R') +  // 4문항 기준점: 12점 (중간값)
+    (axisScores.C >= 9 ? 'C' : 'N') +   // 3문항 기준점: 9점 (중간값)
+    (axisScores.F >= 9 ? 'F' : 'E');    // 3문항 기준점: 9점 (중간값)
 
   return typeCode;
 };
