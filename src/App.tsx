@@ -15,6 +15,7 @@ import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
 import { detailedAnalytics } from './utils/detailedAnalytics';
 import { Answer } from './types';
+import { questions as questionsData } from './data/questions';
 
 // Styled components 정의
 const AppContainer = styled.div`
@@ -42,20 +43,10 @@ const SurveyApp: React.FC = () => {
   const navigate = useNavigate();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
-  const [questions, setQuestions] = useState<any[]>([]); // 수정: questions를 state로 관리
+  const [questions] = useState(questionsData); // 로컬 questions 데이터 사용
 
   useEffect(() => {
-    // 백엔드에서 질문 데이터 로드
-    const fetchQuestions = async () => {
-      const initialData = await PostgresService.getInitialData();
-      // "questions" 데이터가 어떤 필드에 있는지 확인 필요. API 응답에 따라 변경.
-      // 여기서는 임시로 initialData가 question 배열이라고 가정합니다.
-      // 실제 API 응답 구조에 맞게 수정해야 합니다. 
-      // 예를 들어, initialData.questions 일 수 있습니다.
-      setQuestions(initialData.travelTypes); // 임시로 travelTypes를 사용. API 응답 구조 확인 필요
-    };
-
-    fetchQuestions();
+    // 세션 및 분석 초기화
 
     const handleBeforeUnload = async () => {
       if (answers.length > 0) {
@@ -68,8 +59,6 @@ const SurveyApp: React.FC = () => {
   }, [answers]);
 
   const handleAnswer = async (score: number, timeSpent: number) => {
-    if (questions.length === 0) return; // 데이터가 로드되기 전에는 진행하지 않음
-
     const currentQuestion = questions[currentQuestionIndex];
     const newAnswer: Answer = {
       questionId: currentQuestion.id,
@@ -114,9 +103,7 @@ const SurveyApp: React.FC = () => {
     }
   };
 
-  if (questions.length === 0) {
-    return <div>Loading...</div>; // 데이터 로딩 중 표시
-  }
+  // questions는 이제 로컬 데이터이므로 항상 사용 가능
 
   return (
     <QuestionCard

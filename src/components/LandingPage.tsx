@@ -253,7 +253,7 @@ const LandingPage: React.FC = () => {
               <LeadMagnetBanner>
                 <LeadMagnetIcon>🎁</LeadMagnetIcon>
                 <LeadMagnetContent>
-                  <LeadMagnetTitle>🎁 <strong>[NeStory]</strong> 스트레스 제로! 국내 가족여행 완벽 준비 템플릿</LeadMagnetTitle>
+                  <LeadMagnetTitle>🎁 <strong>[NeStory]</strong> 여행 준비 체크리스트 완벽 템플릿</LeadMagnetTitle>
                   <LeadMagnetItems>
                     <LeadMagnetItem>✨ 가족 여행 계획부터 준비까지 모든 것</LeadMagnetItem>
                     <LeadMagnetItem style={{fontSize: '0.9rem', color: '#666'}}>※ 더 특별한 보상은 추가 설문 참여 시 공개!</LeadMagnetItem>
@@ -334,7 +334,7 @@ const LandingPage: React.FC = () => {
           
           {/* 최종 리드마그넷 어필 */}
           <FinalLeadMagnet>
-            <FinalLeadMagnetTitle>🎁 [NeStory] 스트레스 제로! 국내 가족여행 완벽 준비 템플릿</FinalLeadMagnetTitle>
+            <FinalLeadMagnetTitle>🎁 [NeStory] 여행 준비 체크리스트 완벽 템플릿</FinalLeadMagnetTitle>
             <FinalLeadMagnetList>
               <FinalLeadMagnetItem>✨ <strong>우리 가족 맞춤 여행 스타일 분석</strong><br />
                 <span style={{fontSize: '0.9rem', color: '#666'}}>&nbsp;&nbsp;&nbsp;&nbsp;✓ 가족 여행 계획 단계별 가이드<br />
@@ -1293,11 +1293,7 @@ const FinalLeadMagnetList = styled.div`
   flex-direction: column;
   gap: 0.8rem;
   margin-bottom: 1rem;
-  text-align: left;
-  
-  @media (max-width: 768px) {
-    text-align: center;
-  }
+  text-align: center;
 `;
 
 const FinalLeadMagnetItem = styled.div`
