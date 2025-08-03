@@ -1,9 +1,11 @@
 import axios from 'axios';
 import { ComprehensiveDeviceInfo } from '../utils/deviceDetection';
 
-// API 클라이언트 생성
+// API 클라이언트 생성 - Vercel Functions 호출
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_LANDING_API_URL || 'http://localhost:3001/api/landing',
+  baseURL: process.env.NODE_ENV === 'production' 
+    ? 'https://landing.nestory.co.kr/api' 
+    : '/api',
   headers: {
     'Content-Type': 'application/json',
   },
