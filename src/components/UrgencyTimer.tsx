@@ -126,7 +126,7 @@ const UrgencyTimer: React.FC = () => {
       transition={{ duration: 0.5 }}
     >
       <TimerText>
-        <span>🎆 여름방학 가족여행지 정리 특별 혜택!</span>
+        <span>🎁 2025 가을여행 완벽 가이드 무료 제공!</span>
         <span>
           <TimeDisplay>{timeLeft.days}일</TimeDisplay>
           <TimeDisplay>{String(timeLeft.hours).padStart(2, '0')}</TimeDisplay>:

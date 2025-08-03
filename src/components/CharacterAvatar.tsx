@@ -156,9 +156,6 @@ const Eyes = styled.div<{ expression: string }>`
     height: ${props => props.expression === 'excited' ? '12px' : '10px'};
     background: #2d3748;
     border-radius: 50%;
-    
-    /* 눈동자 하이라이트 */
-    box-shadow: inset 2px 2px 0 white;
   }
   
   &::before {
@@ -168,6 +165,37 @@ const Eyes = styled.div<{ expression: string }>`
   
   &::after {
     right: 8px;
+    ${props => props.expression === 'excited' && 'transform: scale(1.2);'}
+  }
+`;
+
+// 눈 하이라이트
+const EyeHighlights = styled.div<{ expression: string }>`
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 20px;
+  z-index: 4;
+  
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+  }
+  
+  &::before {
+    left: ${props => props.expression === 'excited' ? '11px' : '10px'};
+    ${props => props.expression === 'excited' && 'transform: scale(1.2);'}
+  }
+  
+  &::after {
+    right: ${props => props.expression === 'excited' ? '7px' : '6px'};
     ${props => props.expression === 'excited' && 'transform: scale(1.2);'}
   }
 `;
@@ -653,6 +681,7 @@ const CharacterAvatar: React.FC<CharacterAvatarProps> = ({ typeCode }) => {
         />
         <Face skinTone={style.skinTone} />
         <Eyes expression={style.expression} />
+        <EyeHighlights expression={style.expression} />
         <Mouth expression={style.expression} />
         <Body outfitColor={style.outfitColor} />
         <Arms skinTone={style.skinTone} />

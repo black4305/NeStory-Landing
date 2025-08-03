@@ -413,7 +413,7 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
             지금 결과를 확인하시면, 우리 가족 유형에 대한 상세 분석과 함께
           </BenefitTitle>
           <div style={{ fontSize: '1rem', color: '#667eea', fontWeight: 700, marginBottom: '1rem' }}>
-            [2025 여름 여행지/축제 완전 정복 가이드]도 함께 보내드릴게요.
+            [2025 가을여행 완벽 가이드 + 가족 여행 체크리스트]도 함께 보내드릴게요.
           </div>
           <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
             분석 결과가 사라지지 않게, 그리고 무료 템플릿을 놓치지 않도록<br/>

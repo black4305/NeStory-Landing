@@ -581,26 +581,25 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 
         
         <ButtonGroup>
-          {!isSharedView && (
-            <>
-              <Button
-                onClick={downloadResult}
-                disabled={isDownloading}
-                whileHover={{ scale: isDownloading ? 1 : 1.05 }}
-                whileTap={{ scale: isDownloading ? 1 : 0.95 }}
-              >
-                {isDownloading ? '⏳ 생성 중...' : '📸 이미지 다운로드'}
-              </Button>
-            </>
-          )}
           <Button
-            variant={isSharedView ? "primary" : "secondary"}
-            onClick={onRestart}
+            variant="primary"
+            onClick={isSharedView ? onRestart : downloadResult}
+            disabled={!isSharedView && isDownloading}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {isSharedView ? '🚀 나도 테스트하기' : '🔄 다시 테스트하기'}
+            {isSharedView ? '🚀 나도 테스트하기' : (isDownloading ? '⏳ 생성 중...' : '📸 이미지 저장하기')}
           </Button>
+          {!isSharedView && (
+            <Button
+              variant="secondary"
+              onClick={onRestart}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              🔄 다시 테스트하기
+            </Button>
+          )}
         </ButtonGroup>
 
         {/* 맞춤 여행 계획 제작 후킹 섹션 */}
