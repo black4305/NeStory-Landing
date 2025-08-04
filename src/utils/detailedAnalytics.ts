@@ -78,19 +78,25 @@ class DetailedAnalytics {
 
   // 익명 세션 저장
   private async saveSession(): Promise<void> {
-    if (!this.deviceInfo || this.isSessionSaved) return;
+    if (this.isSessionSaved) return;
 
     try {
+      // 디바이스 정보가 없으면 먼저 수집
+      if (!this.deviceInfo) {
+        this.deviceInfo = await deviceDetection.getComprehensiveDeviceInfo();
+      }
+
       const result = await supabaseService.createOrUpdateSession({
-      session_id: this.sessionId,
-      user_agent: this.deviceInfo.userAgent,
-      ip_address: this.deviceInfo.location?.ip,
-      device_type: this.deviceInfo.device?.type,
-      country: this.deviceInfo.location?.country,
-      city: this.deviceInfo.location?.city
-    });
-    const success = result.success;
+        session_id: this.sessionId,
+        user_agent: this.deviceInfo.userAgent,
+        ip_address: this.deviceInfo.location?.ip,
+        device_type: this.deviceInfo.device?.type,
+        country: this.deviceInfo.location?.country,
+        city: this.deviceInfo.location?.city
+      });
+      const success = result.success;
       this.isSessionSaved = success;
+      console.log('✅ Landing 세션 저장:', { sessionId: this.sessionId, success });
     } catch (error) {
       console.error('❌ 세션 저장 실패:', error);
     }
@@ -304,6 +310,11 @@ class DetailedAnalytics {
 
   // 페이지 진입 추적
   public async trackPageEnter(route: string, metadata?: Record<string, any>): Promise<void> {
+    // 세션이 저장되지 않았다면 먼저 저장
+    if (!this.isSessionSaved) {
+      await this.saveSession();
+    }
+
     this.currentRoute = route;
     this.pageEnterTime = Date.now();
 
