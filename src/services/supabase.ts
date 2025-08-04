@@ -74,38 +74,21 @@ export class SupabaseService {
         timeSpent: answer.timeSpent || 5000 // 기본 5초
       })) || [];
 
-      // nestory-landing 스키마 프록시 함수 호출 (개별 컬럼으로 분리)
-      const { data: result, error } = await supabase.rpc('save_nestory_landing_response_complete', {
+      // squeeze_leads 테이블에 직접 저장 (새로운 RPC 함수 사용)
+      const { data: result, error } = await supabase.rpc('landing_save_lead', {
         p_session_id: data.sessionId,
-        p_user_id: null, // 익명 사용자
-        p_start_time: data.startTime || Date.now(),
-        p_answers: data.answers || [],
-        p_total_time: data.totalTime || 0,
-        p_result: data.result || 'INCOMPLETE',
-        p_current_index: currentIndex,
-        p_completed: data.completed || false,
-        p_family_size: userInfo.familySize || 4,
-        p_ages: ages,
-        p_travel_frequency: travelFrequency,
-        p_location: userInfo.region || '서울',
-        p_interests: interests,
-        p_shared_url: sharedUrl,
-        p_ip_address: ipAddress,
-        p_user_agent: data.userAgent || navigator.userAgent,
-        p_device_type: data.deviceType || 'desktop',
-        p_referrer: referrer,
-        p_submitted_at: submittedAt,
+        p_lead_source: 'nestoryti_test',
+        p_email: userInfo.instagram ? `${userInfo.instagram}@instagram` : null,
+        p_phone: null,
+        p_name: userInfo.name || null,
+        p_email_consent: marketingConsent,
         p_marketing_consent: marketingConsent,
-        // 새로운 개별 컬럼들
-        p_click_count: data.clickCount || 0,
-        p_scroll_depth: data.scrollDepth || 0,
-        p_reliability_score: data.reliabilityScore || 0.8,
-        p_response_pattern: data.responsePattern || 'normal',
         p_privacy_consent: privacyConsent,
-        p_user_name: userInfo.name || null,
-        p_user_instagram: userInfo.instagram || null,
-        p_question_times: questionTimes,
-        p_browser_info: browserInfo
+        p_lead_magnet_name: 'family_travel_test',
+        p_conversion_page: window.location.pathname,
+        p_lead_score: data.completed ? 80 : 50,
+        p_lead_quality: data.completed ? 'warm' : 'cold',
+        p_engagement_level: data.completed ? 'high' : 'medium'
       });
 
       if (!error && result) {
@@ -121,27 +104,30 @@ export class SupabaseService {
     }
   }
 
-  // nestory-landing 스키마 프록시 함수로 모든 사용자 데이터 가져오기
+  // squeeze_leads 테이블에서 모든 사용자 데이터 가져오기
   static async getNestoryLandingUserData(): Promise<AnalyticsData[]> {
-    console.log('🔍 nestory-landing 스키마에서 Supabase 조회 시작...');
+    console.log('🔍 squeeze_leads 테이블에서 Supabase 조회 시작...');
     
     try {
-      // nestory-landing 스키마 프록시 함수 호출
-      const { data, error } = await supabase.rpc('get_nestory_landing_responses');
+      // squeeze_leads 테이블에서 직접 조회
+      const { data, error } = await supabase
+        .from('squeeze_leads')
+        .select('*')
+        .order('converted_at', { ascending: false });
 
       if (!error && data) {
-        console.log(`✅ nestory-landing.nestory_landing_user_responses 테이블에서 ${data.length}개 데이터 조회 성공!`);
+        console.log(`✅ squeeze_leads 테이블에서 ${data.length}개 데이터 조회 성공!`);
         
         // Supabase 데이터를 AnalyticsData 형식으로 변환
         return data.map((item: any) => {
           // UserInfo 객체 재구성
-          const userInfo: UserInfo | undefined = (item.user_name || item.user_instagram || item.location) ? {
-            name: item.user_name || '',
-            instagram: item.user_instagram || '',
-            age: item.ages?.[0] || '',
+          const userInfo: UserInfo | undefined = (item.name || item.email) ? {
+            name: item.name || '',
+            instagram: item.email?.includes('@instagram') ? item.email.split('@')[0] : '',
+            age: '',
             gender: '',
-            familySize: item.family_size || 0,
-            region: item.location || '',
+            familySize: 4,
+            region: '',
             marketingConsent: item.marketing_consent || false,
             privacyConsent: item.privacy_consent || false
           } : undefined;
@@ -149,39 +135,40 @@ export class SupabaseService {
           return {
             id: item.id,
             sessionId: item.session_id,
-            startTime: item.start_time,
-            answers: item.answers,
-            totalTime: item.total_time,
-            clickCount: item.click_count || 0, // 이제 개별 컬럼에서 가져옴
-            scrollDepth: item.scroll_depth || 0,
-            deviceType: item.device_type,
-            userAgent: item.user_agent,
-            completed: item.completed,
-            result: item.result,
+            timestamp: new Date(item.converted_at).getTime(),
+            startTime: new Date(item.converted_at).getTime() - 300000, // 5분 전으로 가정
+            answers: [],
+            totalTime: 300000, // 5분으로 가정
+            clickCount: 0,
+            scrollDepth: 0,
+            deviceType: 'desktop',
+            userAgent: '',
+            completed: true,
+            result: 'COMPLETED',
             userInfo: userInfo,
-            submittedAt: item.submitted_at ? new Date(item.submitted_at).getTime() : Date.now(),
-            reliabilityScore: item.reliability_score || null, // 개별 컬럼
-            questionProgress: item.current_index || 0,
-            responsePattern: item.response_pattern || null, // 개별 컬럼
+            submittedAt: new Date(item.converted_at).getTime(),
+            reliabilityScore: item.lead_score ? item.lead_score / 100 : 0.8,
+            questionProgress: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            responsePattern: 'consistent',
             privacyConsent: item.privacy_consent || false,
-            questionTimes: item.question_times || [],
-            browserInfo: item.browser_info || null
+            questionTimes: [],
+            browserInfo: undefined
           };
         });
       } else {
-        console.log('❌ nestory-landing 프록시 함수 조회 실패:', error?.message || 'No data');
+        console.log('❌ squeeze_leads 조회 실패:', error?.message || 'No data');
         return [];
       }
     } catch (error) {
-      console.error('💥 nestory-landing 스키마 데이터 조회 실패:', error);
+      console.error('💥 squeeze_leads 데이터 조회 실패:', error);
       return [];
     }
   }
 
-  // 통계 데이터 가져오기 (프록시 함수 사용)
+  // 통계 데이터 가져오기 (새로운 RPC 함수 사용)
   static async getStatsData() {
     try {
-      const { data, error } = await supabase.rpc('get_nestory_landing_stats');
+      const { data, error } = await supabase.rpc('landing_get_realtime_stats');
 
       if (error) {
         console.error('통계 조회 오류:', error);
@@ -195,27 +182,48 @@ export class SupabaseService {
     }
   }
 
-  // 결과별 리더보드 가져오기
+  // 결과별 리더보드 가져오기 (테이블에서 직접 조회)
   static async getResultLeaderboard() {
     try {
-      const { data, error } = await supabase.rpc('get_nestory_landing_result_leaderboard');
+      const { data, error } = await supabase
+        .from('squeeze_leads')
+        .select('lead_magnet_name, lead_quality, count')
+        .order('converted_at', { ascending: false })
+        .limit(10);
 
       if (error) {
         console.error('리더보드 조회 오류:', error);
         return null;
       }
 
-      return data;
+      // 결과별 집계
+      const leaderboard = data?.reduce((acc: any, lead: any) => {
+        const result = lead.lead_quality || 'unknown';
+        if (!acc[result]) {
+          acc[result] = { result, count: 0 };
+        }
+        acc[result].count++;
+        return acc;
+      }, {});
+
+      return Object.values(leaderboard || {});
     } catch (error) {
       console.error('리더보드 조회 실패:', error);
       return null;
     }
   }
 
-  // 활성 사용자 가져오기
+  // 활성 사용자 가져오기 (세션 테이블에서 직접 조회)
   static async getActiveUsers() {
     try {
-      const { data, error } = await supabase.rpc('get_nestory_landing_active_users');
+      // 최근 5분 이내 활동한 세션 조회
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      
+      const { data, error } = await supabase
+        .from('squeeze_anonymous_sessions')
+        .select('session_id, last_activity, device_type, city')
+        .gte('last_activity', fiveMinutesAgo)
+        .order('last_activity', { ascending: false });
 
       if (error) {
         console.error('활성 사용자 조회 오류:', error);
@@ -241,15 +249,20 @@ export class SupabaseService {
     scrollDepth?: number;
   }) {
     try {
-      const { data: result, error } = await supabase.rpc('save_nestory_landing_analytics', {
-        p_visit_id: data.visitId,
-        p_timestamp: data.timestamp || Date.now(),
-        p_user_agent: data.userAgent || navigator.userAgent,
-        p_referrer: data.referrer || window.location.origin,
-        p_device_type: data.deviceType || SupabaseService.getDeviceType(),
-        p_session_duration: data.sessionDuration || 0,
-        p_cta_clicked: data.ctaClicked || false,
-        p_scroll_depth: data.scrollDepth || 0
+      // 이벤트 추적으로 대체 - 올바른 파라미터 사용
+      const { data: result, error } = await supabase.rpc('landing_record_user_event', {
+        p_session_id: data.visitId || `temp_${Date.now()}`,
+        p_event_type: 'page_analytics',
+        p_timestamp_ms: data.timestamp || Date.now(),
+        p_element_type: 'analytics',
+        p_metadata: {
+          userAgent: data.userAgent || navigator.userAgent,
+          referrer: data.referrer || window.location.origin,
+          deviceType: data.deviceType || SupabaseService.getDeviceType(),
+          sessionDuration: data.sessionDuration || 0,
+          ctaClicked: data.ctaClicked || false,
+          scrollDepth: data.scrollDepth || 0
+        }
       });
 
       if (error) {

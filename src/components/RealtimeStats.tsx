@@ -28,7 +28,7 @@ const RealtimeStats: React.FC<RealtimeStatsProps> = ({ show = true }) => {
     // 활성 사용자 수 가져오기
     const activeUsersData = await SupabaseService.getActiveUsers();
     if (activeUsersData) {
-      setActiveUsers(activeUsersData.count || 0);
+      setActiveUsers(Array.isArray(activeUsersData) ? activeUsersData.length : 0);
     }
 
     // 리더보드 데이터 가져오기
