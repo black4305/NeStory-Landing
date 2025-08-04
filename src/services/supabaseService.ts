@@ -135,104 +135,131 @@ export class SupabaseService {
     }
   }
 
-  // 2. 세션 생성/업데이트
+  // 2. 세션 생성/업데이트 (RPC 사용)
   async createOrUpdateSession(sessionData: AnonymousSession) {
     try {
-      const { data, error } = await supabase
-        .from('squeeze_anonymous_sessions')
-        .upsert({
-          ...sessionData,
-          last_activity: new Date().toISOString()
-        }, {
-          onConflict: 'session_id'
-        })
-        .select();
+      const { data, error } = await supabase.rpc('landing_create_or_update_session', {
+        p_session_id: sessionData.session_id,
+        p_user_agent: sessionData.user_agent,
+        p_ip_address: sessionData.ip_address,
+        p_device_type: sessionData.device_type,
+        p_country: sessionData.country,
+        p_city: sessionData.city,
+        p_referrer: sessionData.referrer,
+        p_landing_page: sessionData.landing_page
+      });
 
       if (error) throw error;
 
-      return { success: true, data: data?.[0] };
+      return data;
     } catch (error) {
       console.error('세션 생성/업데이트 오류:', error);
       return { success: false, error: '세션을 저장할 수 없습니다.' };
     }
   }
 
-  // 3. 페이지 방문 기록
+  // 3. 페이지 방문 기록 (RPC 사용)
   async recordPageVisit(visitData: PageVisit) {
     try {
-      const { data, error } = await supabase
-        .from('squeeze_page_visits')
-        .insert({
-          ...visitData,
-          created_at: new Date().toISOString()
-        })
-        .select();
+      const { data, error } = await supabase.rpc('landing_record_page_visit', {
+        p_session_id: visitData.session_id,
+        p_route: visitData.route,
+        p_page_title: visitData.page_title,
+        p_url_params: visitData.url_params,
+        p_load_time_ms: visitData.load_time_ms,
+        p_viewport_width: visitData.viewport_width || window.innerWidth,
+        p_viewport_height: visitData.viewport_height || window.innerHeight,
+        p_screen_width: window.screen?.width,
+        p_screen_height: window.screen?.height,
+        p_pixel_ratio: window.devicePixelRatio,
+        p_language: navigator.language,
+        p_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        p_timezone_offset: new Date().getTimezoneOffset(),
+        p_color_depth: window.screen?.colorDepth,
+        p_online: navigator.onLine,
+        p_cookies_enabled: navigator.cookieEnabled
+      });
 
       if (error) throw error;
 
-      return { success: true, data: data?.[0] };
+      return data;
     } catch (error) {
       console.error('페이지 방문 기록 오류:', error);
       return { success: false, error: '페이지 방문을 기록할 수 없습니다.' };
     }
   }
 
-  // 4. 사용자 이벤트 기록
+  // 4. 사용자 이벤트 기록 (RPC 사용)
   async recordUserEvent(eventData: UserEvent) {
     try {
-      const { data, error } = await supabase
-        .from('squeeze_user_events')
-        .insert({
-          ...eventData,
-          created_at: new Date().toISOString()
-        })
-        .select();
+      const { data, error } = await supabase.rpc('landing_record_user_event', {
+        p_session_id: eventData.session_id,
+        p_page_visit_id: eventData.page_visit_id,
+        p_event_type: eventData.event_type,
+        p_element_id: eventData.element_id,
+        p_element_type: eventData.element_type,
+        p_element_text: eventData.element_text,
+        p_element_value: eventData.element_value,
+        p_click_x: eventData.click_x,
+        p_click_y: eventData.click_y,
+        p_scroll_position: eventData.scroll_position,
+        p_viewport_width: window.innerWidth,
+        p_viewport_height: window.innerHeight,
+        p_timestamp_ms: eventData.timestamp_ms || Date.now(),
+        p_time_on_page_ms: eventData.time_on_page_ms,
+        p_metadata: eventData.metadata
+      });
 
       if (error) throw error;
 
-      return { success: true, data: data?.[0] };
+      return data;
     } catch (error) {
       console.error('사용자 이벤트 기록 오류:', error);
       return { success: false, error: '이벤트를 기록할 수 없습니다.' };
     }
   }
 
-  // 5. 배치 이벤트 기록
+  // 5. 배치 이벤트 기록 (개별 RPC 호출)
   async recordBatchEvents(events: UserEvent[]) {
     try {
-      const eventsWithTimestamp = events.map(event => ({
-        ...event,
-        created_at: new Date().toISOString()
-      }));
+      const results = await Promise.all(
+        events.map(event => this.recordUserEvent(event))
+      );
 
-      const { data, error } = await supabase
-        .from('squeeze_user_events')
-        .insert(eventsWithTimestamp)
-        .select();
-
-      if (error) throw error;
-
-      return { success: true, data };
+      const successCount = results.filter(r => r.success).length;
+      
+      return {
+        success: successCount > 0,
+        data: { processed: events.length, successful: successCount }
+      };
     } catch (error) {
       console.error('배치 이벤트 기록 오류:', error);
       return { success: false, error: '배치 이벤트를 기록할 수 없습니다.' };
     }
   }
 
-  // 6. 리드 저장
+  // 6. 리드 저장 (RPC 사용)
   async saveLead(leadData: Lead) {
     try {
-      const { data, error } = await supabase
-        .from('squeeze_leads')
-        .insert({
-          ...leadData,
-          created_at: new Date().toISOString()
-        })
-        .select();
+      const { data, error } = await supabase.rpc('landing_save_lead', {
+        p_session_id: leadData.session_id,
+        p_email: leadData.email,
+        p_phone: leadData.phone || null,
+        p_name: leadData.name,
+        p_contact_type: leadData.contact_type,
+        p_contact_value: leadData.contact_value,
+        p_marketing_consent: leadData.marketing_consent,
+        p_privacy_consent: leadData.privacy_consent,
+        p_kakao_channel_added: leadData.kakao_channel_added,
+        p_lead_source: leadData.lead_source || leadData.source,
+        p_travel_type: leadData.travel_type,
+        p_lead_score: leadData.lead_score,
+        p_webhook_sent: leadData.webhook_sent || false
+      });
 
       if (error) throw error;
 
-      return { success: true, data: data?.[0] };
+      return data;
     } catch (error) {
       console.error('리드 저장 오류:', error);
       return { success: false, error: '리드를 저장할 수 없습니다.' };
@@ -259,20 +286,30 @@ export class SupabaseService {
     }
   }
 
-  // 8. 전환 추적
+  // 8. 전환 추적 (RPC 사용)
   async recordConversion(conversionData: any) {
     try {
-      const { data, error } = await supabase
-        .from('squeeze_conversions')
-        .insert({
-          ...conversionData,
-          created_at: new Date().toISOString()
-        })
-        .select();
+      const { data, error } = await supabase.rpc('landing_record_conversion', {
+        p_session_id: conversionData.session_id,
+        p_conversion_type: conversionData.conversion_type,
+        p_conversion_value: conversionData.conversion_value,
+        p_conversion_currency: conversionData.conversion_currency || 'USD',
+        p_funnel_step: conversionData.funnel_step,
+        p_funnel_stage: conversionData.funnel_stage,
+        p_conversion_path: conversionData.conversion_path,
+        p_attribution_source: conversionData.attribution_source,
+        p_attribution_medium: conversionData.attribution_medium,
+        p_conversion_page: conversionData.conversion_page,
+        p_time_to_conversion_ms: conversionData.time_to_conversion_ms,
+        p_device_type: conversionData.device_type,
+        p_country: conversionData.country,
+        p_city: conversionData.city,
+        p_metadata: conversionData.metadata
+      });
 
       if (error) throw error;
 
-      return { success: true, data: data?.[0] };
+      return data;
     } catch (error) {
       console.error('전환 추적 오류:', error);
       return { success: false, error: '전환을 기록할 수 없습니다.' };
