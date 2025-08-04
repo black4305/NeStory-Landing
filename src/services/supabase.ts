@@ -280,9 +280,11 @@ export class SupabaseService {
   // nestory-landing 스키마 프록시 함수로 데이터 삭제
   static async deleteUserData(id: string) {
     try {
-      const { data: result, error } = await supabase.rpc('delete_nestory_landing_response', {
-        p_id: id // UUID로 삭제
-      });
+      // squeeze_leads 테이블에서 직접 삭제
+      const { data: result, error } = await supabase
+        .from('squeeze_leads')
+        .delete()
+        .eq('id', id);
 
       if (!error && result) {
         console.log('✅ nestory-landing.nestory_landing_user_responses에서 데이터 삭제 성공');
@@ -306,7 +308,7 @@ export class SupabaseService {
   // 관리자 페이지용: nestory-landing 통계 조회
   static async getNestoryLandingStats() {
     try {
-      const { data: stats, error } = await supabase.rpc('get_nestory_landing_stats');
+      const { data: stats, error } = await supabase.rpc('landing_get_realtime_stats');
 
       if (error) {
         console.error('통계 조회 오류:', error);
@@ -323,7 +325,13 @@ export class SupabaseService {
   // 관리자 페이지용: nestory-landing 결과 리더보드 조회
   static async getNestoryLandingLeaderboard() {
     try {
-      const { data: leaderboard, error } = await supabase.rpc('get_nestory_landing_result_leaderboard');
+      // 테이블에서 직접 조회 (RPC 함수 없음)
+      const { data: leaderboard, error } = await supabase
+        .from('squeeze_test_results')
+        .select('travel_type_code, type_code')
+        .not('travel_type_code', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(100);
 
       if (error) {
         console.error('리더보드 조회 오류:', error);
@@ -360,7 +368,13 @@ export class SupabaseService {
   // 관리자 페이지용: nestory-landing 활성 사용자 조회
   static async getNestoryLandingActiveUsers() {
     try {
-      const { data: activeUsers, error } = await supabase.rpc('get_nestory_landing_active_users');
+      // 테이블에서 직접 조회
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const { data: activeUsers, error } = await supabase
+        .from('squeeze_anonymous_sessions')
+        .select('session_id, device_type, country, city, last_activity')
+        .gte('last_activity', fiveMinutesAgo)
+        .order('last_activity', { ascending: false });
 
       if (error) {
         console.error('활성 사용자 조회 오류:', error);
@@ -432,13 +446,13 @@ export class SupabaseService {
     marketingConsent: boolean;
   }) {
     try {
-      const { error } = await supabase.rpc('save_nestory_landing_lead_info', {
-        p_visit_id: data.visitId,
-        p_timestamp: data.timestamp,
-        p_lead_type: data.leadType,
+      const { error } = await supabase.rpc('landing_save_lead', {
+        p_session_id: data.visitId,
+        p_lead_source: data.leadType,
         p_email: data.email || null,
         p_phone: data.phone || null,
-        p_marketing_consent: data.marketingConsent
+        p_marketing_consent: data.marketingConsent,
+        p_privacy_consent: true
       });
 
       if (error) {
@@ -471,21 +485,17 @@ export class SupabaseService {
   }) {
     try {
       const { error } = await supabase
-        .from('nestory_landing_page_analytics')
+        .from('squeeze_page_visits')
         .insert({
-          page: data.page,
-          timestamp: new Date(data.timestamp).toISOString(),
           session_id: data.sessionId,
-          visit_id: data.visitId,
-          duration: data.duration,
-          scroll_depth: data.scrollDepth,
-          interactions: data.interactions,
-          exit_point: data.exitPoint,
-          device_type: data.deviceType,
-          user_agent: data.userAgent,
-          referrer: data.referrer,
-          viewport_width: data.viewportWidth,
-          viewport_height: data.viewportHeight
+          route: data.page,
+          page_title: document.title,
+          full_url: window.location.href,
+          enter_time: new Date(data.timestamp).toISOString(),
+          duration_ms: data.duration,
+          scroll_depth_percent: data.scrollDepth,
+          interaction_count: data.interactions,
+          exit_type: data.exitPoint
         });
 
       if (error) {
@@ -504,7 +514,7 @@ export class SupabaseService {
   static async getPageAnalytics(page?: string) {
     try {
       let query = supabase
-        .from('nestory_landing_page_analytics')
+        .from('squeeze_page_visits')
         .select('*')
         .order('timestamp', { ascending: false });
       
@@ -541,18 +551,18 @@ export class SupabaseService {
   }) {
     try {
       const { error } = await supabase
-        .from('nestory_landing_cta_clicks')
+        .from('squeeze_user_events')
+        .eq('event_type', 'cta_click')
         .insert({
-          page: data.page,
-          cta_name: data.ctaName,
-          cta_target: data.ctaTarget,
           session_id: data.sessionId,
-          visit_id: data.visitId,
-          timestamp: new Date(data.timestamp).toISOString(),
-          device_type: data.deviceType,
-          user_agent: data.userAgent,
-          scroll_depth: data.scrollDepth,
-          time_on_page: data.timeOnPage
+          event_type: 'cta_click',
+          element_id: data.ctaName,
+          element_type: 'cta',
+          element_text: data.ctaTarget,
+          timestamp_ms: data.timestamp,
+          time_on_page_ms: data.timeOnPage,
+          scroll_position: Math.round((data.scrollDepth / 100) * document.body.scrollHeight),
+          cta_type: data.ctaName
         });
 
       if (error) {
@@ -579,15 +589,16 @@ export class SupabaseService {
   }) {
     try {
       const { error } = await supabase
-        .from('nestory_landing_section_views')
+        .from('squeeze_user_events')
+        .eq('event_type', 'section_view')
         .insert({
-          page: data.page,
-          section: data.section,
           session_id: data.sessionId,
-          visit_id: data.visitId,
-          timestamp: new Date(data.timestamp).toISOString(),
-          scroll_depth: data.scrollDepth,
-          time_on_page: data.timeOnPage
+          event_type: 'section_view',
+          element_id: data.section,
+          element_type: 'section',
+          timestamp_ms: data.timestamp,
+          time_on_page_ms: data.timeOnPage,
+          scroll_position: Math.round((data.scrollDepth / 100) * document.body.scrollHeight)
         });
 
       if (error) {
@@ -606,7 +617,8 @@ export class SupabaseService {
   static async getCTAAnalytics(page?: string) {
     try {
       let query = supabase
-        .from('nestory_landing_cta_clicks')
+        .from('squeeze_user_events')
+        .eq('event_type', 'cta_click')
         .select('*')
         .order('timestamp', { ascending: false });
       
@@ -632,7 +644,8 @@ export class SupabaseService {
   static async getSectionAnalytics(page?: string) {
     try {
       let query = supabase
-        .from('nestory_landing_section_views')
+        .from('squeeze_user_events')
+        .eq('event_type', 'section_view')
         .select('*')
         .order('timestamp', { ascending: false });
       
@@ -667,53 +680,26 @@ export class SupabaseService {
     timestamp: number;
   }) {
     try {
-      // 기존 페이지 분석 데이터에 사용자 정보 업데이트
-      const { error: pageError } = await supabase
-        .from('nestory_landing_page_analytics')
-        .update({
-          user_email: data.userInfo.email,
-          user_phone: data.userInfo.phone,
-          user_name: data.userInfo.name,
-          marketing_consent: data.userInfo.marketingConsent,
-          identified_at: new Date(data.timestamp).toISOString()
-        })
-        .eq('session_id', data.sessionId);
+      // squeeze_page_visits에는 사용자 정보 필드가 없음
+      // squeeze_leads 테이블에 사용자 정보 저장
+      const pageError = null;
 
-      // CTA 클릭 데이터에도 사용자 정보 업데이트
-      const { error: ctaError } = await supabase
-        .from('nestory_landing_cta_clicks')
-        .update({
-          user_email: data.userInfo.email,
-          user_phone: data.userInfo.phone,
-          user_name: data.userInfo.name,
-          marketing_consent: data.userInfo.marketingConsent
-        })
-        .eq('session_id', data.sessionId);
+      // squeeze_user_events에는 사용자 정보 필드가 없음
+      const ctaError = null;
 
-      // 섹션 조회 데이터에도 사용자 정보 업데이트
-      const { error: sectionError } = await supabase
-        .from('nestory_landing_section_views')
-        .update({
-          user_email: data.userInfo.email,
-          user_phone: data.userInfo.phone,
-          user_name: data.userInfo.name
-        })
-        .eq('session_id', data.sessionId);
+      // squeeze_user_events에는 사용자 정보 필드가 없음
+      const sectionError = null;
 
-      // 사용자 정보 테이블에 별도 저장
-      const { error: userError } = await supabase
-        .from('nestory_landing_users')
-        .upsert({
-          session_id: data.sessionId,
-          visit_id: data.visitId,
-          email: data.userInfo.email,
-          phone: data.userInfo.phone,
-          name: data.userInfo.name,
-          marketing_consent: data.userInfo.marketingConsent,
-          identified_at: new Date(data.timestamp).toISOString()
-        }, {
-          onConflict: 'session_id'
-        });
+      // squeeze_leads 테이블에 사용자 정보 저장
+      const { error: userError } = await supabase.rpc('landing_save_lead', {
+        p_session_id: data.sessionId,
+        p_email: data.userInfo.email,
+        p_phone: data.userInfo.phone,
+        p_name: data.userInfo.name,
+        p_marketing_consent: data.userInfo.marketingConsent,
+        p_privacy_consent: true,
+        p_lead_source: 'identification'
+      });
 
       if (pageError || ctaError || sectionError || userError) {
         console.error('사용자 정보 연결 오류:', { pageError, ctaError, sectionError, userError });
@@ -731,8 +717,8 @@ export class SupabaseService {
   static async getUserIdentificationStats() {
     try {
       const { data: pageData, error } = await supabase
-        .from('nestory_landing_page_analytics')
-        .select('session_id, user_email, user_phone, identified_at')
+        .from('squeeze_page_visits')
+        .select('session_id, enter_time')
         .order('timestamp', { ascending: false });
 
       if (error) {
@@ -746,7 +732,12 @@ export class SupabaseService {
       }
 
       const total = pageData?.length || 0;
-      const identified = pageData?.filter(item => item.user_email || item.user_phone).length || 0;
+      // squeeze_leads 테이블에서 식별된 사용자 조회
+      const { data: leadData } = await supabase
+        .from('squeeze_leads')
+        .select('session_id, email, phone');
+      
+      const identified = leadData?.filter(item => item.email || item.phone).length || 0;
       const anonymous = total - identified;
       const identificationRate = total > 0 ? Math.round((identified / total) * 100) : 0;
 
@@ -755,7 +746,7 @@ export class SupabaseService {
         identified,
         anonymous,
         identificationRate,
-        identifiedUsers: pageData?.filter(item => item.user_email || item.user_phone) || []
+        identifiedUsers: leadData?.filter(item => item.email || item.phone) || []
       };
     } catch (error) {
       console.error('사용자 식별 통계 조회 실패:', error);
@@ -773,19 +764,21 @@ export class SupabaseService {
     try {
       // 페이지 분석 데이터
       const { data: pageData } = await supabase
-        .from('nestory_landing_page_analytics')
+        .from('squeeze_page_visits')
         .select('*')
         .eq('session_id', sessionId);
 
       // CTA 클릭 데이터
       const { data: ctaData } = await supabase
-        .from('nestory_landing_cta_clicks')
+        .from('squeeze_user_events')
+        .eq('event_type', 'cta_click')
         .select('*')
         .eq('session_id', sessionId);
 
       // 섹션 조회 데이터
       const { data: sectionData } = await supabase
-        .from('nestory_landing_section_views')
+        .from('squeeze_user_events')
+        .eq('event_type', 'section_view')
         .select('*')
         .eq('session_id', sessionId);
 
@@ -816,7 +809,7 @@ export class SupabaseService {
   static async saveDetailedEvents(events: any[]) {
     try {
       const { data, error } = await supabase
-        .from('nestory_landing_detailed_events')
+        .from('squeeze_user_events')
         .insert(events);
 
       if (error) {
@@ -835,7 +828,7 @@ export class SupabaseService {
   static async savePageSessions(sessions: any[]) {
     try {
       const { data, error } = await supabase
-        .from('nestory_landing_page_sessions')
+        .from('squeeze_page_visits')
         .insert(sessions);
 
       if (error) {
@@ -854,16 +847,16 @@ export class SupabaseService {
   static async getUserJourneyAnalytics(sessionId?: string) {
     try {
       const { data: eventsData, error: eventsError } = await supabase
-        .from('nestory_landing_detailed_events')
+        .from('squeeze_user_events')
         .select('*')
         .eq(sessionId ? 'sessionId' : 'sessionId', sessionId || '')
-        .order('timestamp', { ascending: true });
+        .order('timestamp_ms', { ascending: true });
 
       const { data: sessionsData, error: sessionsError } = await supabase
-        .from('nestory_landing_page_sessions')
+        .from('squeeze_page_visits')
         .select('*')
         .eq(sessionId ? 'sessionId' : 'sessionId', sessionId || '')
-        .order('enterTime', { ascending: true });
+        .order('enter_time', { ascending: true });
 
       if (eventsError || sessionsError) {
         console.error('사용자 여정 데이터 조회 오류:', eventsError || sessionsError);
@@ -884,9 +877,9 @@ export class SupabaseService {
   static async getRouteAnalytics() {
     try {
       const { data, error } = await supabase
-        .from('nestory_landing_page_sessions')
-        .select('route, duration, interactions, scrollDepth, ctaClicks, errors')
-        .order('enterTime', { ascending: false });
+        .from('squeeze_page_visits')
+        .select('route, duration_ms, interaction_count, scroll_depth_percent, cta_clicks')
+        .order('enter_time', { ascending: false });
 
       if (error) {
         console.error('라우트 통계 조회 오류:', error);
@@ -910,14 +903,14 @@ export class SupabaseService {
 
         const stats = acc[session.route];
         stats.totalSessions++;
-        stats.avgDuration = (stats.avgDuration + (session.duration || 0)) / stats.totalSessions;
-        stats.avgInteractions = (stats.avgInteractions + session.interactions) / stats.totalSessions;
-        stats.avgScrollDepth = (stats.avgScrollDepth + session.scrollDepth) / stats.totalSessions;
-        stats.totalCtaClicks += session.ctaClicks || 0;
-        stats.totalErrors += session.errors?.length || 0;
+        stats.avgDuration = (stats.avgDuration + (session.duration_ms || 0)) / stats.totalSessions;
+        stats.avgInteractions = (stats.avgInteractions + session.interaction_count) / stats.totalSessions;
+        stats.avgScrollDepth = (stats.avgScrollDepth + session.scroll_depth_percent) / stats.totalSessions;
+        stats.totalCtaClicks += session.cta_clicks || 0;
+        stats.totalErrors += 0; // squeeze_page_visits에 errors 필드 없음
         
         // 바운스 레이트 계산 (5초 미만 + 인터랙션 없음)
-        if ((session.duration || 0) < 5000 && session.interactions === 0) {
+        if ((session.duration_ms || 0) < 5000 && session.interaction_count === 0) {
           stats.bounceRate++;
         }
 
@@ -940,9 +933,9 @@ export class SupabaseService {
   static async getFunnelAnalytics() {
     try {
       const { data, error } = await supabase
-        .from('nestory_landing_page_sessions')
-        .select('sessionId, route, enterTime, ctaClicks')
-        .order('sessionId, enterTime', { ascending: true });
+        .from('squeeze_page_visits')
+        .select('session_id, route, enter_time, cta_clicks')
+        .order('session_id, enter_time', { ascending: true });
 
       if (error) {
         console.error('퍼널 분석 조회 오류:', error);
@@ -951,10 +944,10 @@ export class SupabaseService {
 
       // 세션별로 그룹핑하여 여정 분석
       const sessionJourneys = data?.reduce((acc: any, session: any) => {
-        if (!acc[session.sessionId]) {
-          acc[session.sessionId] = [];
+        if (!acc[session.session_id]) {
+          acc[session.session_id] = [];
         }
-        acc[session.sessionId].push(session);
+        acc[session.session_id].push(session);
         return acc;
       }, {});
 

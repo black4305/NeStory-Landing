@@ -177,19 +177,14 @@ export class SupabaseService {
         p_session_id: visitData.session_id,
         p_route: visitData.route,
         p_page_title: visitData.page_title,
+        p_full_url: window.location.href,
         p_url_params: visitData.url_params,
-        p_load_time_ms: visitData.load_time_ms,
-        p_viewport_width: visitData.viewport_width || window.innerWidth,
-        p_viewport_height: visitData.viewport_height || window.innerHeight,
-        p_screen_width: window.screen?.width,
-        p_screen_height: window.screen?.height,
-        p_pixel_ratio: window.devicePixelRatio,
-        p_language: navigator.language,
-        p_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        p_timezone_offset: new Date().getTimezoneOffset(),
-        p_color_depth: window.screen?.colorDepth,
-        p_online: navigator.onLine,
-        p_cookies_enabled: navigator.cookieEnabled
+        p_scroll_depth_percent: visitData.scroll_depth_percent || 0,
+        p_click_count: visitData.click_count || 0,
+        p_interaction_count: visitData.interaction_count || 0,
+        p_form_submissions: 0,
+        p_cta_clicks: visitData.cta_clicks || 0,
+        p_load_time_ms: visitData.load_time_ms
       });
 
       if (error) throw error;
