@@ -10,7 +10,7 @@ import AdminLogin from './components/AdminLogin';
 import AdvancedAdminDashboard from './components/AdvancedAdminDashboard';
 import AllTypesScreen from './components/AllTypesScreen';
 import LandingPage from './components/LandingPage';
-import PostgresService from './services/postgresService';
+import { supabaseService } from './services/supabaseService';
 import { calculateTravelType, getAxisScores } from './utils/calculator';
 import { analytics } from './utils/analytics';
 import { detailedAnalytics } from './utils/detailedAnalytics';

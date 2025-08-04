@@ -15,7 +15,7 @@ import {
   Filler
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import PostgresService from '../services/postgresService';
+import { supabaseService } from '../services/supabaseService';
 
 // Chart.js 등록
 ChartJS.register(
@@ -288,8 +288,8 @@ const AdvancedAdminDashboard: React.FC<AdvancedAdminDashboardProps> = ({ onLogou
   const [activeTab, setActiveTab] = useState<'overview' | 'funnel' | 'analytics' | 'realtime'>('overview');
   const [funnelMetrics, setFunnelMetrics] = useState<any>(null);
   const [realtimeStats, setRealtimeStats] = useState<any>(null);
-  const [travelTypeAnalytics, setTravelTypeAnalytics] = useState<any[]>([]);
-  const [pagePerformance, setPagePerformance] = useState<any[]>([]);
+  const [travelTypeAnalytics, setTravelTypeAnalytics] = useState<any>({});
+  const [pagePerformance, setPagePerformance] = useState<any>({});
   const [geographicData, setGeographicData] = useState<any>(null);
   const [activeUsers, setActiveUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -310,20 +310,20 @@ const AdvancedAdminDashboard: React.FC<AdvancedAdminDashboardProps> = ({ onLogou
         geoData,
         activeUserData
       ] = await Promise.all([
-        PostgresService.getFunnelMetrics(),
-        PostgresService.getRealtimeStats(),
-        PostgresService.getTravelTypeAnalytics(),
-        PostgresService.getPagePerformanceAnalytics(),
-        PostgresService.getGeographicAnalytics(),
-        PostgresService.getCurrentActiveUsers()
+        supabaseService.getFunnelMetrics(),
+        supabaseService.getRealtimeStats(),
+        supabaseService.getTravelTypeAnalytics(),
+        supabaseService.getPagePerformanceAnalytics(),
+        supabaseService.getGeographicAnalytics(),
+        supabaseService.getActiveUserData()
       ]);
 
-      setFunnelMetrics(funnelData);
-      setRealtimeStats(realtimeData);
-      setTravelTypeAnalytics(travelTypeData);
-      setPagePerformance(pageData);
-      setGeographicData(geoData);
-      setActiveUsers(activeUserData);
+      setFunnelMetrics(funnelData?.data || {});
+      setRealtimeStats(realtimeData?.data || {});
+      setTravelTypeAnalytics(travelTypeData?.data || {});
+      setPagePerformance(pageData?.data || {});
+      setGeographicData(geoData?.data || {});
+      setActiveUsers(activeUserData?.data || []);
       setLastUpdate(new Date().toLocaleString());
     } catch (err) {
       setError('데이터 로딩 중 오류가 발생했습니다.');
@@ -373,13 +373,16 @@ const AdvancedAdminDashboard: React.FC<AdvancedAdminDashboardProps> = ({ onLogou
   };
 
   const getTravelTypeChartData = () => {
-    if (!travelTypeAnalytics.length) return null;
+    if (!travelTypeAnalytics || Object.keys(travelTypeAnalytics).length === 0) return null;
+    
+    const labels = Object.keys(travelTypeAnalytics);
+    const data = Object.values(travelTypeAnalytics);
     
     return {
-      labels: travelTypeAnalytics.map(item => item.travel_type_code),
+      labels,
       datasets: [{
         label: '완료 수',
-        data: travelTypeAnalytics.map(item => item.completion_count),
+        data,
         backgroundColor: [
           '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
           '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
@@ -389,20 +392,24 @@ const AdvancedAdminDashboard: React.FC<AdvancedAdminDashboardProps> = ({ onLogou
   };
 
   const getPagePerformanceChartData = () => {
-    if (!pagePerformance.length) return null;
+    if (!pagePerformance || Object.keys(pagePerformance).length === 0) return null;
+    
+    const routes = Object.keys(pagePerformance);
+    const avgTimes = routes.map(route => pagePerformance[route]?.avgTime || 0);
+    const bounceRates = routes.map(route => pagePerformance[route]?.bounceRate || 0);
     
     return {
-      labels: pagePerformance.map(item => item.route),
+      labels: routes,
       datasets: [
         {
-          label: '평균 체류시간(초)',
-          data: pagePerformance.map(item => item.avg_duration_sec),
+          label: '평균 체류시간(ms)',
+          data: avgTimes,
           backgroundColor: 'rgba(102, 126, 234, 0.8)',
           yAxisID: 'y'
         },
         {
-          label: '바운스율(%)',
-          data: pagePerformance.map(item => item.bounce_rate),
+          label: '방문 수',
+          data: routes.map(route => pagePerformance[route]?.visits || 0),
           backgroundColor: 'rgba(245, 87, 108, 0.8)',
           yAxisID: 'y1'
         }

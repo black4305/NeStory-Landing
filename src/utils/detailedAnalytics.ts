@@ -1,5 +1,5 @@
 import React from 'react';
-import PostgresService, { PageVisit, UserEvent, SurveyResponse, TestResult, Lead } from '../services/postgresService';
+import { supabaseService, PageVisit, UserEvent, TestResult, Lead, SurveyResponse } from '../services/supabaseService';
 import { deviceDetection, ComprehensiveDeviceInfo } from './deviceDetection';
 
 // 상세 추적 이벤트 타입 정의
@@ -81,7 +81,15 @@ class DetailedAnalytics {
     if (!this.deviceInfo || this.isSessionSaved) return;
 
     try {
-      const success = await PostgresService.createOrUpdateSession(this.deviceInfo, this.sessionId);
+      const result = await supabaseService.createOrUpdateSession({
+      session_id: this.sessionId,
+      user_agent: this.deviceInfo.userAgent,
+      ip_address: this.deviceInfo.location?.ip,
+      device_type: this.deviceInfo.device?.type,
+      country: this.deviceInfo.location?.country,
+      city: this.deviceInfo.location?.city
+    });
+    const success = result.success;
       this.isSessionSaved = success;
     } catch (error) {
       console.error('❌ 세션 저장 실패:', error);
@@ -324,7 +332,8 @@ class DetailedAnalytics {
       load_time_ms: performance.now()
     };
 
-    this.currentPageVisitId = await PostgresService.recordPageVisit(visitData);
+    const visitResult = await supabaseService.recordPageVisit(visitData);
+    this.currentPageVisitId = visitResult.data?.id;
 
     // 새 페이지 세션 시작 (기존 로직 유지)
     this.currentPageSession = {
@@ -363,7 +372,7 @@ class DetailedAnalytics {
       exit_type: 'navigation'
     };
 
-    await PostgresService.updatePageVisitExit(this.currentPageVisitId, exitData);
+    await supabaseService.updatePageVisitExit(this.currentPageVisitId, exitData);
 
     // 기존 로직 유지
     this.currentPageSession.exitTime = exitTime;
@@ -421,7 +430,7 @@ class DetailedAnalytics {
         answered_at: new Date().toISOString()
       };
       
-      await PostgresService.saveSurveyResponse(surveyResponse);
+      await supabaseService.saveSurveyResponse(surveyResponse);
     }
 
     // 기존 이벤트 추적
@@ -471,7 +480,7 @@ class DetailedAnalytics {
         shared_count: 0
       };
       
-      await PostgresService.saveTestResult(testResult);
+      await supabaseService.saveTestResult(testResult);
       console.log('✅ 테스트 완료 결과 저장:', travelTypeCode);
     } catch (error) {
       console.error('❌ 테스트 완료 저장 실패:', error);
@@ -495,7 +504,7 @@ class DetailedAnalytics {
         created_at: new Date().toISOString()
       };
       
-      await PostgresService.saveLead(lead);
+      await supabaseService.saveLead(lead);
       console.log('✅ 리드 정보 저장 완료:', contactType);
       
       // 익명 사용자를 식별된 사용자로 전환
@@ -580,7 +589,7 @@ class DetailedAnalytics {
         metadata: event.metadata
       }));
 
-      await PostgresService.recordUserEvents(userEvents);
+      await supabaseService.recordBatchEvents(userEvents);
       console.log(`✅ ${this.events.length}개 상세 이벤트 저장 완료`);
       this.events = []; // 저장 후 초기화
     } catch (error) {
