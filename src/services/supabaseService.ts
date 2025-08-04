@@ -74,6 +74,7 @@ export interface UserEvent {
 export interface Lead {
   session_id: string;
   email?: string;
+  phone?: string;
   contact_type?: string;
   contact_value?: string;
   marketing_consent?: any;
