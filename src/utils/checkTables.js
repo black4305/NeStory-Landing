@@ -1,8 +1,8 @@
 // Supabase에서 현재 존재하는 테이블들 확인
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = 'https://mkvfmzrtkbkpslxntbsz.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdmZtenJ0a2JrcHNseG50YnN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwODgxMTUsImV4cCI6MjA2NDY2NDExNX0.PpdOo5N7_hcR04avCj_JXvVY43fa0DSmHDlCdaLHxf0';
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://qjirykgrrcspyicrpnoi.supabase.co';
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqaXJ5a2dycmNzcHlpY3Jwbm9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyNjE2ODcsImV4cCI6MjA2OTgzNzY4N30.4j2xxYhN81XKx72LiuQZ9P3Y1iziBAJtmhPibEtcWvE';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
