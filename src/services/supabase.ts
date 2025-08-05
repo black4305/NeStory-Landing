@@ -8,6 +8,27 @@ const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-anon-key';
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export class SupabaseService {
+  // 세션 존재 확인 및 생성 헬퍼 함수 (RPC 사용)
+  static async ensureSessionExists(sessionId: string, userAgent: string = '') {
+    try {
+      // RPC 함수로 세션 생성/업데이트
+      const { data, error } = await supabase.rpc('landing_create_or_update_session', {
+        p_session_id: sessionId,
+        p_user_agent: userAgent,
+        p_device_type: 'desktop',
+        p_country: 'South Korea'
+      });
+
+      if (error) {
+        console.error('세션 RPC 생성 실패:', error);
+      } else {
+        console.log('✅ 세션 RPC 생성 성공:', sessionId);
+      }
+    } catch (error) {
+      console.error('세션 확인/생성 실패:', error);
+    }
+  }
+
   // nestory-landing 스키마 프록시 함수 사용
   static async saveUserData(data: AnalyticsData) {
     console.log('🔍 nestory-landing 스키마로 Supabase 저장 시작:', data.sessionId);
@@ -484,19 +505,20 @@ export class SupabaseService {
     viewportHeight: number;
   }) {
     try {
-      const { error } = await supabase
-        .from('squeeze_page_visits')
-        .insert({
-          session_id: data.sessionId,
-          route: data.page,
-          page_title: document.title,
-          full_url: window.location.href,
-          enter_time: new Date(data.timestamp).toISOString(),
-          duration_ms: data.duration,
-          scroll_depth_percent: data.scrollDepth,
-          interaction_count: data.interactions,
-          exit_type: data.exitPoint
-        });
+      // 세션이 존재하는지 확인하고 없으면 생성
+      await this.ensureSessionExists(data.sessionId, data.userAgent);
+      
+      const { error } = await supabase.rpc('landing_record_page_visit', {
+        p_session_id: data.sessionId,
+        p_route: data.page,
+        p_page_title: document.title,
+        p_full_url: window.location.href,
+        p_enter_time: new Date(data.timestamp).toISOString(),
+        p_duration_ms: data.duration,
+        p_scroll_depth_percent: data.scrollDepth,
+        p_interaction_count: data.interactions,
+        p_exit_type: data.exitPoint
+      });
 
       if (error) {
         console.error('페이지 분석 데이터 저장 오류:', error);
@@ -550,19 +572,17 @@ export class SupabaseService {
     timeOnPage: number;
   }) {
     try {
-      const { error } = await supabase
-        .from('squeeze_user_events')
-        .insert({
-          session_id: data.sessionId,
-          event_type: 'cta_click',
-          element_id: data.ctaName,
-          element_type: 'cta',
-          element_text: data.ctaTarget,
-          timestamp_ms: data.timestamp,
-          time_on_page_ms: data.timeOnPage,
-          scroll_position: Math.round((data.scrollDepth / 100) * document.body.scrollHeight),
-          cta_type: data.ctaName
-        });
+      const { error } = await supabase.rpc('landing_record_user_event', {
+        p_session_id: data.sessionId,
+        p_event_type: 'cta_click',
+        p_element_id: data.ctaName,
+        p_element_type: 'cta',
+        p_element_text: data.ctaTarget,
+        p_timestamp_ms: data.timestamp,
+        p_time_on_page_ms: data.timeOnPage,
+        p_scroll_position: Math.round((data.scrollDepth / 100) * document.body.scrollHeight),
+        p_cta_type: data.ctaName
+      });
 
       if (error) {
         console.error('CTA 클릭 추적 오류:', error);
@@ -587,17 +607,15 @@ export class SupabaseService {
     timeOnPage: number;
   }) {
     try {
-      const { error } = await supabase
-        .from('squeeze_user_events')
-        .insert({
-          session_id: data.sessionId,
-          event_type: 'section_view',
-          element_id: data.section,
-          element_type: 'section',
-          timestamp_ms: data.timestamp,
-          time_on_page_ms: data.timeOnPage,
-          scroll_position: Math.round((data.scrollDepth / 100) * document.body.scrollHeight)
-        });
+      const { error } = await supabase.rpc('landing_record_user_event', {
+        p_session_id: data.sessionId,
+        p_event_type: 'section_view',
+        p_element_id: data.section,
+        p_element_type: 'section',
+        p_timestamp_ms: data.timestamp,
+        p_time_on_page_ms: data.timeOnPage,
+        p_scroll_position: Math.round((data.scrollDepth / 100) * document.body.scrollHeight)
+      });
 
       if (error) {
         console.error('섹션 조회 추적 오류:', error);
