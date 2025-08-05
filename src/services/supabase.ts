@@ -552,7 +552,6 @@ export class SupabaseService {
     try {
       const { error } = await supabase
         .from('squeeze_user_events')
-        .eq('event_type', 'cta_click')
         .insert({
           session_id: data.sessionId,
           event_type: 'cta_click',
@@ -590,7 +589,6 @@ export class SupabaseService {
     try {
       const { error } = await supabase
         .from('squeeze_user_events')
-        .eq('event_type', 'section_view')
         .insert({
           session_id: data.sessionId,
           event_type: 'section_view',
@@ -618,8 +616,8 @@ export class SupabaseService {
     try {
       let query = supabase
         .from('squeeze_user_events')
-        .eq('event_type', 'cta_click')
         .select('*')
+        .eq('event_type', 'cta_click')
         .order('timestamp', { ascending: false });
       
       if (page) {
@@ -645,8 +643,8 @@ export class SupabaseService {
     try {
       let query = supabase
         .from('squeeze_user_events')
-        .eq('event_type', 'section_view')
         .select('*')
+        .eq('event_type', 'section_view')
         .order('timestamp', { ascending: false });
       
       if (page) {
@@ -771,15 +769,15 @@ export class SupabaseService {
       // CTA 클릭 데이터
       const { data: ctaData } = await supabase
         .from('squeeze_user_events')
-        .eq('event_type', 'cta_click')
         .select('*')
+        .eq('event_type', 'cta_click')
         .eq('session_id', sessionId);
 
       // 섹션 조회 데이터
       const { data: sectionData } = await supabase
         .from('squeeze_user_events')
-        .eq('event_type', 'section_view')
         .select('*')
+        .eq('event_type', 'section_view')
         .eq('session_id', sessionId);
 
       return {
