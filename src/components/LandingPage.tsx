@@ -38,38 +38,16 @@ const LandingPage: React.FC = () => {
   }, []);
 
   React.useEffect(() => {
-    const visitId = Date.now().toString();
-    // const sessionId = `landing-${visitId}`;
+    // detailedAnalytics가 이미 세션을 생성하므로 중복 생성 방지
+    const sessionId = sessionStorage.getItem('sessionId');
+    const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
+    
+    if (!sessionId) {
+      // detailedAnalytics가 생성할 때까지 대기
+      return;
+    }
+    
     sessionStorage.setItem('visitId', visitId);
-    
-    // 랜딩 페이지 방문 데이터 수집
-    const visit: any = {
-      id: visitId,
-      timestamp: Date.now(),
-      userAgent: navigator.userAgent,
-      referrer: document.referrer,
-      deviceType: getDeviceType()
-    };
-
-    // RPC 함수를 사용하여 세션 생성 및 페이지 방문 기록
-    const sessionId = `landing-${visitId}`;
-    sessionStorage.setItem('sessionId', sessionId);
-    
-    // 세션 생성
-    SupabaseService.ensureSessionExists(sessionId, visit.userAgent);
-    
-    // 페이지 방문 기록
-    SupabaseService.savePageAnalytics({
-      page: '/',
-      timestamp: visit.timestamp,
-      sessionId,
-      visitId,
-      deviceType: visit.deviceType,
-      userAgent: visit.userAgent,
-      referrer: visit.referrer,
-      viewportWidth: window.innerWidth,
-      viewportHeight: window.innerHeight
-    });
 
     // 섹션별 조회 추적을 위한 Intersection Observer
     const observeSection = (selector: string, sectionName: string) => {
@@ -119,9 +97,9 @@ const LandingPage: React.FC = () => {
           duration: sessionDuration * 1000,
           scrollDepth: maxScrollDepth,
           exitPoint: 'page_unload',
-          deviceType: visit.deviceType,
-          userAgent: visit.userAgent,
-          referrer: visit.referrer,
+          deviceType: getDeviceType(),
+          userAgent: navigator.userAgent,
+          referrer: document.referrer,
           viewportWidth: window.innerWidth,
           viewportHeight: window.innerHeight
         });

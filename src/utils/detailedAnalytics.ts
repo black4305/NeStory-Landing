@@ -54,7 +54,21 @@ class DetailedAnalytics {
   private isSessionSaved: boolean = false;
 
   constructor() {
-    this.sessionId = this.generateSessionId();
+    // 기존 세션 확인 또는 새 세션 생성
+    const existingSessionId = sessionStorage.getItem('sessionId');
+    if (existingSessionId) {
+      this.sessionId = existingSessionId;
+      console.log('✅ 기존 Landing 세션 사용:', this.sessionId);
+    } else {
+      this.sessionId = this.generateSessionId();
+      sessionStorage.setItem('sessionId', this.sessionId);
+      console.log('✅ 새 Landing 세션 생성:', this.sessionId);
+    }
+    
+    // visitId도 동기화
+    const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
+    sessionStorage.setItem('visitId', visitId);
+    
     this.initializeDeviceInfo();
     this.initializeTracking();
   }
