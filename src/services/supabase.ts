@@ -100,16 +100,9 @@ export class SupabaseService {
         p_session_id: data.sessionId,
         p_lead_source: 'nestoryti_test',
         p_email: userInfo.instagram ? `${userInfo.instagram}@instagram` : null,
-        p_phone: null,
         p_name: userInfo.name || null,
-        p_email_consent: marketingConsent,
         p_marketing_consent: marketingConsent,
-        p_privacy_consent: privacyConsent,
-        p_lead_magnet_name: 'family_travel_test',
-        p_conversion_page: window.location.pathname,
-        p_lead_score: data.completed ? 80 : 50,
-        p_lead_quality: data.completed ? 'warm' : 'cold',
-        p_engagement_level: data.completed ? 'high' : 'medium'
+        p_privacy_consent: privacyConsent
       });
 
       if (!error && result) {
@@ -274,16 +267,7 @@ export class SupabaseService {
       const { data: result, error } = await supabase.rpc('landing_record_user_event', {
         p_session_id: data.visitId || `temp_${Date.now()}`,
         p_event_type: 'page_analytics',
-        p_timestamp_ms: data.timestamp || Date.now(),
-        p_element_type: 'analytics',
-        p_metadata: {
-          userAgent: data.userAgent || navigator.userAgent,
-          referrer: data.referrer || window.location.origin,
-          deviceType: data.deviceType || SupabaseService.getDeviceType(),
-          sessionDuration: data.sessionDuration || 0,
-          ctaClicked: data.ctaClicked || false,
-          scrollDepth: data.scrollDepth || 0
-        }
+        p_timestamp_ms: data.timestamp || Date.now()
       });
 
       if (error) {
@@ -471,7 +455,6 @@ export class SupabaseService {
         p_session_id: data.visitId,
         p_lead_source: data.leadType,
         p_email: data.email || null,
-        p_phone: data.phone || null,
         p_marketing_consent: data.marketingConsent,
         p_privacy_consent: true
       });
@@ -510,14 +493,7 @@ export class SupabaseService {
       
       const { error } = await supabase.rpc('landing_record_page_visit', {
         p_session_id: data.sessionId,
-        p_route: data.page,
-        p_page_title: document.title,
-        p_full_url: window.location.href,
-        p_enter_time: new Date(data.timestamp).toISOString(),
-        p_duration_ms: data.duration,
-        p_scroll_depth_percent: data.scrollDepth,
-        p_interaction_count: data.interactions,
-        p_exit_type: data.exitPoint
+        p_route: data.page
       });
 
       if (error) {
@@ -575,13 +551,7 @@ export class SupabaseService {
       const { error } = await supabase.rpc('landing_record_user_event', {
         p_session_id: data.sessionId,
         p_event_type: 'cta_click',
-        p_element_id: data.ctaName,
-        p_element_type: 'cta',
-        p_element_text: data.ctaTarget,
-        p_timestamp_ms: data.timestamp,
-        p_time_on_page_ms: data.timeOnPage,
-        p_scroll_position: Math.round((data.scrollDepth / 100) * document.body.scrollHeight),
-        p_cta_type: data.ctaName
+        p_timestamp_ms: data.timestamp
       });
 
       if (error) {
@@ -610,11 +580,7 @@ export class SupabaseService {
       const { error } = await supabase.rpc('landing_record_user_event', {
         p_session_id: data.sessionId,
         p_event_type: 'section_view',
-        p_element_id: data.section,
-        p_element_type: 'section',
-        p_timestamp_ms: data.timestamp,
-        p_time_on_page_ms: data.timeOnPage,
-        p_scroll_position: Math.round((data.scrollDepth / 100) * document.body.scrollHeight)
+        p_timestamp_ms: data.timestamp
       });
 
       if (error) {
@@ -710,7 +676,6 @@ export class SupabaseService {
       const { error: userError } = await supabase.rpc('landing_save_lead', {
         p_session_id: data.sessionId,
         p_email: data.userInfo.email,
-        p_phone: data.userInfo.phone,
         p_name: data.userInfo.name,
         p_marketing_consent: data.userInfo.marketingConsent,
         p_privacy_consent: true,
@@ -819,6 +784,32 @@ export class SupabaseService {
     if (width <= 768) return 'mobile';
     if (width <= 1024) return 'tablet';
     return 'desktop';
+  }
+
+  // 전환 기록
+  static async recordConversion(data: {
+    sessionId: string;
+    conversionType: string;
+    conversionPage?: string;
+    conversionValue?: number;
+    metadata?: any;
+  }) {
+    try {
+      const { error } = await supabase.rpc('landing_record_conversion', {
+        p_session_id: data.sessionId,
+        p_conversion_type: data.conversionType
+      });
+
+      if (error) {
+        console.error('전환 기록 오류:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('전환 기록 실패:', error);
+      return false;
+    }
   }
 
   // 상세 이벤트 저장

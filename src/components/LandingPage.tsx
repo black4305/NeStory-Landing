@@ -51,13 +51,24 @@ const LandingPage: React.FC = () => {
       deviceType: getDeviceType()
     };
 
-    // Supabase에 방문 데이터 저장
-    SupabaseService.saveLandingAnalytics({
-      visitId,
+    // RPC 함수를 사용하여 세션 생성 및 페이지 방문 기록
+    const sessionId = `landing-${visitId}`;
+    sessionStorage.setItem('sessionId', sessionId);
+    
+    // 세션 생성
+    SupabaseService.ensureSessionExists(sessionId, visit.userAgent);
+    
+    // 페이지 방문 기록
+    SupabaseService.savePageAnalytics({
+      page: '/',
       timestamp: visit.timestamp,
+      sessionId,
+      visitId,
+      deviceType: visit.deviceType,
       userAgent: visit.userAgent,
       referrer: visit.referrer,
-      deviceType: visit.deviceType
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight
     });
 
     // 섹션별 조회 추적을 위한 Intersection Observer
@@ -98,14 +109,21 @@ const LandingPage: React.FC = () => {
     const handleBeforeUnload = () => {
       const sessionDuration = (Date.now() - startTime) / 1000;
       if (sessionDuration > 1) {
-        SupabaseService.saveLandingAnalytics({
+        // 페이지 종료 시 업데이트
+        const sessionId = sessionStorage.getItem('sessionId') || `landing-${visitId}`;
+        SupabaseService.savePageAnalytics({
+          page: '/',
+          timestamp: Date.now(),
+          sessionId,
           visitId,
-          timestamp: visit.timestamp,
+          duration: sessionDuration * 1000,
+          scrollDepth: maxScrollDepth,
+          exitPoint: 'page_unload',
+          deviceType: visit.deviceType,
           userAgent: visit.userAgent,
           referrer: visit.referrer,
-          deviceType: visit.deviceType,
-          sessionDuration,
-          scrollDepth: maxScrollDepth
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight
         });
       }
     };
@@ -149,14 +167,20 @@ const LandingPage: React.FC = () => {
     });
     
     const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
-    SupabaseService.saveLandingAnalytics({
-      visitId,
-      timestamp: Date.now(),
-      userAgent: navigator.userAgent,
-      referrer: document.referrer,
-      deviceType: getDeviceType(),
-      ctaClicked: true
+    const sessionId = sessionStorage.getItem('sessionId') || `landing-${visitId}`;
+    
+    // CTA 클릭을 전환으로 기록
+    SupabaseService.recordConversion({
+      sessionId,
+      conversionType: 'cta_click',
+      conversionPage: '/',
+      conversionValue: 1,
+      metadata: {
+        ctaName: '메인 CTA - 무료 진단',
+        targetPage: '/info'
+      }
     });
+    
     navigate('/info');
   };
 
