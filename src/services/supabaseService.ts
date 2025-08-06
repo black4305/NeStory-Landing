@@ -99,6 +99,15 @@ export interface Lead {
   name?: string;
   source?: string;
   timestamp?: Date;
+  // 추가 필드들
+  device_type?: string;
+  device_info?: any;
+  ip_address?: string;
+  ip_location?: any;
+  page_url?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
 
 export interface SurveyResponse {
@@ -283,7 +292,16 @@ export class SupabaseService {
         p_lead_source: leadData.lead_source || leadData.source,
         p_travel_type: leadData.travel_type,
         p_lead_score: leadData.lead_score,
-        p_webhook_sent: leadData.webhook_sent || false
+        p_webhook_sent: leadData.webhook_sent || false,
+        // 추가 파라미터
+        p_device_type: leadData.device_type,
+        p_device_info: leadData.device_info,
+        p_ip_address: leadData.ip_address,
+        p_ip_location: leadData.ip_location,
+        p_page_url: leadData.page_url,
+        p_utm_source: leadData.utm_source,
+        p_utm_medium: leadData.utm_medium,
+        p_utm_campaign: leadData.utm_campaign
       });
 
       if (error) throw error;

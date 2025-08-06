@@ -98,7 +98,10 @@ export class SupabaseService {
       // squeeze_leads 테이블에 직접 저장 (새로운 RPC 함수 사용)
       const { data: result, error } = await supabase.rpc('landing_save_lead', {
         p_session_id: data.sessionId,
+        p_contact_type: 'instagram',
+        p_contact_value: userInfo.instagram || '',
         p_lead_source: 'nestoryti_test',
+        p_travel_type: (data as any).typeCode || 'unknown',
         p_email: userInfo.instagram ? `${userInfo.instagram}@instagram` : null,
         p_name: userInfo.name || null,
         p_marketing_consent: marketingConsent,
@@ -453,8 +456,12 @@ export class SupabaseService {
     try {
       const { error } = await supabase.rpc('landing_save_lead', {
         p_session_id: data.visitId,
-        p_lead_source: data.leadType,
+        p_contact_type: data.leadType || 'email',
+        p_contact_value: data.email || data.phone || '',
+        p_lead_source: data.leadType || 'direct',
+        p_travel_type: 'unknown',
         p_email: data.email || null,
+        p_phone: data.phone || null,
         p_marketing_consent: data.marketingConsent,
         p_privacy_consent: true
       });
@@ -675,11 +682,14 @@ export class SupabaseService {
       // squeeze_leads 테이블에 사용자 정보 저장
       const { error: userError } = await supabase.rpc('landing_save_lead', {
         p_session_id: data.sessionId,
+        p_contact_type: 'email',
+        p_contact_value: data.userInfo.email || '',
+        p_lead_source: 'identification',
+        p_travel_type: 'unknown',
         p_email: data.userInfo.email,
         p_name: data.userInfo.name,
         p_marketing_consent: data.userInfo.marketingConsent,
-        p_privacy_consent: true,
-        p_lead_source: 'identification'
+        p_privacy_consent: true
       });
 
       if (pageError || ctaError || sectionError || userError) {

@@ -276,7 +276,52 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
     });
     
     try {
-      // 새로운 PostgreSQL 기반 리드 추적 시스템
+      // UTM 파라미터 가져오기
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmSource = urlParams.get('utm_source');
+      const utmMedium = urlParams.get('utm_medium');
+      const utmCampaign = urlParams.get('utm_campaign');
+      
+      // IP 및 위치 정보 가져오기 (기존 코드 활용)
+      let ipInfo = { ip: 'Unknown', city: 'Unknown', country: 'Unknown' };
+      try {
+        const ipResponse = await fetch('https://ipapi.co/json/');
+        if (ipResponse.ok) {
+          const data = await ipResponse.json();
+          ipInfo = {
+            ip: data.ip || 'Unknown',
+            city: data.city || 'Unknown',
+            country: data.country_name || 'Unknown'
+          };
+        }
+      } catch (e) {
+        console.log('Failed to get IP info');
+      }
+      
+      // 디바이스 정보 가져오기
+      const getDeviceInfo = () => {
+        const ua = navigator.userAgent;
+        let device = 'Unknown';
+        
+        // 모바일 체크
+        if (/iPhone|iPad|iPod/.test(ua)) {
+          device = 'iOS';
+          if (/iPhone/.test(ua)) device = 'iPhone';
+          else if (/iPad/.test(ua)) device = 'iPad';
+        } else if (/Android/.test(ua)) {
+          device = 'Android';
+        } else if (/Windows/.test(ua)) {
+          device = 'Windows PC';
+        } else if (/Mac/.test(ua)) {
+          device = 'Mac';
+        } else if (/Linux/.test(ua)) {
+          device = 'Linux';
+        }
+        
+        return device;
+      };
+      
+      // 개선된 리드 추적 (모든 데이터 포함)
       await detailedAnalytics.trackLeadCapture(
         selectedOption as 'email' | 'kakao',
         inputValue.trim(),
@@ -284,7 +329,20 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
         {
           marketingConsent: selectedOption === 'kakao' ? channelAdded : false,
           privacyConsent: true,
-          kakaoChannelAdded: selectedOption === 'kakao' ? channelAdded : false
+          kakaoChannelAdded: selectedOption === 'kakao' ? channelAdded : false,
+          // 추가 데이터
+          deviceType: getDeviceInfo(),
+          deviceInfo: {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            screenResolution: `${window.screen.width}x${window.screen.height}`
+          },
+          ipAddress: ipInfo.ip,
+          ipLocation: ipInfo,
+          pageUrl: window.location.href,
+          utmSource,
+          utmMedium,
+          utmCampaign
         }
       );
 
@@ -312,45 +370,6 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
       
       if (webhookUrl) {
         try {
-          // 디바이스 정보 파싱
-          const getDeviceInfo = () => {
-            const ua = navigator.userAgent;
-            let device = '알 수 없음';
-            
-            // 모바일 체크
-            if (/iPhone|iPad|iPod/.test(ua)) {
-              device = 'iOS';
-              if (/iPhone/.test(ua)) device = 'iPhone';
-              else if (/iPad/.test(ua)) device = 'iPad';
-            } else if (/Android/.test(ua)) {
-              device = 'Android';
-            } else if (/Windows/.test(ua)) {
-              device = 'Windows PC';
-            } else if (/Mac/.test(ua)) {
-              device = 'Mac';
-            } else if (/Linux/.test(ua)) {
-              device = 'Linux';
-            }
-            
-            return device;
-          };
-          
-          // IP 주소 가져오기 (외부 API 사용)
-          let ipInfo = { ip: '알 수 없음', city: '알 수 없음', country: '알 수 없음' };
-          try {
-            const ipResponse = await fetch('https://ipapi.co/json/');
-            if (ipResponse.ok) {
-              const data = await ipResponse.json();
-              ipInfo = {
-                ip: data.ip || '알 수 없음',
-                city: data.city || '알 수 없음',
-                country: data.country_name || '알 수 없음'
-              };
-            }
-          } catch (e) {
-            console.log('IP 정보 가져오기 실패');
-          }
-          
           // 웹훅으로 데이터 전송
           const response = await fetch(webhookUrl, {
             method: 'POST',
@@ -365,7 +384,10 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
               device: getDeviceInfo(),
               ip: ipInfo.ip,
               location: `${ipInfo.city}, ${ipInfo.country}`,
-              pageUrl: window.location.href
+              pageUrl: window.location.href,
+              utmSource,
+              utmMedium,
+              utmCampaign
             })
           });
           

@@ -530,6 +530,8 @@ class DetailedAnalytics {
         session_id: this.sessionId,
         contact_type: contactType,
         contact_value: contactValue,
+        email: contactType === 'email' ? contactValue : undefined,
+        phone: contactType === 'kakao' ? contactValue : undefined,
         marketing_consent: additionalData?.marketingConsent || false,
         privacy_consent: additionalData?.privacyConsent || true,
         kakao_channel_added: additionalData?.kakaoChannelAdded || false,
@@ -537,11 +539,20 @@ class DetailedAnalytics {
         travel_type: travelType,
         lead_score: this.calculateLeadScore(contactType, additionalData),
         webhook_sent: false,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        // 추가 필드들
+        device_type: additionalData?.deviceType,
+        device_info: additionalData?.deviceInfo,
+        ip_address: additionalData?.ipAddress,
+        ip_location: additionalData?.ipLocation,
+        page_url: additionalData?.pageUrl,
+        utm_source: additionalData?.utmSource,
+        utm_medium: additionalData?.utmMedium,
+        utm_campaign: additionalData?.utmCampaign
       };
       
       await supabaseService.saveLead(lead);
-      console.log('✅ 리드 정보 저장 완료:', contactType);
+      console.log('✅ 리드 정보 저장 완료 (개선된 버전):', contactType);
       
       // 익명 사용자를 식별된 사용자로 전환
       await this.linkUserIdentity(contactType, contactValue);
