@@ -21,6 +21,17 @@ export interface AnonymousSession {
   city?: string;
   referrer?: string;
   landing_page?: string;
+  // 추가 위치 정보 필드
+  country_code?: string;
+  region?: string;
+  region_code?: string;
+  zip_code?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  isp?: string;
+  organization?: string;
+  asn?: string;
 }
 
 export interface PageVisit {
@@ -158,7 +169,18 @@ export class SupabaseService {
         p_country: sessionData.country,
         p_city: sessionData.city,
         p_referrer: sessionData.referrer,
-        p_landing_page: sessionData.landing_page
+        p_landing_page: sessionData.landing_page,
+        // 추가 위치 정보 파라미터
+        p_country_code: sessionData.country_code,
+        p_region: sessionData.region,
+        p_region_code: sessionData.region_code,
+        p_zip_code: sessionData.zip_code,
+        p_latitude: sessionData.latitude,
+        p_longitude: sessionData.longitude,
+        p_timezone: sessionData.timezone,
+        p_isp: sessionData.isp,
+        p_organization: sessionData.organization,
+        p_asn: sessionData.asn
       });
 
       if (error) throw error;

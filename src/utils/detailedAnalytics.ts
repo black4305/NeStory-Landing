@@ -106,7 +106,18 @@ class DetailedAnalytics {
         ip_address: this.deviceInfo.location?.ip,
         device_type: this.deviceInfo.device?.type,
         country: this.deviceInfo.location?.country,
-        city: this.deviceInfo.location?.city
+        city: this.deviceInfo.location?.city,
+        // 추가 위치 정보
+        country_code: this.deviceInfo.location?.countryCode,
+        region: this.deviceInfo.location?.region,
+        region_code: this.deviceInfo.location?.regionCode,
+        zip_code: this.deviceInfo.location?.zipCode,
+        latitude: this.deviceInfo.location?.latitude,
+        longitude: this.deviceInfo.location?.longitude,
+        timezone: this.deviceInfo.location?.timezone,
+        isp: this.deviceInfo.location?.isp,
+        organization: this.deviceInfo.location?.org,
+        asn: this.deviceInfo.location?.asn
       });
       const success = result.success;
       this.isSessionSaved = success;

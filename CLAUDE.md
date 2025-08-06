@@ -708,3 +708,81 @@ export function saveSurveySessionId(sessionId: string): void {
 3. 중복 체크 로직 추가
 
 이제 사용자가 아무리 새로고침을 해도 **단일 세션**만 유지되며, 정확한 사용자 행동 분석이 가능합니다. 🎉
+
+---
+
+## 🎯 2025.08.06 11:30 - IP Geolocation API 개선 및 Make.com 웹훅 자동화 복구
+
+### 1. IP Geolocation API 구현 개선
+
+#### 문제점
+- IP 주소만 DB에 저장되고 위치 정보(latitude, longitude, 국가, 지역 등)는 저장되지 않음
+- deviceDetection.ts에서 수집한 상세 위치 정보가 DB로 전달되지 않음
+
+#### 해결 방법
+1. **supabaseService.ts 수정**
+   - AnonymousSession 인터페이스에 추가 위치 정보 필드 추가
+   - createOrUpdateSession 함수에서 모든 위치 정보를 RPC 파라미터로 전달
+   ```typescript
+   // 추가된 필드들
+   country_code?: string;
+   region?: string;
+   region_code?: string;
+   zip_code?: string;
+   latitude?: number;
+   longitude?: number;
+   timezone?: string;
+   isp?: string;
+   organization?: string;
+   asn?: string;
+   ```
+
+2. **detailedAnalytics.ts 수정**
+   - saveSession 함수에서 모든 위치 정보 필드를 DB로 전달하도록 수정
+   - 기존에는 country와 city만 전달했으나, 이제 모든 위치 정보 전달
+
+#### 구현된 Geolocation API들
+- ipapi.co: 기본 IP 정보 API
+- ip-api.com: 백업 API (ipapi.co 실패 시)
+- ipify.org: IP 주소만 가져오는 추가 백업
+
+### 2. Make.com 웹훅 자동화 복구
+
+#### 문제점
+- DB/백엔드 변경 후 Make 웹훅 자동화가 작동하지 않음
+- 환경 변수 REACT_APP_WEBHOOK_URL이 설정되지 않음
+
+#### 해결 방법
+1. **.env 파일 설정**
+   ```env
+   # Make.com 웹훅 설정
+   REACT_APP_WEBHOOK_URL=https://hook.us2.make.com/bge2m6qyscw129jyax6gh6pwc4ae8qvw
+   ```
+
+2. **LeadMagnetPage.tsx**
+   - 이미 웹훅 전송 로직이 구현되어 있었음
+   - 환경 변수만 설정하면 정상 작동
+
+3. **웹훅 데이터 구조**
+   ```json
+   {
+     "timestamp": "ISO 날짜",
+     "type": "email/kakao",
+     "value": "이메일 또는 카카오톡 이름",
+     "channelAdded": true/false,
+     "device": "디바이스 정보",
+     "ip": "IP 주소",
+     "location": "도시, 국가",
+     "pageUrl": "현재 페이지 URL"
+   }
+   ```
+
+### 3. 빌드 테스트
+- 빌드 성공: 323.31 kB
+- 모든 TypeScript 타입 에러 해결
+- 웹훅 정상 작동 확인
+
+### 4. 주요 파일 변경사항
+- `/Landing/src/services/supabaseService.ts`: 위치 정보 필드 추가
+- `/Landing/src/utils/detailedAnalytics.ts`: 전체 위치 정보 전달
+- `/Landing/.env`: Make 웹훅 URL 추가
