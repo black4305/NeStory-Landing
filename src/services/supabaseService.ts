@@ -206,7 +206,7 @@ export class SupabaseService {
         p_interaction_count: visitData.interaction_count || 0,
         p_form_submissions: 0,
         p_cta_clicks: visitData.cta_clicks || 0,
-        p_load_time_ms: visitData.load_time_ms
+        p_load_time_ms: visitData.load_time_ms ? Math.round(visitData.load_time_ms) : null
       });
 
       if (error) throw error;
@@ -451,7 +451,7 @@ export class SupabaseService {
       const { data: visits, error } = await supabase
         .from('squeeze_page_visits')
         .select('route, enter_time, exit_time, scroll_depth_percent')
-        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+        .gte('enter_time', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
       if (error) throw error;
 

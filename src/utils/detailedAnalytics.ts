@@ -365,7 +365,7 @@ class DetailedAnalytics {
       form_interactions: 0,
       bounce: false,
       exit_intent_triggered: false,
-      load_time_ms: performance.now()
+      load_time_ms: Math.round(performance.now())
     };
 
     const visitResult = await supabaseService.recordPageVisit(visitData);

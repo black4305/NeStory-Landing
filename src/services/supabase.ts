@@ -514,10 +514,10 @@ export class SupabaseService {
       let query = supabase
         .from('squeeze_page_visits')
         .select('*')
-        .order('timestamp', { ascending: false });
+        .order('enter_time', { ascending: false });
       
       if (page) {
-        query = query.eq('page', page);
+        query = query.eq('route', page);
       }
 
       const { data, error } = await query;

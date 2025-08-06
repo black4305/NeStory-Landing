@@ -152,29 +152,29 @@ export const usePageTracking = (pageName: string) => {
       const pageData = await SupabaseService.getPageAnalytics(pageName);
       
       const pageViews = pageData.length;
-      const uniqueVisitors = new Set(pageData.map(item => item.visitId)).size;
+      const uniqueVisitors = new Set(pageData.map(item => item.session_id)).size;
       
       const averageTimeOnPage = pageViews > 0 
-        ? Math.round(pageData.reduce((sum, item) => sum + (item.duration || 0), 0) / pageViews / 1000)
+        ? Math.round(pageData.reduce((sum, item) => sum + (item.duration_ms || 0), 0) / pageViews / 1000)
         : 0;
       
       const scrollDepthAverage = pageViews > 0
-        ? Math.round(pageData.reduce((sum, item) => sum + (item.scrollDepth || 0), 0) / pageViews)
+        ? Math.round(pageData.reduce((sum, item) => sum + (item.scroll_depth_percent || 0), 0) / pageViews)
         : 0;
       
       // 바운스율 계산 (30초 미만 + 스크롤 25% 미만)
       const bounces = pageData.filter(item => 
-        (item.duration || 0) < 30000 && (item.scrollDepth || 0) < 25
+        (item.duration_ms || 0) < 30000 && (item.scroll_depth_percent || 0) < 25
       ).length;
       const bounceRate = pageViews > 0 ? Math.round((bounces / pageViews) * 100) : 0;
       
       // 상호작용율 (클릭 1회 이상)
-      const interacted = pageData.filter(item => (item.interactions || 0) > 0).length;
+      const interacted = pageData.filter(item => (item.interaction_count || 0) > 0).length;
       const interactionRate = pageViews > 0 ? Math.round((interacted / pageViews) * 100) : 0;
       
       // 이탈율 (이 페이지에서 세션 종료)
       const exits = pageData.filter(item => 
-        item.exitPoint === 'browser_close' || item.exitPoint === 'tab_hidden'
+        item.exit_type === 'browser_close' || item.exit_type === 'tab_hidden'
       ).length;
       const exitRate = pageViews > 0 ? Math.round((exits / pageViews) * 100) : 0;
       
