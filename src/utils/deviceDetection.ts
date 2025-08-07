@@ -369,13 +369,24 @@ class DeviceDetection {
       proxy: false,
       vpn: false
     };
+    
+    // 캐시 확인 (5분간 유효)
+    const cacheKey = 'cached_ip_location';
+    const cacheExpiry = 'cached_ip_location_expiry';
+    const cached = sessionStorage.getItem(cacheKey);
+    const expiry = sessionStorage.getItem(cacheExpiry);
+    
+    if (cached && expiry && new Date().getTime() < parseInt(expiry)) {
+      console.log('✅ 캐시된 IP 위치 정보 사용');
+      return JSON.parse(cached);
+    }
 
     try {
       // 1차: ipapi.co (무료, 상세 정보)
       const response1 = await fetch('https://ipapi.co/json/');
       if (response1.ok) {
         const data = await response1.json();
-        return {
+        const locationInfo = {
           ip: data.ip || defaultLocation.ip,
           country: data.country_name || defaultLocation.country,
           countryCode: data.country_code || defaultLocation.countryCode,
@@ -392,6 +403,13 @@ class DeviceDetection {
           proxy: false,
           vpn: false
         };
+        
+        // 캐시에 저장 (5분간 유효)
+        sessionStorage.setItem(cacheKey, JSON.stringify(locationInfo));
+        sessionStorage.setItem(cacheExpiry, (new Date().getTime() + 5 * 60 * 1000).toString());
+        console.log('✅ IP 위치 정보 캐시 저장');
+        
+        return locationInfo;
       }
     } catch (error) {
       console.warn('ipapi.co failed, trying backup services');
@@ -403,7 +421,7 @@ class DeviceDetection {
       if (response2.ok) {
         const data = await response2.json();
         if (data.status === 'success') {
-          return {
+          const locationInfo = {
             ip: data.query || defaultLocation.ip,
             country: data.country || defaultLocation.country,
             countryCode: data.countryCode || defaultLocation.countryCode,
@@ -420,6 +438,13 @@ class DeviceDetection {
             proxy: data.proxy || false,
             vpn: false
           };
+          
+          // 캐시에 저장 (5분간 유효)
+          sessionStorage.setItem(cacheKey, JSON.stringify(locationInfo));
+          sessionStorage.setItem(cacheExpiry, (new Date().getTime() + 5 * 60 * 1000).toString());
+          console.log('✅ IP 위치 정보 캐시 저장 (백업 API)');
+          
+          return locationInfo;
         }
       }
     } catch (error) {

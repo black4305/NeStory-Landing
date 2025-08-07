@@ -42,7 +42,7 @@ export interface PageSession {
 }
 
 class DetailedAnalytics {
-  private sessionId: string;
+  private sessionId: string = '';
   private currentRoute: string = '';
   private pageEnterTime: number = 0;
   private events: DetailedEvent[] = [];
@@ -54,23 +54,43 @@ class DetailedAnalytics {
   private isSessionSaved: boolean = false;
 
   constructor() {
-    // 기존 세션 확인 또는 새 세션 생성
+    // IP 기반 방문자 식별을 위한 고유 ID 생성/복구
+    this.initializeSession();
+    this.initializeDeviceInfo();
+    this.initializeTracking();
+  }
+
+  private async initializeSession(): Promise<void> {
+    // 1. localStorage에서 영구 방문자 ID 확인 (재방문자 추적)
+    let visitorId = localStorage.getItem('visitorId');
+    if (!visitorId) {
+      visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 12)}`;
+      localStorage.setItem('visitorId', visitorId);
+      localStorage.setItem('firstVisit', new Date().toISOString());
+    }
+    
+    // 2. sessionStorage에서 현재 세션 ID 확인 (탭/브라우저 세션)
     const existingSessionId = sessionStorage.getItem('sessionId');
     if (existingSessionId) {
       this.sessionId = existingSessionId;
+      this.isSessionSaved = sessionStorage.getItem('sessionSaved') === 'true';
       console.log('✅ 기존 Landing 세션 사용:', this.sessionId);
     } else {
       this.sessionId = this.generateSessionId();
       sessionStorage.setItem('sessionId', this.sessionId);
+      sessionStorage.setItem('visitorId', visitorId);
+      sessionStorage.setItem('sessionStart', Date.now().toString()); // 세션 시작 시간 저장
       console.log('✅ 새 Landing 세션 생성:', this.sessionId);
+      
+      // 방문 횟수 증가
+      const visitCount = parseInt(localStorage.getItem('visitCount') || '0') + 1;
+      localStorage.setItem('visitCount', visitCount.toString());
+      localStorage.setItem('lastVisit', new Date().toISOString());
     }
     
-    // visitId도 동기화
+    // visitId 동기화
     const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
     sessionStorage.setItem('visitId', visitId);
-    
-    this.initializeDeviceInfo();
-    this.initializeTracking();
   }
 
   private async initializeDeviceInfo(): Promise<void> {
@@ -90,15 +110,25 @@ class DetailedAnalytics {
     }
   }
 
-  // 익명 세션 저장
+  // 익명 세션 저장 (개선된 버전)
   private async saveSession(): Promise<void> {
-    if (this.isSessionSaved) return;
+    // 세션 저장 상태를 sessionStorage에서도 확인
+    if (this.isSessionSaved || sessionStorage.getItem('sessionSaved') === 'true') {
+      console.log('⚠️ 세션이 이미 저장됨, 스킵:', this.sessionId);
+      return;
+    }
 
     try {
       // 디바이스 정보가 없으면 먼저 수집
       if (!this.deviceInfo) {
         this.deviceInfo = await deviceDetection.getComprehensiveDeviceInfo();
       }
+
+      // 방문자 정보 가져오기
+      const visitorId = localStorage.getItem('visitorId') || undefined;
+      const visitCount = parseInt(localStorage.getItem('visitCount') || '1');
+      const firstVisit = localStorage.getItem('firstVisit') || undefined;
+      const lastVisit = localStorage.getItem('lastVisit') || undefined;
 
       const result = await supabaseService.createOrUpdateSession({
         session_id: this.sessionId,
@@ -107,6 +137,8 @@ class DetailedAnalytics {
         device_type: this.deviceInfo.device?.type,
         country: this.deviceInfo.location?.country,
         city: this.deviceInfo.location?.city,
+        referrer: document.referrer || 'direct',
+        landing_page: window.location.href,
         // 추가 위치 정보
         country_code: this.deviceInfo.location?.countryCode,
         region: this.deviceInfo.location?.region,
@@ -117,13 +149,28 @@ class DetailedAnalytics {
         timezone: this.deviceInfo.location?.timezone,
         isp: this.deviceInfo.location?.isp,
         organization: this.deviceInfo.location?.org,
-        asn: this.deviceInfo.location?.asn
+        asn: this.deviceInfo.location?.asn,
+        // 방문자 추적 정보 (메타데이터로 전달)
+        visitor_id: visitorId,
+        visit_count: visitCount,
+        first_visit: firstVisit,
+        last_visit: lastVisit
       });
-      const success = result.success;
-      this.isSessionSaved = success;
-      console.log('✅ Landing 세션 저장:', { sessionId: this.sessionId, success });
+      
+      if (result && !result.error) {
+        this.isSessionSaved = true;
+        sessionStorage.setItem('sessionSaved', 'true');
+        console.log('✅ Landing 세션 저장 성공:', { 
+          sessionId: this.sessionId, 
+          visitorId,
+          visitCount,
+          ip: this.deviceInfo.location?.ip 
+        });
+      } else {
+        console.error('❌ 세션 저장 실패:', result?.error);
+      }
     } catch (error) {
-      console.error('❌ 세션 저장 실패:', error);
+      console.error('❌ 세션 저장 예외:', error);
     }
   }
 

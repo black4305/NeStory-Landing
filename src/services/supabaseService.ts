@@ -32,6 +32,11 @@ export interface AnonymousSession {
   isp?: string;
   organization?: string;
   asn?: string;
+  // 방문자 추적 필드
+  visitor_id?: string;
+  visit_count?: number;
+  first_visit?: string;
+  last_visit?: string;
 }
 
 export interface PageVisit {
