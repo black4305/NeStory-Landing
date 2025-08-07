@@ -322,6 +322,14 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
         return device;
       };
       
+      // 디버깅 로그
+      console.log('📊 리드 저장 시작:', {
+        selectedOption,
+        inputValue: inputValue.trim(),
+        channelAdded,
+        typeCode
+      });
+
       // 개선된 리드 추적 (모든 데이터 포함)
       await detailedAnalytics.trackLeadCapture(
         selectedOption as 'email' | 'kakao',
@@ -350,28 +358,32 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
       // 전환 추적 (리드 제공 = 전환)
       const sessionId = sessionStorage.getItem('sessionId');
       if (sessionId) {
-        await supabaseService.recordConversion({
-          p_session_id: sessionId,
-          p_conversion_type: 'lead_capture',
-          p_conversion_value: 1,
-          p_conversion_currency: 'KRW',
-          p_funnel_step: 4,
-          p_funnel_stage: 'completion',
-          p_conversion_path: `test_complete > lead_magnet > ${selectedOption}`,
-          p_attribution_source: utmSource || 'organic',
-          p_attribution_medium: utmMedium || 'direct',
-          p_conversion_page: '/leadmagnet',
-          p_time_to_conversion_ms: Date.now() - parseInt(sessionStorage.getItem('sessionStart') || Date.now().toString()),
-          p_device_type: getDeviceInfo(),
-          p_country: ipInfo.country,
-          p_city: ipInfo.city,
-          p_metadata: {
-            leadType: selectedOption,
-            travelType: typeCode,
-            channelAdded: selectedOption === 'kakao' ? channelAdded : false
-          }
-        });
-        console.log('✅ 전환 추적 완료:', selectedOption);
+        try {
+          await supabaseService.recordConversion({
+            session_id: sessionId,
+            conversion_type: 'lead_capture',
+            conversion_value: 1,
+            conversion_currency: 'KRW',
+            funnel_step: 4,
+            funnel_stage: 'completion',
+            conversion_path: `test_complete > lead_magnet > ${selectedOption}`,
+            attribution_source: utmSource || 'organic',
+            attribution_medium: utmMedium || 'direct',
+            conversion_page: '/leadmagnet',
+            time_to_conversion_ms: Date.now() - parseInt(sessionStorage.getItem('sessionStart') || Date.now().toString()),
+            device_type: getDeviceInfo(),
+            country: ipInfo.country,
+            city: ipInfo.city,
+            metadata: {
+              leadType: selectedOption,
+              travelType: typeCode,
+              channelAdded: selectedOption === 'kakao' ? channelAdded : false
+            }
+          });
+          console.log('✅ 전환 추적 완료:', selectedOption);
+        } catch (error) {
+          console.error('전환 추적 실패:', error);
+        }
       }
 
       // 기존 Supabase 시스템과의 호환성 유지 (나중에 제거 예정)
