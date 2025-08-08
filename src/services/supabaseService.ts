@@ -292,36 +292,76 @@ export class SupabaseService {
         kakao_channel_added: leadData.kakao_channel_added
       });
 
-      const { data, error } = await supabase
+      // 먼저 기존 리드가 있는지 확인
+      const { data: existingLead } = await supabase
         .from('squeeze_leads')
-        .upsert({
-          session_id: leadData.session_id,
-          email: leadData.email || null,
-          phone: leadData.phone || null,
-          name: leadData.name || null,
-          contact_type: leadData.contact_type,
-          contact_value: leadData.contact_value,
-          marketing_consent: leadData.marketing_consent || false,
-          privacy_consent: leadData.privacy_consent || true,
-          kakao_channel_added: leadData.kakao_channel_added || false,
-          lead_source: leadData.lead_source || leadData.source || 'organic',
-          travel_type: leadData.travel_type || null,
-          lead_score: leadData.lead_score || 50,
-          webhook_sent: leadData.webhook_sent || false,
-          device_type: leadData.device_type || null,
-          device_info: leadData.device_info || null,
-          ip_address: leadData.ip_address || null,
-          ip_location: leadData.ip_location || null,
-          page_url: leadData.page_url || null,
-          utm_source: leadData.utm_source || null,
-          utm_medium: leadData.utm_medium || null,
-          utm_campaign: leadData.utm_campaign || null,
-          created_at: new Date().toISOString()
-        }, {
-          onConflict: 'session_id'
-        })
-        .select()
+        .select('id')
+        .eq('session_id', leadData.session_id)
         .single();
+
+      let data, error;
+      
+      if (existingLead) {
+        // 업데이트
+        ({ data, error } = await supabase
+          .from('squeeze_leads')
+          .update({
+            email: leadData.email || null,
+            phone: leadData.phone || null,
+            name: leadData.name || null,
+            contact_type: leadData.contact_type,
+            contact_value: leadData.contact_value,
+            marketing_consent: leadData.marketing_consent || false,
+            privacy_consent: leadData.privacy_consent || true,
+            kakao_channel_added: leadData.kakao_channel_added || false,
+            lead_source: leadData.lead_source || leadData.source || 'organic',
+            travel_type: leadData.travel_type || null,
+            lead_score: leadData.lead_score || 50,
+            webhook_sent: leadData.webhook_sent || false,
+            device_type: leadData.device_type || null,
+            device_info: leadData.device_info || null,
+            ip_address: leadData.ip_address || null,
+            ip_location: leadData.ip_location || null,
+            page_url: leadData.page_url || null,
+            utm_source: leadData.utm_source || null,
+            utm_medium: leadData.utm_medium || null,
+            utm_campaign: leadData.utm_campaign || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('session_id', leadData.session_id)
+          .select()
+          .single());
+      } else {
+        // 새로 삽입
+        ({ data, error } = await supabase
+          .from('squeeze_leads')
+          .insert({
+            session_id: leadData.session_id,
+            email: leadData.email || null,
+            phone: leadData.phone || null,
+            name: leadData.name || null,
+            contact_type: leadData.contact_type,
+            contact_value: leadData.contact_value,
+            marketing_consent: leadData.marketing_consent || false,
+            privacy_consent: leadData.privacy_consent || true,
+            kakao_channel_added: leadData.kakao_channel_added || false,
+            lead_source: leadData.lead_source || leadData.source || 'organic',
+            travel_type: leadData.travel_type || null,
+            lead_score: leadData.lead_score || 50,
+            webhook_sent: leadData.webhook_sent || false,
+            device_type: leadData.device_type || null,
+            device_info: leadData.device_info || null,
+            ip_address: leadData.ip_address || null,
+            ip_location: leadData.ip_location || null,
+            page_url: leadData.page_url || null,
+            utm_source: leadData.utm_source || null,
+            utm_medium: leadData.utm_medium || null,
+            utm_campaign: leadData.utm_campaign || null,
+            created_at: new Date().toISOString()
+          })
+          .select()
+          .single());
+      }
 
       if (error) {
         console.error('❌ 리드 저장 실패:', error);
