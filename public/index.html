@@ -77,6 +77,37 @@
     </script>
     
     <title>NeStoryTI - 3시간 준비로 3세대 행복지수 3배 높이기 | AI 맞춤 여행 추천</title>
+    
+    <!-- 다크모드 완전 비활성화 -->
+    <style>
+      /* 다크모드 강제 비활성화 */
+      :root {
+        color-scheme: light only !important;
+      }
+      
+      html {
+        color-scheme: light only !important;
+        background-color: white !important;
+      }
+      
+      body {
+        color-scheme: light only !important;
+        background-color: white !important;
+      }
+      
+      /* 다크모드 미디어 쿼리 무시 */
+      @media (prefers-color-scheme: dark) {
+        :root, html, body {
+          color-scheme: light only !important;
+          background-color: white !important;
+          color: black !important;
+        }
+        
+        * {
+          color-scheme: light only !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- AMP Auto Ads -->
