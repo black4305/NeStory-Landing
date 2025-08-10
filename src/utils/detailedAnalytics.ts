@@ -1,6 +1,7 @@
 import React from 'react';
 import { supabaseService, PageVisit, UserEvent, TestResult, Lead, SurveyResponse } from '../services/supabaseService';
 import { deviceDetection, ComprehensiveDeviceInfo } from './deviceDetection';
+import { enhancedGeolocation } from './enhancedGeolocation';
 
 // 상세 추적 이벤트 타입 정의
 export interface DetailedEvent {
@@ -95,12 +96,46 @@ class DetailedAnalytics {
 
   private async initializeDeviceInfo(): Promise<void> {
     try {
+      // 기본 디바이스 정보 수집
       this.deviceInfo = await deviceDetection.getComprehensiveDeviceInfo();
+      
+      // 향상된 위치 정보 수집 (HTML5 + IP 하이브리드)
+      const enhancedLocation = await enhancedGeolocation.getKoreanLocation();
+      
+      // 위치 정보 업데이트 (더 정확한 정보로 덮어쓰기)
+      if (enhancedLocation && enhancedLocation.confidence !== 'low') {
+        this.deviceInfo.location = {
+          ip: enhancedLocation.ip,
+          country: enhancedLocation.country,
+          countryCode: enhancedLocation.countryCode,
+          region: enhancedLocation.region,
+          regionCode: enhancedLocation.regionCode,
+          city: enhancedLocation.city,
+          zipCode: enhancedLocation.zipCode,
+          latitude: enhancedLocation.latitude,
+          longitude: enhancedLocation.longitude,
+          timezone: enhancedLocation.timezone,
+          isp: enhancedLocation.isp,
+          org: enhancedLocation.org,
+          asn: enhancedLocation.asn,
+          proxy: enhancedLocation.isProxy,
+          vpn: enhancedLocation.isVPN
+        };
+        
+        console.log('✅ 향상된 위치 정보 사용:', {
+          source: enhancedLocation.source,
+          confidence: enhancedLocation.confidence,
+          accuracy: `${enhancedLocation.accuracy}m`,
+          location: `${enhancedLocation.city}, ${enhancedLocation.country}`
+        });
+      }
+      
       console.log('✅ 포괄적인 디바이스 정보 수집 완료:', {
         device: `${this.deviceInfo.device.brand} ${this.deviceInfo.device.model}`,
         location: `${this.deviceInfo.location.city}, ${this.deviceInfo.location.country}`,
         isp: this.deviceInfo.location.isp,
-        ip: this.deviceInfo.location.ip
+        ip: this.deviceInfo.location.ip,
+        accuracy: enhancedLocation ? enhancedLocation.accuracy : 'IP-based'
       });
 
       // 익명 세션을 PostgreSQL에 저장
@@ -579,9 +614,9 @@ class DetailedAnalytics {
         contact_value: contactValue,
         email: contactType === 'email' ? contactValue : undefined,
         phone: contactType === 'kakao' ? contactValue : undefined,
-        marketing_consent: additionalData?.marketingConsent || false,
-        privacy_consent: additionalData?.privacyConsent || true,
-        kakao_channel_added: additionalData?.kakaoChannelAdded || false,
+        marketing_consent: Boolean(additionalData?.marketingConsent) || false,
+        privacy_consent: Boolean(additionalData?.privacyConsent) || true,
+        kakao_channel_added: Boolean(additionalData?.kakaoChannelAdded) || false,
         lead_source: this.getLeadSource(),
         travel_type: travelType,
         lead_score: this.calculateLeadScore(contactType, additionalData),
@@ -597,6 +632,14 @@ class DetailedAnalytics {
         utm_medium: additionalData?.utmMedium,
         utm_campaign: additionalData?.utmCampaign
       };
+      
+      console.log('📊 리드 저장 시작 (detailedAnalytics):', {
+        session_id: lead.session_id,
+        contact_type: lead.contact_type,
+        contact_value: lead.contact_value,
+        kakao_channel_added: lead.kakao_channel_added,
+        marketing_consent: lead.marketing_consent
+      });
       
       await supabaseService.saveLead(lead);
       console.log('✅ 리드 정보 저장 완료 (개선된 버전):', contactType);

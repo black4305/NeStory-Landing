@@ -292,16 +292,27 @@ export class SupabaseService {
         kakao_channel_added: leadData.kakao_channel_added
       });
 
+      // 세션 ID 검증
+      if (!leadData.session_id) {
+        console.error('❌ 세션 ID가 없습니다');
+        return { success: false, error: '세션 ID가 필요합니다' };
+      }
+
       // 먼저 기존 리드가 있는지 확인
-      const { data: existingLead } = await supabase
+      const { data: existingLead, error: checkError } = await supabase
         .from('squeeze_leads')
         .select('id')
         .eq('session_id', leadData.session_id)
         .single();
 
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('❌ 리드 확인 중 오류:', checkError);
+      }
+
       let data, error;
       
       if (existingLead) {
+        console.log('📝 기존 리드 업데이트');
         // 업데이트
         ({ data, error } = await supabase
           .from('squeeze_leads')
@@ -311,9 +322,9 @@ export class SupabaseService {
             name: leadData.name || null,
             contact_type: leadData.contact_type,
             contact_value: leadData.contact_value,
-            marketing_consent: leadData.marketing_consent || false,
-            privacy_consent: leadData.privacy_consent || true,
-            kakao_channel_added: leadData.kakao_channel_added || false,
+            marketing_consent: Boolean(leadData.marketing_consent) || false,
+            privacy_consent: Boolean(leadData.privacy_consent) || true,
+            kakao_channel_added: Boolean(leadData.kakao_channel_added) || false,
             lead_source: leadData.lead_source || leadData.source || 'organic',
             travel_type: leadData.travel_type || null,
             lead_score: leadData.lead_score || 50,
@@ -332,6 +343,7 @@ export class SupabaseService {
           .select()
           .single());
       } else {
+        console.log('✨ 새 리드 생성');
         // 새로 삽입
         ({ data, error } = await supabase
           .from('squeeze_leads')
@@ -342,9 +354,9 @@ export class SupabaseService {
             name: leadData.name || null,
             contact_type: leadData.contact_type,
             contact_value: leadData.contact_value,
-            marketing_consent: leadData.marketing_consent || false,
-            privacy_consent: leadData.privacy_consent || true,
-            kakao_channel_added: leadData.kakao_channel_added || false,
+            marketing_consent: Boolean(leadData.marketing_consent) || false,
+            privacy_consent: Boolean(leadData.privacy_consent) || true,
+            kakao_channel_added: Boolean(leadData.kakao_channel_added) || false,
             lead_source: leadData.lead_source || leadData.source || 'organic',
             travel_type: leadData.travel_type || null,
             lead_score: leadData.lead_score || 50,
@@ -365,6 +377,12 @@ export class SupabaseService {
 
       if (error) {
         console.error('❌ 리드 저장 실패:', error);
+        console.error('상세 에러 정보:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
 
