@@ -1,33 +1,26 @@
-import React from 'react';
-import { supabaseService, PageVisit, UserEvent, TestResult, Lead, SurveyResponse } from '../services/supabaseService';
-import { deviceDetection, ComprehensiveDeviceInfo } from './deviceDetection';
-import { enhancedGeolocation } from './enhancedGeolocation';
+// Landing 프로젝트 전용 상세 분석 시스템 (Survey와 동일한 방식)
+import { 
+  supabaseService,
+  AnonymousSession,
+  PageVisit,
+  UserEvent,
+  TestResult,
+  Lead
+} from '../services/supabaseService';
+import { 
+  collectComprehensiveDeviceInfo,
+  generateSessionId,
+  getExistingSession,
+  saveSessionId,
+  summarizeDeviceInfo,
+  ComprehensiveDeviceInfo 
+} from './deviceDetection';
 
-// 상세 추적 이벤트 타입 정의
-export interface DetailedEvent {
-  sessionId: string;
-  timestamp: number;
-  route: string;
-  eventType: 'page_enter' | 'page_exit' | 'click' | 'scroll' | 'form_input' | 'error' | 'hover' | 'focus' | 'blur' | 'resize';
-  elementId?: string;
-  elementType?: string;
-  elementText?: string;
-  value?: string | number;
-  position?: { x: number; y: number };
-  scrollPosition?: number;
-  timeOnPage?: number;
-  
-  // 포괄적인 디바이스 정보
-  deviceInfo: ComprehensiveDeviceInfo;
-  
-  referrer?: string;
-  metadata?: Record<string, any>;
-}
-
-// 페이지별 세션 정보
-export interface PageSession {
+// 페이지 세션 정보
+interface LandingPageSession {
   sessionId: string;
   route: string;
+  pageVisitId?: string;
   enterTime: number;
   exitTime?: number;
   duration?: number;
@@ -36,549 +29,401 @@ export interface PageSession {
   ctaClicks: number;
   errors: string[];
   formInputs: Record<string, any>;
-  
-  // 세션별 디바이스 정보 (요약)
-  deviceSummary: string;
   deviceInfo: ComprehensiveDeviceInfo;
 }
 
-class DetailedAnalytics {
+// 이벤트 데이터
+interface LandingEventData {
+  eventType: 'page_enter' | 'page_exit' | 'click' | 'scroll' | 'form_input' | 'error' | 'cta_click';
+  elementId?: string;
+  elementType?: string;
+  elementText?: string;
+  value?: string;
+  position?: { x: number; y: number };
+  scrollPosition?: number;
+  metadata?: Record<string, any>;
+}
+
+class LandingDetailedAnalytics {
   private sessionId: string = '';
-  private currentRoute: string = '';
-  private pageEnterTime: number = 0;
-  private events: DetailedEvent[] = [];
-  private pageSessions: PageSession[] = [];
-  private currentPageSession: PageSession | null = null;
-  private currentPageVisitId: string | null = null;
-  private isTracking: boolean = true;
   private deviceInfo: ComprehensiveDeviceInfo | null = null;
-  private isSessionSaved: boolean = false;
+  private currentPageSession: LandingPageSession | null = null;
+  private eventBuffer: UserEvent[] = [];
+  private isInitialized = false;
+  private saveInterval: NodeJS.Timeout | null = null;
+  private isSessionSaved = false;
 
   constructor() {
-    // IP 기반 방문자 식별을 위한 고유 ID 생성/복구
-    this.initializeSession();
-    this.initializeDeviceInfo();
-    this.initializeTracking();
+    this.sessionId = this.initializeSession();
+    this.setupEventListeners();
+    this.startPeriodicSave();
   }
 
-  private async initializeSession(): Promise<void> {
-    // 1. localStorage에서 영구 방문자 ID 확인 (재방문자 추적)
-    let visitorId = localStorage.getItem('visitorId');
-    if (!visitorId) {
-      visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 12)}`;
-      localStorage.setItem('visitorId', visitorId);
-      localStorage.setItem('firstVisit', new Date().toISOString());
+  // 세션 초기화 (중복 방지)
+  private initializeSession(): string {
+    // 기존 세션 확인
+    const existingSession = getExistingSession();
+    if (existingSession) {
+      this.isSessionSaved = sessionStorage.getItem('landingSessionSaved') === 'true';
+      console.log('✅ 기존 Landing 세션 사용:', existingSession);
+      return existingSession;
     }
+
+    // 새 세션 생성
+    const newSessionId = generateSessionId();
+    saveSessionId(newSessionId);
+    sessionStorage.setItem('landingSessionStart', Date.now().toString());
+    sessionStorage.setItem('sessionStart', Date.now().toString()); // 호환성
+    console.log('✅ 새 Landing 세션 생성:', newSessionId);
     
-    // 2. sessionStorage에서 현재 세션 ID 확인 (탭/브라우저 세션)
-    const existingSessionId = sessionStorage.getItem('sessionId');
-    if (existingSessionId) {
-      this.sessionId = existingSessionId;
-      this.isSessionSaved = sessionStorage.getItem('sessionSaved') === 'true';
-      console.log('✅ 기존 Landing 세션 사용:', this.sessionId);
-    } else {
-      this.sessionId = this.generateSessionId();
-      sessionStorage.setItem('sessionId', this.sessionId);
-      sessionStorage.setItem('visitorId', visitorId);
-      sessionStorage.setItem('sessionStart', Date.now().toString()); // 세션 시작 시간 저장
-      console.log('✅ 새 Landing 세션 생성:', this.sessionId);
-      
-      // 방문 횟수 증가
-      const visitCount = parseInt(localStorage.getItem('visitCount') || '0') + 1;
-      localStorage.setItem('visitCount', visitCount.toString());
-      localStorage.setItem('lastVisit', new Date().toISOString());
-    }
+    // 방문 횟수 증가 (localStorage)
+    const visitCount = parseInt(localStorage.getItem('landingVisitCount') || '0') + 1;
+    localStorage.setItem('landingVisitCount', visitCount.toString());
+    localStorage.setItem('landingLastVisit', new Date().toISOString());
     
-    // visitId 동기화
-    const visitId = sessionStorage.getItem('visitId') || Date.now().toString();
-    sessionStorage.setItem('visitId', visitId);
+    return newSessionId;
   }
 
-  private async initializeDeviceInfo(): Promise<void> {
-    try {
-      // 기본 디바이스 정보 수집
-      this.deviceInfo = await deviceDetection.getComprehensiveDeviceInfo();
-      
-      // 향상된 위치 정보 수집 (HTML5 + IP 하이브리드)
-      const enhancedLocation = await enhancedGeolocation.getKoreanLocation();
-      
-      // 위치 정보 업데이트 (더 정확한 정보로 덮어쓰기)
-      if (enhancedLocation && enhancedLocation.confidence !== 'low') {
-        this.deviceInfo.location = {
-          ip: enhancedLocation.ip,
-          country: enhancedLocation.country,
-          countryCode: enhancedLocation.countryCode,
-          region: enhancedLocation.region,
-          regionCode: enhancedLocation.regionCode,
-          city: enhancedLocation.city,
-          zipCode: enhancedLocation.zipCode,
-          latitude: enhancedLocation.latitude,
-          longitude: enhancedLocation.longitude,
-          timezone: enhancedLocation.timezone,
-          isp: enhancedLocation.isp,
-          org: enhancedLocation.org,
-          asn: enhancedLocation.asn,
-          proxy: enhancedLocation.isProxy,
-          vpn: enhancedLocation.isVPN
-        };
-        
-        console.log('✅ 향상된 위치 정보 사용:', {
-          source: enhancedLocation.source,
-          confidence: enhancedLocation.confidence,
-          accuracy: `${enhancedLocation.accuracy}m`,
-          location: `${enhancedLocation.city}, ${enhancedLocation.country}`
-        });
-      }
-      
-      console.log('✅ 포괄적인 디바이스 정보 수집 완료:', {
-        device: `${this.deviceInfo.device.brand} ${this.deviceInfo.device.model}`,
-        location: `${this.deviceInfo.location.city}, ${this.deviceInfo.location.country}`,
-        isp: this.deviceInfo.location.isp,
-        ip: this.deviceInfo.location.ip,
-        accuracy: enhancedLocation ? enhancedLocation.accuracy : 'IP-based'
-      });
+  // 이벤트 리스너 설정
+  private setupEventListeners(): void {
+    // 페이지 이탈 시 데이터 저장
+    window.addEventListener('beforeunload', () => {
+      this.saveAllPendingData();
+    });
 
-      // 익명 세션을 PostgreSQL에 저장
-      await this.saveSession();
-    } catch (error) {
-      console.error('❌ 디바이스 정보 수집 실패:', error);
-    }
-  }
-
-  // 익명 세션 저장 (개선된 버전)
-  private async saveSession(): Promise<void> {
-    // 세션 저장 상태를 sessionStorage에서도 확인
-    if (this.isSessionSaved || sessionStorage.getItem('sessionSaved') === 'true') {
-      console.log('⚠️ 세션이 이미 저장됨, 스킵:', this.sessionId);
-      return;
-    }
-
-    try {
-      // 디바이스 정보가 없으면 먼저 수집
-      if (!this.deviceInfo) {
-        this.deviceInfo = await deviceDetection.getComprehensiveDeviceInfo();
-      }
-
-      // 방문자 정보 가져오기
-      const visitorId = localStorage.getItem('visitorId') || undefined;
-      const visitCount = parseInt(localStorage.getItem('visitCount') || '1');
-      const firstVisit = localStorage.getItem('firstVisit') || undefined;
-      const lastVisit = localStorage.getItem('lastVisit') || undefined;
-
-      const result = await supabaseService.createOrUpdateSession({
-        session_id: this.sessionId,
-        user_agent: this.deviceInfo.userAgent,
-        ip_address: this.deviceInfo.location?.ip,
-        device_type: this.deviceInfo.device?.type,
-        country: this.deviceInfo.location?.country,
-        city: this.deviceInfo.location?.city,
-        referrer: document.referrer || 'direct',
-        landing_page: window.location.href,
-        // 추가 위치 정보
-        country_code: this.deviceInfo.location?.countryCode,
-        region: this.deviceInfo.location?.region,
-        region_code: this.deviceInfo.location?.regionCode,
-        zip_code: this.deviceInfo.location?.zipCode,
-        latitude: this.deviceInfo.location?.latitude,
-        longitude: this.deviceInfo.location?.longitude,
-        timezone: this.deviceInfo.location?.timezone,
-        isp: this.deviceInfo.location?.isp,
-        organization: this.deviceInfo.location?.org,
-        asn: this.deviceInfo.location?.asn,
-        // 방문자 추적 정보 (메타데이터로 전달)
-        visitor_id: visitorId,
-        visit_count: visitCount,
-        first_visit: firstVisit,
-        last_visit: lastVisit
-      });
-      
-      if (result && !result.error) {
-        this.isSessionSaved = true;
-        sessionStorage.setItem('sessionSaved', 'true');
-        console.log('✅ Landing 세션 저장 성공:', { 
-          sessionId: this.sessionId, 
-          visitorId,
-          visitCount,
-          ip: this.deviceInfo.location?.ip 
-        });
+    // 페이지 가시성 변경 추적
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this.trackCustomEvent('page_visibility', { visible: false });
       } else {
-        console.error('❌ 세션 저장 실패:', result?.error);
-      }
-    } catch (error) {
-      console.error('❌ 세션 저장 예외:', error);
-    }
-  }
-
-  private generateSessionId(): string {
-    return `detailed_${Date.now()}_${Math.random().toString(36).substr(2, 12)}`;
-  }
-
-  private async getDeviceInfoForEvent(): Promise<ComprehensiveDeviceInfo> {
-    if (this.deviceInfo) {
-      return this.deviceInfo;
-    }
-    
-    // 디바이스 정보가 아직 로드되지 않은 경우 대기
-    try {
-      this.deviceInfo = await deviceDetection.getComprehensiveDeviceInfo();
-      return this.deviceInfo;
-    } catch (error) {
-      console.error('Failed to get device info for event:', error);
-      // 기본값 반환
-      return {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        languages: [navigator.language],
-        device: {
-          type: 'desktop',
-          brand: 'Unknown',
-          model: 'Unknown',
-          os: 'Unknown',
-          osVersion: 'Unknown',
-          browser: 'Unknown',
-          browserVersion: 'Unknown',
-          engine: 'Unknown'
-        },
-        hardware: {
-          screenWidth: window.screen.width,
-          screenHeight: window.screen.height,
-          screenResolution: `${window.screen.width}x${window.screen.height}`,
-          pixelRatio: window.devicePixelRatio || 1,
-          colorDepth: window.screen.colorDepth,
-          touchSupport: 'ontouchstart' in window,
-          maxTouchPoints: navigator.maxTouchPoints || 0,
-          hardwareConcurrency: navigator.hardwareConcurrency || 1
-        },
-        network: {},
-        location: {
-          ip: '0.0.0.0',
-          country: 'Unknown',
-          countryCode: 'XX',
-          region: 'Unknown',
-          regionCode: 'XX',
-          city: 'Unknown',
-          zipCode: 'Unknown',
-          latitude: 0,
-          longitude: 0,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          isp: 'Unknown',
-          org: 'Unknown',
-          asn: 'Unknown',
-          proxy: false,
-          vpn: false
-        },
-        capabilities: {
-          cookieEnabled: navigator.cookieEnabled,
-          doNotTrack: navigator.doNotTrack === '1',
-          javaEnabled: false,
-          webGL: false,
-          webGLVendor: '',
-          webGLRenderer: '',
-          localStorage: true,
-          sessionStorage: true,
-          indexedDB: !!window.indexedDB,
-          webWorkers: !!window.Worker,
-          serviceWorkers: 'serviceWorker' in navigator,
-          pushNotifications: 'PushManager' in window,
-          geolocation: 'geolocation' in navigator,
-          camera: false,
-          microphone: false
-        },
-        misc: {
-          timezoneOffset: new Date().getTimezoneOffset(),
-          currentTime: new Date().toISOString(),
-          referrer: document.referrer,
-          onlineStatus: navigator.onLine,
-          installedFonts: [],
-          canvasFingerprint: 'unknown',
-          audioFingerprint: 'unknown'
-        }
-      };
-    }
-  }
-
-  // 초기 추적 설정
-  private initializeTracking(): void {
-    // 클릭 이벤트 추적
-    document.addEventListener('click', (e) => {
-      this.trackEvent('click', {
-        elementId: (e.target as HTMLElement)?.id,
-        elementType: (e.target as HTMLElement)?.tagName,
-        elementText: (e.target as HTMLElement)?.textContent?.slice(0, 100),
-        position: { x: e.clientX, y: e.clientY }
-      });
-      
-      if (this.currentPageSession) {
-        this.currentPageSession.interactions++;
-        
-        // CTA 버튼 클릭 감지
-        const target = e.target as HTMLElement;
-        if (target.textContent?.includes('시작') || 
-            target.textContent?.includes('테스트') ||
-            target.textContent?.includes('받기') ||
-            target.className?.includes('cta')) {
-          this.currentPageSession.ctaClicks++;
-        }
+        this.trackCustomEvent('page_visibility', { visible: true });
       }
     });
 
-    // 스크롤 이벤트 추적
+    // 전역 에러 추적
+    window.addEventListener('error', (event) => {
+      this.trackError(`JS Error: ${event.message}`, {
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        stack: event.error?.stack
+      });
+    });
+
+    // 스크롤 추적 (throttled)
     let scrollTimeout: NodeJS.Timeout;
     window.addEventListener('scroll', () => {
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        const scrollPercent = Math.round(
-          (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100
-        );
-        
-        this.trackEvent('scroll', {
-          scrollPosition: window.scrollY,
-          value: scrollPercent
-        });
-
-        if (this.currentPageSession && scrollPercent > this.currentPageSession.scrollDepth) {
-          this.currentPageSession.scrollDepth = scrollPercent;
-        }
+        this.trackScroll();
       }, 100);
     });
 
-    // 폼 입력 이벤트 추적
-    document.addEventListener('input', (e) => {
-      const target = e.target as HTMLInputElement;
-      if (target.type !== 'password') { // 비밀번호는 추적 안함
-        this.trackEvent('form_input', {
-          elementId: target.id,
-          elementType: target.type,
-          value: target.type === 'email' ? '***@***.***' : target.value?.slice(0, 20) // 개인정보 마스킹
-        });
-
-        if (this.currentPageSession) {
-          this.currentPageSession.formInputs[target.id || target.name] = target.value?.slice(0, 20);
-        }
-      }
-    });
-
-    // 에러 이벤트 추적
-    window.addEventListener('error', (e) => {
-      this.trackEvent('error', {
-        value: e.error?.message || 'Unknown error',
-        metadata: {
-          filename: e.filename,
-          lineno: e.lineno,
-          colno: e.colno
-        }
-      });
-
-      if (this.currentPageSession) {
-        this.currentPageSession.errors.push(e.error?.message || 'Unknown error');
-      }
-    });
-
-    // 페이지 이탈 추적
-    window.addEventListener('beforeunload', () => {
-      this.trackPageExit();
-      this.saveAllData();
-    });
-
-    // 화면 크기 변경 추적
-    window.addEventListener('resize', () => {
-      this.trackEvent('resize', {
-        metadata: {
-          newSize: { width: window.innerWidth, height: window.innerHeight }
-        }
-      });
+    // 클릭 추적
+    document.addEventListener('click', (event) => {
+      this.trackClick(event);
     });
   }
 
-  // 기본 이벤트 추적 함수
-  private async trackEvent(eventType: DetailedEvent['eventType'], data?: Partial<DetailedEvent>): Promise<void> {
-    if (!this.isTracking) return;
+  // 주기적 데이터 저장 (30초마다)
+  private startPeriodicSave(): void {
+    this.saveInterval = setInterval(() => {
+      this.savePendingEvents();
+    }, 30000);
+  }
 
-    const deviceInfo = await this.getDeviceInfoForEvent();
-    
-    const event: DetailedEvent = {
-      sessionId: this.sessionId,
-      timestamp: Date.now(),
-      route: this.currentRoute,
-      eventType,
-      deviceInfo,
-      referrer: document.referrer || 'direct',
-      ...data
-    };
+  // 디바이스 정보 초기화 (Survey와 동일한 방식)
+  public async initialize(landingSpecific?: {
+    entryPoint?: string;
+    referralSource?: string;
+    landingVersion?: string;
+  }): Promise<void> {
+    if (this.isInitialized) return;
 
-    this.events.push(event);
+    try {
+      // 디바이스 정보 수집
+      this.deviceInfo = await collectComprehensiveDeviceInfo(landingSpecific);
+      
+      // Landing 세션 정보 생성 (Survey와 동일한 구조)
+      const sessionInfo: AnonymousSession = {
+        session_id: this.sessionId,
+        referrer: document.referrer,
+        landing_page: window.location.href,
+        
+        // 디바이스 정보
+        user_agent: navigator.userAgent,
+        ip_address: this.deviceInfo.location.ip || '',
+        device_type: this.deviceInfo.device.type,
+        device_brand: this.deviceInfo.device.brand,
+        device_model: this.deviceInfo.device.model,
+        os: this.deviceInfo.device.os,
+        os_version: this.deviceInfo.device.osVersion,
+        browser: this.deviceInfo.device.browser,
+        browser_version: this.deviceInfo.device.browserVersion,
+        screen_width: this.deviceInfo.hardware.screenWidth,
+        screen_height: this.deviceInfo.hardware.screenHeight,
+        pixel_ratio: this.deviceInfo.hardware.pixelRatio,
+        
+        // 위치 정보
+        country: this.deviceInfo.location.country,
+        country_code: this.deviceInfo.location.countryCode,
+        region: this.deviceInfo.location.region,
+        region_code: this.deviceInfo.location.regionCode,
+        city: this.deviceInfo.location.city,
+        zip_code: this.deviceInfo.location.zipCode,
+        latitude: this.deviceInfo.location.latitude,
+        longitude: this.deviceInfo.location.longitude,
+        timezone: this.deviceInfo.location.timezone,
+        isp: this.deviceInfo.location.isp,
+        organization: this.deviceInfo.location.org,
+        asn: this.deviceInfo.location.asn,
+        
+        // 네트워크 정보
+        connection_type: this.deviceInfo.network.connectionType,
+        effective_type: this.deviceInfo.network.effectiveType,
+        downlink: this.deviceInfo.network.downlink,
+        rtt: this.deviceInfo.network.rtt,
+        save_data: this.deviceInfo.network.saveData,
+        
+        // 브라우저 능력
+        webgl_support: this.deviceInfo.capabilities.webGL,
+        webgl_vendor: this.deviceInfo.capabilities.webGLVendor,
+        webgl_renderer: this.deviceInfo.capabilities.webGLRenderer,
+        local_storage: this.deviceInfo.capabilities.localStorage,
+        session_storage: this.deviceInfo.capabilities.sessionStorage,
+        indexed_db: this.deviceInfo.capabilities.indexedDB,
+        service_workers: this.deviceInfo.capabilities.serviceWorkers,
+        geolocation: this.deviceInfo.capabilities.geolocation,
+        
+        // 기타 정보
+        language: navigator.language,
+        languages: this.deviceInfo.misc.languages,
+        timezone_offset: this.deviceInfo.misc.timezoneOffset,
+        visit_count: parseInt(localStorage.getItem('landingVisitCount') || '1'),
+        ad_blocker_detected: this.deviceInfo.misc.adBlock,
+        canvas_fingerprint: this.deviceInfo.misc.canvasFingerprint,
+        audio_fingerprint: this.deviceInfo.misc.audioFingerprint,
+        installed_fonts: this.deviceInfo.misc.installedFonts
+      };
 
-    // 이벤트가 50개 이상 쌓이면 저장 (더 자주 저장)
-    if (this.events.length >= 50) {
-      await this.saveEvents();
+      // 세션 정보 저장 (중복 방지)
+      if (!this.isSessionSaved) {
+        await supabaseService.createOrUpdateSession(sessionInfo);
+        this.isSessionSaved = true;
+        sessionStorage.setItem('landingSessionSaved', 'true');
+        console.log('✅ Landing 세션 DB 저장 완료');
+      }
+      
+      this.isInitialized = true;
+      
+      console.log('Landing analytics initialized:', {
+        sessionId: this.sessionId,
+        deviceSummary: summarizeDeviceInfo(this.deviceInfo)
+      });
+    } catch (error) {
+      console.error('Failed to initialize landing analytics:', error);
     }
   }
 
   // 페이지 진입 추적
   public async trackPageEnter(route: string, metadata?: Record<string, any>): Promise<void> {
-    // 세션이 저장되지 않았다면 먼저 저장
-    if (!this.isSessionSaved) {
-      await this.saveSession();
+    if (!this.isInitialized) {
+      await this.initialize();
     }
 
-    this.currentRoute = route;
-    this.pageEnterTime = Date.now();
+    const now = Date.now();
+    const enterTime = new Date();
 
     // 이전 페이지 세션 종료
     if (this.currentPageSession) {
-      this.trackPageExit();
+      await this.trackPageExit();
     }
 
-    const deviceInfo = await this.getDeviceInfoForEvent();
-    const deviceSummary = await deviceDetection.getDeviceSummary();
-
-    // PostgreSQL에 페이지 방문 기록
-    const visitData: PageVisit = {
-      session_id: this.sessionId,
-      route,
-      page_title: document.title,
-      url_params: Object.fromEntries(new URLSearchParams(window.location.search)),
-      enter_time: new Date().toISOString(),
-      scroll_depth_percent: 0,
-      click_count: 0,
-      interaction_count: 0,
-      cta_clicks: 0,
-      form_interactions: 0,
-      bounce: false,
-      exit_intent_triggered: false,
-      load_time_ms: Math.round(performance.now())
-    };
-
-    const visitResult = await supabaseService.recordPageVisit(visitData);
-    this.currentPageVisitId = visitResult.data?.id;
-
-    // 새 페이지 세션 시작 (기존 로직 유지)
+    // 새 페이지 세션 시작
     this.currentPageSession = {
       sessionId: this.sessionId,
       route,
-      enterTime: this.pageEnterTime,
+      enterTime: now,
       interactions: 0,
       scrollDepth: 0,
       ctaClicks: 0,
       errors: [],
       formInputs: {},
-      deviceSummary,
-      deviceInfo
+      deviceInfo: this.deviceInfo!
     };
 
-    this.trackEvent('page_enter', { metadata });
+    // 페이지 방문 기록
+    const pageVisit: PageVisit = {
+      session_id: this.sessionId,
+      route,
+      page_title: document.title,
+      url_params: metadata,
+      enter_time: enterTime,
+      scroll_depth_percent: 0,
+      click_count: 0,
+      interaction_count: 0,
+      cta_clicks: 0,
+      load_time_ms: performance.timing ? 
+        performance.timing.loadEventEnd - performance.timing.navigationStart : undefined
+    };
+
+    const result = await supabaseService.recordPageVisit(pageVisit);
+    if (result && result.id) {
+      this.currentPageSession.pageVisitId = result.id;
+    }
+
+    // 이벤트 추가
+    this.addEvent({
+      eventType: 'page_enter',
+      metadata: { route, ...metadata }
+    });
   }
 
   // 페이지 이탈 추적
   public async trackPageExit(): Promise<void> {
-    if (!this.currentPageSession || !this.currentPageVisitId) return;
+    if (!this.currentPageSession) return;
 
     const exitTime = Date.now();
-    const duration = exitTime - this.currentPageSession.enterTime;
-
-    // PostgreSQL에 페이지 이탈 정보 업데이트
-    const exitData: Partial<PageVisit> = {
-      exit_time: new Date().toISOString(),
-      duration_ms: duration,
-      scroll_depth_percent: this.currentPageSession.scrollDepth,
-      click_count: this.currentPageSession.interactions,
-      interaction_count: this.currentPageSession.interactions,
-      cta_clicks: this.currentPageSession.ctaClicks,
-      form_interactions: Object.keys(this.currentPageSession.formInputs).length,
-      bounce: duration < 30000 && this.currentPageSession.interactions === 0,
-      exit_type: 'navigation'
-    };
-
-    await supabaseService.updatePageVisitExit(this.currentPageVisitId, exitData);
-
-    // 기존 로직 유지
     this.currentPageSession.exitTime = exitTime;
-    this.currentPageSession.duration = duration;
-    this.pageSessions.push({ ...this.currentPageSession });
+    this.currentPageSession.duration = exitTime - this.currentPageSession.enterTime;
 
-    this.trackEvent('page_exit', {
-      timeOnPage: duration,
+    // 페이지 방문 종료 업데이트
+    if (this.currentPageSession.pageVisitId) {
+      await supabaseService.updatePageVisitExit(this.currentPageSession.pageVisitId, {
+        exit_time: new Date(),
+        time_spent_seconds: Math.floor(this.currentPageSession.duration / 1000),
+        scroll_depth_percent: this.currentPageSession.scrollDepth,
+        interaction_count: this.currentPageSession.interactions,
+        cta_clicks: this.currentPageSession.ctaClicks
+      });
+    }
+
+    // 이벤트 추가
+    this.addEvent({
+      eventType: 'page_exit',
       metadata: {
-        interactions: this.currentPageSession.interactions,
-        scrollDepth: this.currentPageSession.scrollDepth,
-        ctaClicks: this.currentPageSession.ctaClicks,
-        errors: this.currentPageSession.errors
+        route: this.currentPageSession.route,
+        duration: this.currentPageSession.duration,
+        scrollDepth: this.currentPageSession.scrollDepth
       }
     });
 
     this.currentPageSession = null;
-    this.currentPageVisitId = null;
   }
 
-  // CTA 클릭 추적 (기존 호환성)
-  public trackCTAClick(ctaName: string, destination: string, metadata?: Record<string, any>): void {
-    this.trackEvent('click', {
-      elementType: 'CTA',
-      elementText: ctaName,
-      value: destination,
-      metadata
-    });
-  }
+  // 클릭 추적
+  private trackClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target) return;
 
-  // 폼 제출 추적
-  public trackFormSubmit(formType: string, formData: Record<string, any>): void {
-    this.trackEvent('form_input', {
-      elementType: 'form_submit',
-      elementId: formType,
-      metadata: formData
-    });
-  }
+    const eventData: LandingEventData = {
+      eventType: 'click',
+      elementId: target.id,
+      elementType: target.tagName.toLowerCase(),
+      elementText: target.textContent?.slice(0, 100),
+      position: { x: event.clientX, y: event.clientY }
+    };
 
-  // 테스트 답변 추적
-  public async trackTestAnswer(questionId: number, answer: string | number, timeSpent: number, questionData?: any): Promise<void> {
-    // PostgreSQL에 설문 응답 저장
-    if (questionData) {
-      const surveyResponse: SurveyResponse = {
-        session_id: this.sessionId,
-        question_number: questionId,
-        question_id: questionId,
-        question_text: questionData.text,
-        option_a: questionData.optionA,
-        option_b: questionData.optionB,
-        selected_option: typeof answer === 'string' ? answer : (answer >= 3 ? 'A' : 'B'),
-        selected_score: typeof answer === 'number' ? answer : 0,
-        response_time_ms: timeSpent,
-        confidence_score: timeSpent < 3000 ? 0.9 : (timeSpent > 10000 ? 0.3 : 0.6),
-        answered_at: new Date().toISOString()
-      };
-      
-      await supabaseService.saveSurveyResponse(surveyResponse);
+    // CTA 버튼 클릭 추적
+    if (target.classList.contains('cta') || target.closest('.cta')) {
+      eventData.eventType = 'cta_click';
+      if (this.currentPageSession) {
+        this.currentPageSession.ctaClicks++;
+      }
     }
 
-    // 기존 이벤트 추적
-    this.trackEvent('click', {
-      elementType: 'test_answer',
-      elementId: `question_${questionId}`,
-      value: answer,
-      metadata: {
-        timeSpent,
-        questionId
-      }
-    });
+    this.addEvent(eventData);
+
+    if (this.currentPageSession) {
+      this.currentPageSession.interactions++;
+    }
+  }
+
+  // 스크롤 추적
+  private trackScroll(): void {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollDepth = scrollHeight > 0 ? Math.round((scrollTop / scrollHeight) * 100) : 0;
+
+    if (this.currentPageSession && scrollDepth > this.currentPageSession.scrollDepth) {
+      this.currentPageSession.scrollDepth = scrollDepth;
+
+      this.addEvent({
+        eventType: 'scroll',
+        scrollPosition: scrollTop,
+        metadata: { scrollDepth }
+      });
+    }
   }
 
   // 에러 추적
-  public trackError(errorType: string, errorMessage: string, context?: Record<string, any>): void {
-    this.trackEvent('error', {
-      elementType: errorType,
-      value: errorMessage,
-      metadata: context
+  public trackError(message: string, metadata?: any): void {
+    if (this.currentPageSession) {
+      this.currentPageSession.errors.push(message);
+    }
+
+    this.addEvent({
+      eventType: 'error',
+      metadata: { message, ...metadata }
     });
   }
 
   // 커스텀 이벤트 추적
   public trackCustomEvent(eventName: string, data: Record<string, any>): void {
-    this.trackEvent('click', {
-      elementType: 'custom',
+    this.addEvent({
+      eventType: 'click',
       elementId: eventName,
       metadata: data
     });
+  }
+
+  // CTA 클릭 추적
+  public trackCTAClick(ctaName: string, targetRoute: string, metadata?: Record<string, any>): void {
+    this.addEvent({
+      eventType: 'cta_click',
+      elementId: ctaName,
+      value: targetRoute,
+      metadata: metadata
+    });
+    
+    if (this.currentPageSession) {
+      this.currentPageSession.ctaClicks++;
+    }
+  }
+
+  // 폼 제출 추적
+  public trackFormSubmit(formName: string, metadata?: Record<string, any>): void {
+    this.addEvent({
+      eventType: 'form_input',
+      elementId: formName,
+      elementType: 'form_submit',
+      metadata: metadata
+    });
+    
+    if (this.currentPageSession) {
+      this.currentPageSession.interactions++;
+    }
+  }
+
+  // 테스트 답변 추적
+  public trackTestAnswer(questionId: string | number, answer: any, responseTime: number): void {
+    const questionIdStr = String(questionId);
+    this.addEvent({
+      eventType: 'form_input',
+      elementId: questionIdStr,
+      elementType: 'test_answer',
+      value: String(answer),
+      metadata: {
+        questionId: questionIdStr,
+        answer,
+        responseTime
+      }
+    });
+    
+    if (this.currentPageSession) {
+      this.currentPageSession.formInputs[questionIdStr] = answer;
+      this.currentPageSession.interactions++;
+    }
   }
 
   // 테스트 완료 추적
@@ -600,6 +445,31 @@ class DetailedAnalytics {
       
       await supabaseService.saveTestResult(testResult);
       console.log('✅ 테스트 완료 결과 저장:', travelTypeCode);
+      
+      // 완료 추적 추가
+      await supabaseService.saveCompletion({
+        session_id: this.sessionId,
+        completion_status: 'completed',
+        completion_percentage: 100,
+        total_steps: 3,
+        completed_steps: 3,
+        started_at: testResult.started_at,
+        completed_at: testResult.completed_at,
+        total_duration_ms: analytics.totalTime || 0,
+        average_response_time_ms: analytics.averageResponseTime || 0,
+        quality_score: 85,
+        consistency_score: this.calculateConsistencyScore(axisScores),
+        engagement_score: 90,
+        test_type: 'family_travel',
+        test_result: travelTypeCode,
+        axis_scores: axisScores,
+        user_journey_stage: 'test_completed',
+        metadata: {
+          analytics: analytics,
+          share_id: testResult.share_id
+        }
+      });
+      console.log('✅ 완료 추적 저장 성공');
     } catch (error) {
       console.error('❌ 테스트 완료 저장 실패:', error);
     }
@@ -614,86 +484,133 @@ class DetailedAnalytics {
         contact_value: contactValue,
         email: contactType === 'email' ? contactValue : undefined,
         phone: contactType === 'kakao' ? contactValue : undefined,
-        marketing_consent: Boolean(additionalData?.marketingConsent) || false,
-        privacy_consent: Boolean(additionalData?.privacyConsent) || true,
-        kakao_channel_added: Boolean(additionalData?.kakaoChannelAdded) || false,
-        lead_source: this.getLeadSource(),
+        kakao_channel_added: additionalData?.kakaoChannelAdded,
         travel_type: travelType,
+        lead_source: this.determineLeadSource(),
         lead_score: this.calculateLeadScore(contactType, additionalData),
-        webhook_sent: false,
-        created_at: new Date().toISOString(),
-        // 추가 필드들
-        device_type: additionalData?.deviceType,
+        marketing_consent: additionalData?.marketingConsent,
+        privacy_consent: additionalData?.privacyConsent,
+        device_type: this.deviceInfo?.device.type,
         device_info: additionalData?.deviceInfo,
-        ip_address: additionalData?.ipAddress,
+        ip_address: additionalData?.ipAddress || this.deviceInfo?.location.ip,
         ip_location: additionalData?.ipLocation,
-        page_url: additionalData?.pageUrl,
+        page_url: additionalData?.pageUrl || window.location.href,
         utm_source: additionalData?.utmSource,
         utm_medium: additionalData?.utmMedium,
-        utm_campaign: additionalData?.utmCampaign
+        utm_campaign: additionalData?.utmCampaign,
+        created_at: new Date()
       };
-      
-      console.log('📊 리드 저장 시작 (detailedAnalytics):', {
-        session_id: lead.session_id,
-        contact_type: lead.contact_type,
-        contact_value: lead.contact_value,
-        kakao_channel_added: lead.kakao_channel_added,
-        marketing_consent: lead.marketing_consent
-      });
-      
+
       await supabaseService.saveLead(lead);
-      console.log('✅ 리드 정보 저장 완료 (개선된 버전):', contactType);
-      
-      // 익명 사용자를 식별된 사용자로 전환
-      await this.linkUserIdentity(contactType, contactValue);
+      console.log('✅ 리드 정보 저장:', contactType);
+
+      this.addEvent({
+        eventType: 'form_input',
+        elementId: 'lead_capture',
+        value: contactType,
+        metadata: { travelType, ...additionalData }
+      });
     } catch (error) {
-      console.error('❌ 리드 정보 저장 실패:', error);
+      console.error('❌ 리드 저장 실패:', error);
     }
   }
 
-  // 사용자 신원 연결 (익명 -> 식별)
-  private async linkUserIdentity(contactType: string, contactValue: string): Promise<void> {
-    // 이후 이 세션의 모든 활동을 식별된 사용자로 연결할 수 있도록 플래그 설정
-    localStorage.setItem('userIdentified', 'true');
-    localStorage.setItem('userContactType', contactType);
-    localStorage.setItem('userContactValue', contactValue);
-    
-    console.log('✅ 사용자 신원 연결 완료:', contactType);
+  // 질문 응답 추적
+  public async trackQuestionResponse(
+    questionNumber: number,
+    questionText: string,
+    selectedOption: string,
+    responseTime: number
+  ): Promise<void> {
+    this.addEvent({
+      eventType: 'form_input',
+      elementId: `question_${questionNumber}`,
+      value: selectedOption,
+      metadata: {
+        questionText,
+        responseTime
+      }
+    });
+
+    if (this.currentPageSession) {
+      this.currentPageSession.formInputs[`question_${questionNumber}`] = selectedOption;
+    }
   }
 
-  // 보조 함수들
-  private calculateConsistencyScore(axisScores: Record<string, number>): number {
-    // 축별 점수의 일관성을 0-1 사이로 계산
-    const scores = Object.values(axisScores);
-    const avg = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-    const variance = scores.reduce((sum, score) => sum + Math.pow(score - avg, 2), 0) / scores.length;
-    return Math.max(0, 1 - (variance / 25)); // 분산이 낮을수록 일관성 높음
+  // 이벤트 추가
+  private addEvent(eventData: LandingEventData): void {
+    const event: UserEvent = {
+      session_id: this.sessionId,
+      event_type: eventData.eventType,
+      element_id: eventData.elementId,
+      element_type: eventData.elementType,
+      element_text: eventData.elementText,
+      element_value: eventData.value,
+      click_x: eventData.position?.x,
+      click_y: eventData.position?.y,
+      scroll_position: eventData.scrollPosition,
+      timestamp_ms: Date.now(),
+      metadata: eventData.metadata
+    };
+
+    this.eventBuffer.push(event);
+
+    // 버퍼가 10개 이상이면 저장
+    if (this.eventBuffer.length >= 10) {
+      this.savePendingEvents();
+    }
   }
 
+  // 대기 중인 이벤트 저장
+  private async savePendingEvents(): Promise<void> {
+    if (this.eventBuffer.length === 0) return;
+
+    const eventsToSave = [...this.eventBuffer];
+    this.eventBuffer = [];
+
+    try {
+      await supabaseService.recordBatchEvents(eventsToSave);
+    } catch (error) {
+      console.error('이벤트 저장 실패:', error);
+      // 실패한 이벤트는 다시 버퍼에 추가
+      this.eventBuffer.unshift(...eventsToSave);
+    }
+  }
+
+  // 모든 대기 중인 데이터 저장
+  private async saveAllPendingData(): Promise<void> {
+    await this.trackPageExit();
+    await this.savePendingEvents();
+  }
+
+  // 헬퍼 함수들
   private generateShareId(): string {
-    return `share_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+    return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private getLeadSource(): string {
+  private calculateConsistencyScore(axisScores: Record<string, number>): number {
+    const scores = Object.values(axisScores);
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const variance = scores.reduce((sum, score) => sum + Math.pow(score - avg, 2), 0) / scores.length;
+    return Math.max(0, 100 - variance);
+  }
+
+  private determineLeadSource(): string {
     const referrer = document.referrer;
-    if (!referrer || referrer.includes(window.location.hostname)) return 'organic';
+    if (!referrer) return 'direct';
     if (referrer.includes('google.com')) return 'google';
     if (referrer.includes('facebook.com') || referrer.includes('instagram.com')) return 'social';
     return 'referral';
   }
 
   private calculateLeadScore(contactType: string, additionalData?: any): number {
-    let score = 50; // 베이스 점수
+    let score = 50;
     
-    // 연락처 타입에 따른 점수
     if (contactType === 'email') score += 20;
     if (contactType === 'kakao') score += 15;
-    
-    // 추가 정보에 따른 점수
     if (additionalData?.marketingConsent) score += 15;
     if (additionalData?.kakaoChannelAdded) score += 10;
     
-    // 세션 품질에 따른 점수
     if (this.currentPageSession) {
       if (this.currentPageSession.interactions > 5) score += 10;
       if (this.currentPageSession.scrollDepth > 80) score += 5;
@@ -702,95 +619,25 @@ class DetailedAnalytics {
     return Math.min(100, score);
   }
 
-  // 이벤트 데이터 저장
-  private async saveEvents(): Promise<void> {
-    if (this.events.length === 0) return;
-
-    try {
-      // DetailedEvent를 UserEvent 형식으로 변환
-      const userEvents: UserEvent[] = this.events.map(event => ({
-        session_id: event.sessionId,
-        page_visit_id: this.currentPageVisitId || undefined,
-        event_type: event.eventType,
-        element_id: event.elementId,
-        element_type: event.elementType,
-        element_text: event.elementText,
-        element_value: typeof event.value === 'string' ? event.value : String(event.value || ''),
-        click_x: event.position?.x,
-        click_y: event.position?.y,
-        scroll_position: event.scrollPosition,
-        viewport_width: window.innerWidth,
-        viewport_height: window.innerHeight,
-        timestamp_ms: event.timestamp,
-        time_on_page_ms: event.timeOnPage,
-        metadata: event.metadata
-      }));
-
-      await supabaseService.recordBatchEvents(userEvents);
-      console.log(`✅ ${this.events.length}개 상세 이벤트 저장 완료`);
-      this.events = []; // 저장 후 초기화
-    } catch (error) {
-      console.error('❌ 상세 이벤트 저장 실패:', error);
-      // localStorage에 백업
-      const existingEvents = JSON.parse(localStorage.getItem('detailedEvents') || '[]');
-      localStorage.setItem('detailedEvents', JSON.stringify([...existingEvents, ...this.events]));
-    }
-  }
-
-  // 페이지 세션 데이터 저장
-  private async savePageSessions(): Promise<void> {
-    if (this.pageSessions.length === 0) return;
-
-    try {
-      // PostgresService로 페이지 세션 저장 (현재는 로깅만)
-      console.log('📊 페이지 세션 데이터:', this.pageSessions);
-      console.log(`✅ ${this.pageSessions.length}개 페이지 세션 저장 완료`);
-      this.pageSessions = []; // 저장 후 초기화
-    } catch (error) {
-      console.error('❌ 페이지 세션 저장 실패:', error);
-    }
-  }
-
-  // 모든 데이터 저장
-  public async saveAllData(): Promise<void> {
-    await Promise.all([
-      this.saveEvents(),
-      this.savePageSessions()
-    ]);
-  }
-
-  // 추적 중지/시작
-  public stopTracking(): void {
-    this.isTracking = false;
-  }
-
-  public startTracking(): void {
-    this.isTracking = true;
-  }
-
   // 세션 정보 반환
   public getSessionInfo() {
     return {
       sessionId: this.sessionId,
-      currentRoute: this.currentRoute,
-      eventCount: this.events.length,
-      pageSessionCount: this.pageSessions.length,
-      currentPageSession: this.currentPageSession
+      currentPageSession: this.currentPageSession,
+      eventBufferSize: this.eventBuffer.length,
+      isInitialized: this.isInitialized
     };
+  }
+
+  // 정리
+  public cleanup(): void {
+    if (this.saveInterval) {
+      clearInterval(this.saveInterval);
+    }
+    this.saveAllPendingData();
   }
 }
 
-// 전역 인스턴스 생성
-export const detailedAnalytics = new DetailedAnalytics();
-
-// 페이지 라우트 변경 감지 hook 함수
-export const useDetailedAnalytics = (route: string) => {
-  React.useEffect(() => {
-    detailedAnalytics.trackPageEnter(route);
-    return () => {
-      detailedAnalytics.trackPageExit();
-    };
-  }, [route]);
-
-  return detailedAnalytics;
-};
+// 싱글톤 인스턴스
+export const detailedAnalytics = new LandingDetailedAnalytics();
+export default detailedAnalytics;

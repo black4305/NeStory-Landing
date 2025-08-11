@@ -1,24 +1,19 @@
-// 포괄적인 디바이스 및 위치 정보 수집 시스템
+// Survey 프로젝트 전용 디바이스 정보 수집 시스템
+// Landing 프로젝트와 동일한 구조로 포괄적인 디바이스 정보 수집
 
 export interface ComprehensiveDeviceInfo {
-  // 기본 정보
-  userAgent: string;
-  platform: string;
-  language: string;
-  languages: string[];
-  
-  // 디바이스 정보
+  // 기본 디바이스 정보
   device: {
-    type: 'mobile' | 'tablet' | 'desktop' | 'tv' | 'unknown';
-    brand: string; // Apple, Samsung, Google, etc.
-    model: string; // iPhone 15 Pro, Galaxy S24, etc.
-    os: string; // iOS, Android, Windows, macOS, etc.
-    osVersion: string;
-    browser: string; // Chrome, Safari, Firefox, etc.
-    browserVersion: string;
-    engine: string; // WebKit, Blink, Gecko, etc.
+    type: 'mobile' | 'tablet' | 'desktop' | 'tv';
+    brand?: string;
+    model?: string;
+    os?: string;
+    osVersion?: string;
+    browser?: string;
+    browserVersion?: string;
+    engine?: string;
   };
-
+  
   // 하드웨어 정보
   hardware: {
     screenWidth: number;
@@ -28,46 +23,46 @@ export interface ComprehensiveDeviceInfo {
     colorDepth: number;
     touchSupport: boolean;
     maxTouchPoints: number;
-    hardwareConcurrency: number; // CPU 코어 수
-    deviceMemory?: number; // RAM (GB) - Chrome only
+    hardwareConcurrency: number;
+    deviceMemory?: number; // Chrome only
   };
-
+  
   // 네트워크 정보
   network: {
-    connectionType?: string; // wifi, cellular, ethernet, etc.
-    effectiveType?: string; // 4g, 3g, 2g, slow-2g
-    downlink?: number; // Mbps
-    rtt?: number; // Round Trip Time (ms)
-    saveData?: boolean; // Data Saver 모드
+    connectionType?: string;
+    effectiveType?: string;
+    downlink?: number;
+    rtt?: number;
+    saveData?: boolean;
   };
-
+  
   // 위치 정보 (IP 기반)
   location: {
-    ip: string;
-    country: string;
-    countryCode: string;
-    region: string;
-    regionCode: string;
-    city: string;
-    zipCode: string;
-    latitude: number;
-    longitude: number;
-    timezone: string;
-    isp: string; // 통신사/ISP
-    org: string; // 조직/회사
-    asn: string; // AS Number
-    proxy: boolean;
-    vpn: boolean;
+    ip?: string;
+    country?: string;
+    countryCode?: string;
+    region?: string;
+    regionCode?: string;
+    city?: string;
+    zipCode?: string;
+    latitude?: number;
+    longitude?: number;
+    timezone?: string;
+    isp?: string;
+    org?: string;
+    asn?: string;
+    proxy?: boolean;
+    vpn?: boolean;
   };
-
+  
   // 브라우저 능력
   capabilities: {
     cookieEnabled: boolean;
     doNotTrack: boolean;
     javaEnabled: boolean;
     webGL: boolean;
-    webGLVendor: string;
-    webGLRenderer: string;
+    webGLVendor?: string;
+    webGLRenderer?: string;
     localStorage: boolean;
     sessionStorage: boolean;
     indexedDB: boolean;
@@ -75,10 +70,10 @@ export interface ComprehensiveDeviceInfo {
     serviceWorkers: boolean;
     pushNotifications: boolean;
     geolocation: boolean;
-    camera: boolean;
-    microphone: boolean;
+    camera?: boolean;
+    microphone?: boolean;
   };
-
+  
   // 기타 정보
   misc: {
     timezoneOffset: number;
@@ -87,603 +82,472 @@ export interface ComprehensiveDeviceInfo {
     onlineStatus: boolean;
     batteryLevel?: number;
     batteryCharging?: boolean;
-    installedFonts: string[];
-    canvasFingerprint: string;
-    audioFingerprint: string;
-    
-    // 추가 정보
-    sessionDuration?: number; // 세션 지속 시간
-    visitCount?: number; // 방문 횟수
-    lastVisit?: string; // 마지막 방문
-    adBlock?: boolean; // 광고 차단기 사용 여부
-    cpuClass?: string; // CPU 클래스
-    oscpu?: string; // OS CPU
-    buildID?: string; // 빌드 ID
-    product?: string; // 제품명
-    productSub?: string; // 제품 서브
-    vendor?: string; // 벤더
-    vendorSub?: string; // 벤더 서브
-    webdriver?: boolean; // 웹드라이버 사용 여부
-    pdfViewerEnabled?: boolean; // PDF 뷰어 지원
-    mozApps?: boolean; // Firefox 앱 지원
-    mozConnection?: boolean; // Firefox 연결 지원
+    installedFonts?: string[];
+    canvasFingerprint?: string;
+    audioFingerprint?: string;
+    sessionDuration?: number;
+    visitCount?: number;
+    adBlock?: boolean;
+    cpuClass?: string;
+    platform?: string;
+    plugins?: string[];
+    mimeTypes?: string[];
+    languages?: string[];
+    webdriver?: boolean;
+    phantomJS?: boolean;
+    selenium?: boolean;
+  };
+  
+  // Survey 특화 정보
+  survey: {
+    entryPoint?: string;
+    referralSource?: string;
+    landingSessionId?: string;
+    surveyVersion?: string;
   };
 }
 
-class DeviceDetection {
-  private deviceInfo: ComprehensiveDeviceInfo | null = null;
+// User Agent 파싱 함수
+function parseUserAgent(userAgent: string) {
+  const device = {
+    type: 'desktop' as 'mobile' | 'tablet' | 'desktop' | 'tv',
+    brand: undefined as string | undefined,
+    model: undefined as string | undefined,
+    os: undefined as string | undefined,
+    osVersion: undefined as string | undefined,
+    browser: undefined as string | undefined,
+    browserVersion: undefined as string | undefined,
+    engine: undefined as string | undefined,
+  };
 
-  // User Agent 파싱하여 디바이스 정보 추출
-  private parseUserAgent(ua: string): ComprehensiveDeviceInfo['device'] {
-    const device: ComprehensiveDeviceInfo['device'] = {
-      type: 'desktop',
-      brand: 'Unknown',
-      model: 'Unknown',
-      os: 'Unknown',
-      osVersion: 'Unknown',
-      browser: 'Unknown',
-      browserVersion: 'Unknown',
-      engine: 'Unknown'
-    };
-
-    // OS 감지
-    if (/Windows NT/i.test(ua)) {
-      device.os = 'Windows';
-      const winVersion = ua.match(/Windows NT ([\d.]+)/);
-      if (winVersion) {
-        const versions: { [key: string]: string } = {
-          '10.0': '10/11',
-          '6.3': '8.1',
-          '6.2': '8',
-          '6.1': '7'
-        };
-        device.osVersion = versions[winVersion[1]] || winVersion[1];
-      }
-    } else if (/Mac OS X/i.test(ua)) {
-      device.os = 'macOS';
-      const macVersion = ua.match(/Mac OS X ([\d_]+)/);
-      if (macVersion) {
-        device.osVersion = macVersion[1].replace(/_/g, '.');
-      }
-    } else if (/iPhone|iPad|iPod/i.test(ua)) {
-      device.type = /iPad/i.test(ua) ? 'tablet' : 'mobile';
-      device.brand = 'Apple';
-      device.os = 'iOS';
-      
-      // iPhone 모델 감지
-      if (/iPhone/i.test(ua)) {
-        const iphoneModels: { [key: string]: string } = {
-          'iPhone14,2': 'iPhone 13 Pro',
-          'iPhone14,3': 'iPhone 13 Pro Max',
-          'iPhone14,4': 'iPhone 13 mini',
-          'iPhone14,5': 'iPhone 13',
-          'iPhone15,2': 'iPhone 14 Pro',
-          'iPhone15,3': 'iPhone 14 Pro Max',
-          'iPhone15,4': 'iPhone 14',
-          'iPhone15,5': 'iPhone 14 Plus',
-          'iPhone16,1': 'iPhone 15 Pro',
-          'iPhone16,2': 'iPhone 15 Pro Max'
-        };
-        
-        const modelMatch = ua.match(/iPhone[\d,]+/);
-        device.model = modelMatch ? (iphoneModels[modelMatch[0]] || modelMatch[0]) : 'iPhone';
-      } else if (/iPad/i.test(ua)) {
-        device.model = 'iPad';
-      }
-
-      const iosVersion = ua.match(/OS ([\d_]+)/);
-      if (iosVersion) {
-        device.osVersion = iosVersion[1].replace(/_/g, '.');
-      }
-    } else if (/Android/i.test(ua)) {
-      device.type = /Mobile/i.test(ua) ? 'mobile' : 'tablet';
-      device.os = 'Android';
-      
-      const androidVersion = ua.match(/Android ([\d.]+)/);
-      if (androidVersion) {
-        device.osVersion = androidVersion[1];
-      }
-
-      // 브랜드 감지
-      const brands: { [key: string]: string } = {
-        'Samsung': 'Samsung',
-        'SM-': 'Samsung Galaxy',
-        'LG-': 'LG',
-        'HTC': 'HTC',
-        'HUAWEI': 'Huawei',
-        'Pixel': 'Google Pixel',
-        'OnePlus': 'OnePlus',
-        'Xiaomi': 'Xiaomi'
-      };
-
-      for (const [key, brand] of Object.entries(brands)) {
-        if (ua.includes(key)) {
-          device.brand = brand;
-          break;
-        }
-      }
-
-      // 모델명 추출
-      const modelMatch = ua.match(/(?:SM-\w+|LG-\w+|Pixel \d+|OnePlus \w+)/);
-      if (modelMatch) {
-        device.model = modelMatch[0];
-      }
-    } else if (/Linux/i.test(ua)) {
-      device.os = 'Linux';
-    }
-
-    // 브라우저 감지
-    if (/Chrome/i.test(ua) && !/Chromium/i.test(ua)) {
-      device.browser = 'Chrome';
-      const chromeVersion = ua.match(/Chrome\/([\d.]+)/);
-      if (chromeVersion) device.browserVersion = chromeVersion[1];
-      device.engine = 'Blink';
-    } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
-      device.browser = 'Safari';
-      const safariVersion = ua.match(/Safari\/([\d.]+)/);
-      if (safariVersion) device.browserVersion = safariVersion[1];
-      device.engine = 'WebKit';
-    } else if (/Firefox/i.test(ua)) {
-      device.browser = 'Firefox';
-      const firefoxVersion = ua.match(/Firefox\/([\d.]+)/);
-      if (firefoxVersion) device.browserVersion = firefoxVersion[1];
-      device.engine = 'Gecko';
-    } else if (/Edge/i.test(ua)) {
-      device.browser = 'Edge';
-      const edgeVersion = ua.match(/Edge\/([\d.]+)/);
-      if (edgeVersion) device.browserVersion = edgeVersion[1];
-      device.engine = 'EdgeHTML';
-    }
-
-    // 디바이스 타입 재분류 (화면 크기 기반)
-    const width = window.screen.width;
-    if (width <= 768) {
-      device.type = 'mobile';
-    } else if (width <= 1024) {
-      device.type = 'tablet';
-    } else {
-      device.type = 'desktop';
-    }
-
-    return device;
+  // 디바이스 타입 감지
+  if (/Mobi|Android/i.test(userAgent)) {
+    device.type = 'mobile';
+  } else if (/Tablet|iPad/i.test(userAgent)) {
+    device.type = 'tablet';
   }
 
-  // 하드웨어 정보 수집
-  private getHardwareInfo(): ComprehensiveDeviceInfo['hardware'] {
+  // 브라우저 감지
+  if (userAgent.includes('Chrome')) {
+    device.browser = 'Chrome';
+    const chromeMatch = userAgent.match(/Chrome\/([0-9.]+)/);
+    if (chromeMatch) device.browserVersion = chromeMatch[1];
+    device.engine = 'Blink';
+  } else if (userAgent.includes('Safari')) {
+    device.browser = 'Safari';
+    const safariMatch = userAgent.match(/Version\/([0-9.]+)/);
+    if (safariMatch) device.browserVersion = safariMatch[1];
+    device.engine = 'WebKit';
+  } else if (userAgent.includes('Firefox')) {
+    device.browser = 'Firefox';
+    const firefoxMatch = userAgent.match(/Firefox\/([0-9.]+)/);
+    if (firefoxMatch) device.browserVersion = firefoxMatch[1];
+    device.engine = 'Gecko';
+  } else if (userAgent.includes('Edge')) {
+    device.browser = 'Edge';
+    const edgeMatch = userAgent.match(/Edge\/([0-9.]+)/);
+    if (edgeMatch) device.browserVersion = edgeMatch[1];
+    device.engine = 'EdgeHTML';
+  }
+
+  // OS 감지
+  if (userAgent.includes('Windows NT')) {
+    device.os = 'Windows';
+    const winMatch = userAgent.match(/Windows NT ([0-9.]+)/);
+    if (winMatch) device.osVersion = winMatch[1];
+  } else if (userAgent.includes('Mac OS X')) {
+    device.os = 'macOS';
+    const macMatch = userAgent.match(/Mac OS X ([0-9_]+)/);
+    if (macMatch) device.osVersion = macMatch[1].replace(/_/g, '.');
+  } else if (userAgent.includes('iPhone OS')) {
+    device.os = 'iOS';
+    device.brand = 'Apple';
+    device.model = 'iPhone';
+    const iosMatch = userAgent.match(/iPhone OS ([0-9_]+)/);
+    if (iosMatch) device.osVersion = iosMatch[1].replace(/_/g, '.');
+  } else if (userAgent.includes('iPad')) {
+    device.os = 'iOS';
+    device.brand = 'Apple';
+    device.model = 'iPad';
+    const iosMatch = userAgent.match(/OS ([0-9_]+)/);
+    if (iosMatch) device.osVersion = iosMatch[1].replace(/_/g, '.');
+  } else if (userAgent.includes('Android')) {
+    device.os = 'Android';
+    const androidMatch = userAgent.match(/Android ([0-9.]+)/);
+    if (androidMatch) device.osVersion = androidMatch[1];
+    
+    // Android 디바이스 브랜드/모델 감지
+    if (userAgent.includes('Samsung')) {
+      device.brand = 'Samsung';
+      const samsungMatch = userAgent.match(/Samsung[^;]*/);
+      if (samsungMatch) device.model = samsungMatch[0];
+    } else if (userAgent.includes('LG')) {
+      device.brand = 'LG';
+    } else if (userAgent.includes('Pixel')) {
+      device.brand = 'Google';
+      device.model = 'Pixel';
+    }
+  }
+
+  return device;
+}
+
+// WebGL 정보 수집
+function getWebGLInfo() {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    
+    if (!gl) {
+      return { webGL: false };
+    }
+
+    const debugInfo = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info');
     return {
+      webGL: true,
+      webGLVendor: debugInfo ? (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : undefined,
+      webGLRenderer: debugInfo ? (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : undefined,
+    };
+  } catch (e) {
+    return { webGL: false };
+  }
+}
+
+// Canvas 핑거프린트 생성
+function generateCanvasFingerprint(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return 'no-canvas';
+
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Survey Canvas Fingerprint 🔍', 2, 2);
+    
+    return canvas.toDataURL().slice(-50); // 마지막 50자만 사용
+  } catch (e) {
+    return 'canvas-error';
+  }
+}
+
+// Audio 핑거프린트 생성
+function generateAudioFingerprint(): string {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const analyser = audioContext.createAnalyser();
+    
+    oscillator.connect(analyser);
+    oscillator.frequency.value = 1000;
+    
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+    
+    return Array.from(dataArray.slice(0, 10)).join('');
+  } catch (e) {
+    return 'audio-error';
+  }
+}
+
+// 배터리 정보 수집
+async function getBatteryInfo() {
+  try {
+    if ('getBattery' in navigator) {
+      const battery = await (navigator as any).getBattery();
+      return {
+        batteryLevel: Math.round(battery.level * 100),
+        batteryCharging: battery.charging,
+      };
+    }
+  } catch (e) {
+    // Battery API not supported
+  }
+  return {};
+}
+
+// 설치된 폰트 감지
+function getInstalledFonts(): string[] {
+  const fonts = [
+    'Arial', 'Helvetica', 'Times New Roman', 'Courier New', 'Verdana',
+    'Georgia', 'Palatino', 'Garamond', 'Bookman', 'Comic Sans MS',
+    'Trebuchet MS', 'Arial Black', 'Impact', 'sans-serif', 'serif'
+  ];
+  
+  const installedFonts: string[] = [];
+  const testString = 'mmmmmmmmmmlli';
+  const testSize = '72px';
+  
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) return [];
+  
+  // 기본 폰트로 측정
+  context.font = testSize + ' sans-serif';
+  const baseWidth = context.measureText(testString).width;
+  
+  fonts.forEach(font => {
+    context.font = testSize + ' ' + font + ', sans-serif';
+    const width = context.measureText(testString).width;
+    if (width !== baseWidth) {
+      installedFonts.push(font);
+    }
+  });
+  
+  return installedFonts;
+}
+
+// 위치 정보 수집 (IP 기반, 3단계 백업 + 캐싱)
+async function getLocationInfo() {
+  // 캐시 확인 (5분간 유효)
+  const cacheKey = 'survey_cached_ip_location';
+  const cacheExpiry = 'survey_cached_ip_location_expiry';
+  const cached = sessionStorage.getItem(cacheKey);
+  const expiry = sessionStorage.getItem(cacheExpiry);
+  
+  if (cached && expiry && new Date().getTime() < parseInt(expiry)) {
+    console.log('✅ Survey 캐시된 IP 위치 정보 사용');
+    return JSON.parse(cached);
+  }
+
+  const apis = [
+    {
+      url: 'https://ipapi.co/json/',
+      parser: (data: any) => ({
+        ip: data.ip,
+        country: data.country_name,
+        countryCode: data.country_code,
+        region: data.region,
+        regionCode: data.region_code,
+        city: data.city,
+        zipCode: data.postal,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        timezone: data.timezone,
+        isp: data.org,
+        org: data.org,
+        asn: data.asn,
+      })
+    },
+    {
+      url: 'http://ip-api.com/json/',
+      parser: (data: any) => ({
+        ip: data.query,
+        country: data.country,
+        countryCode: data.countryCode,
+        region: data.regionName,
+        regionCode: data.region,
+        city: data.city,
+        zipCode: data.zip,
+        latitude: data.lat,
+        longitude: data.lon,
+        timezone: data.timezone,
+        isp: data.isp,
+        org: data.org,
+        asn: data.as,
+      })
+    },
+    {
+      url: 'https://api.ipify.org?format=json',
+      parser: (data: any) => ({
+        ip: data.ip,
+      })
+    }
+  ];
+
+  for (const api of apis) {
+    try {
+      const response = await fetch(api.url, { timeout: 5000 } as any);
+      const data = await response.json();
+      const locationInfo = api.parser(data);
+      
+      // 캐시에 저장 (5분간 유효)
+      if (locationInfo.ip) {
+        sessionStorage.setItem(cacheKey, JSON.stringify(locationInfo));
+        sessionStorage.setItem(cacheExpiry, (new Date().getTime() + 5 * 60 * 1000).toString());
+        console.log('✅ Survey IP 위치 정보 캐시 저장');
+      }
+      
+      return locationInfo;
+    } catch (error) {
+      console.warn(`Failed to fetch from ${api.url}:`, error);
+      continue;
+    }
+  }
+
+  return {}; // 모든 API 실패 시 빈 객체 반환
+}
+
+// 권한 상태 확인
+async function getPermissions() {
+  const permissions = {
+    camera: false,
+    microphone: false,
+    geolocation: false,
+    pushNotifications: false,
+  };
+
+  try {
+    if ('permissions' in navigator) {
+      const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName });
+      permissions.camera = cameraPermission.state === 'granted';
+      
+      const microphonePermission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      permissions.microphone = microphonePermission.state === 'granted';
+      
+      const geolocationPermission = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+      permissions.geolocation = geolocationPermission.state === 'granted';
+      
+      const notificationPermission = await navigator.permissions.query({ name: 'notifications' as PermissionName });
+      permissions.pushNotifications = notificationPermission.state === 'granted';
+    }
+  } catch (e) {
+    // Permissions API not supported
+  }
+
+  return permissions;
+}
+
+// 메인 디바이스 정보 수집 함수
+export async function collectComprehensiveDeviceInfo(surveySpecific?: {
+  entryPoint?: string;
+  referralSource?: string;
+  landingSessionId?: string;
+  surveyVersion?: string;
+}): Promise<ComprehensiveDeviceInfo> {
+  const userAgent = navigator.userAgent;
+  const device = parseUserAgent(userAgent);
+  const webglInfo = getWebGLInfo();
+  const batteryInfo = await getBatteryInfo();
+  const locationInfo = await getLocationInfo();
+  const permissions = await getPermissions();
+
+  // 네트워크 정보
+  const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+  
+  const deviceInfo: ComprehensiveDeviceInfo = {
+    device,
+    
+    hardware: {
       screenWidth: window.screen.width,
       screenHeight: window.screen.height,
       screenResolution: `${window.screen.width}x${window.screen.height}`,
       pixelRatio: window.devicePixelRatio || 1,
       colorDepth: window.screen.colorDepth,
-      touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+      touchSupport: 'ontouchstart' in window,
       maxTouchPoints: navigator.maxTouchPoints || 0,
       hardwareConcurrency: navigator.hardwareConcurrency || 1,
-      deviceMemory: (navigator as any).deviceMemory
-    };
-  }
-
-  // 네트워크 정보 수집
-  private getNetworkInfo(): ComprehensiveDeviceInfo['network'] {
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+      deviceMemory: (navigator as any).deviceMemory,
+    },
     
-    return {
+    network: {
       connectionType: connection?.type,
       effectiveType: connection?.effectiveType,
       downlink: connection?.downlink,
       rtt: connection?.rtt,
-      saveData: connection?.saveData
-    };
-  }
-
-  // 브라우저 능력 확인
-  private async getCapabilities(): Promise<ComprehensiveDeviceInfo['capabilities']> {
-    const capabilities = {
+      saveData: connection?.saveData,
+    },
+    
+    location: locationInfo,
+    
+    capabilities: {
       cookieEnabled: navigator.cookieEnabled,
       doNotTrack: navigator.doNotTrack === '1',
-      javaEnabled: (navigator as any).javaEnabled?.() || false,
-      webGL: false,
-      webGLVendor: '',
-      webGLRenderer: '',
-      localStorage: false,
-      sessionStorage: false,
-      indexedDB: false,
-      webWorkers: false,
-      serviceWorkers: false,
-      pushNotifications: false,
-      geolocation: false,
-      camera: false,
-      microphone: false
-    };
-
-    // WebGL 확인
-    try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') as WebGLRenderingContext || canvas.getContext('experimental-webgl') as WebGLRenderingContext;
-      if (gl) {
-        capabilities.webGL = true;
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (debugInfo) {
-          capabilities.webGLVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-          capabilities.webGLRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-        }
-      }
-    } catch (e) {
-      // WebGL not supported
-    }
-
-    // Storage 확인
-    try {
-      localStorage.setItem('test', 'test');
-      localStorage.removeItem('test');
-      capabilities.localStorage = true;
-    } catch (e) {
-      capabilities.localStorage = false;
-    }
-
-    try {
-      sessionStorage.setItem('test', 'test');
-      sessionStorage.removeItem('test');
-      capabilities.sessionStorage = true;
-    } catch (e) {
-      capabilities.sessionStorage = false;
-    }
-
-    // 기타 API 확인
-    capabilities.indexedDB = !!window.indexedDB;
-    capabilities.webWorkers = !!window.Worker;
-    capabilities.serviceWorkers = 'serviceWorker' in navigator;
-    capabilities.pushNotifications = 'PushManager' in window;
-    capabilities.geolocation = 'geolocation' in navigator;
-
-    // 미디어 권한 확인
-    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        capabilities.camera = devices.some(device => device.kind === 'videoinput');
-        capabilities.microphone = devices.some(device => device.kind === 'audioinput');
-      } catch (e) {
-        // Permission denied or not available
-      }
-    }
-
-    return capabilities;
-  }
-
-  // 위치 정보 수집 (여러 API 사용)
-  private async getLocationInfo(): Promise<ComprehensiveDeviceInfo['location']> {
-    const defaultLocation = {
-      ip: '0.0.0.0',
-      country: 'Unknown',
-      countryCode: 'XX',
-      region: 'Unknown',
-      regionCode: 'XX',
-      city: 'Unknown',
-      zipCode: 'Unknown',
-      latitude: 0,
-      longitude: 0,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      isp: 'Unknown',
-      org: 'Unknown',
-      asn: 'Unknown',
-      proxy: false,
-      vpn: false
-    };
+      javaEnabled: (navigator as any).javaEnabled ? (navigator as any).javaEnabled() : false,
+      ...webglInfo,
+      localStorage: !!window.localStorage,
+      sessionStorage: !!window.sessionStorage,
+      indexedDB: !!window.indexedDB,
+      webWorkers: !!window.Worker,
+      serviceWorkers: 'serviceWorker' in navigator,
+      ...permissions,
+    },
     
-    // 캐시 확인 (5분간 유효)
-    const cacheKey = 'cached_ip_location';
-    const cacheExpiry = 'cached_ip_location_expiry';
-    const cached = sessionStorage.getItem(cacheKey);
-    const expiry = sessionStorage.getItem(cacheExpiry);
-    
-    if (cached && expiry && new Date().getTime() < parseInt(expiry)) {
-      console.log('✅ 캐시된 IP 위치 정보 사용');
-      return JSON.parse(cached);
-    }
-
-    try {
-      // 1차: ipapi.co (무료, 상세 정보)
-      const response1 = await fetch('https://ipapi.co/json/');
-      if (response1.ok) {
-        const data = await response1.json();
-        const locationInfo = {
-          ip: data.ip || defaultLocation.ip,
-          country: data.country_name || defaultLocation.country,
-          countryCode: data.country_code || defaultLocation.countryCode,
-          region: data.region || defaultLocation.region,
-          regionCode: data.region_code || defaultLocation.regionCode,
-          city: data.city || defaultLocation.city,
-          zipCode: data.postal || defaultLocation.zipCode,
-          latitude: data.latitude || defaultLocation.latitude,
-          longitude: data.longitude || defaultLocation.longitude,
-          timezone: data.timezone || defaultLocation.timezone,
-          isp: data.org || defaultLocation.isp,
-          org: data.org || defaultLocation.org,
-          asn: data.asn || defaultLocation.asn,
-          proxy: false,
-          vpn: false
-        };
-        
-        // 캐시에 저장 (5분간 유효)
-        sessionStorage.setItem(cacheKey, JSON.stringify(locationInfo));
-        sessionStorage.setItem(cacheExpiry, (new Date().getTime() + 5 * 60 * 1000).toString());
-        console.log('✅ IP 위치 정보 캐시 저장');
-        
-        return locationInfo;
-      }
-    } catch (error) {
-      console.warn('ipapi.co failed, trying backup services');
-    }
-
-    try {
-      // 2차: ip-api.com (무료, 통신사 정보 포함)
-      const response2 = await fetch('http://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,proxy,query');
-      if (response2.ok) {
-        const data = await response2.json();
-        if (data.status === 'success') {
-          const locationInfo = {
-            ip: data.query || defaultLocation.ip,
-            country: data.country || defaultLocation.country,
-            countryCode: data.countryCode || defaultLocation.countryCode,
-            region: data.regionName || defaultLocation.region,
-            regionCode: data.region || defaultLocation.regionCode,
-            city: data.city || defaultLocation.city,
-            zipCode: data.zip || defaultLocation.zipCode,
-            latitude: data.lat || defaultLocation.latitude,
-            longitude: data.lon || defaultLocation.longitude,
-            timezone: data.timezone || defaultLocation.timezone,
-            isp: data.isp || defaultLocation.isp,
-            org: data.org || defaultLocation.org,
-            asn: data.as || defaultLocation.asn,
-            proxy: data.proxy || false,
-            vpn: false
-          };
-          
-          // 캐시에 저장 (5분간 유효)
-          sessionStorage.setItem(cacheKey, JSON.stringify(locationInfo));
-          sessionStorage.setItem(cacheExpiry, (new Date().getTime() + 5 * 60 * 1000).toString());
-          console.log('✅ IP 위치 정보 캐시 저장 (백업 API)');
-          
-          return locationInfo;
-        }
-      }
-    } catch (error) {
-      console.warn('ip-api.com failed, trying final backup');
-    }
-
-    try {
-      // 3차: ipify.org (기본 IP만)
-      const response3 = await fetch('https://api.ipify.org?format=json');
-      if (response3.ok) {
-        const data = await response3.json();
-        return {
-          ...defaultLocation,
-          ip: data.ip
-        };
-      }
-    } catch (error) {
-      console.error('All IP services failed');
-    }
-
-    return defaultLocation;
-  }
-
-  // Canvas 핑거프린팅
-  private getCanvasFingerprint(): string {
-    try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return 'no-canvas';
-
-      ctx.textBaseline = 'top';
-      ctx.font = '14px Arial';
-      ctx.fillText('Device fingerprint canvas 🎯', 2, 2);
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-      ctx.fillRect(100, 100, 200, 100);
-      
-      return canvas.toDataURL().slice(-50); // 마지막 50자리만
-    } catch (e) {
-      return 'canvas-error';
-    }
-  }
-
-  // Audio 핑거프린팅
-  private getAudioFingerprint(): string {
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const analyser = audioContext.createAnalyser();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(analyser);
-      analyser.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      return audioContext.sampleRate.toString() + analyser.frequencyBinCount.toString();
-    } catch (e) {
-      return 'audio-error';
-    }
-  }
-
-  // 설치된 폰트 감지
-  private getInstalledFonts(): string[] {
-    const fonts = [
-      'Arial', 'Helvetica', 'Times New Roman', 'Courier New', 'Verdana', 'Georgia', 'Palatino',
-      'Garamond', 'Bookman', 'Comic Sans MS', 'Trebuchet MS', 'Arial Black', 'Impact',
-      'Malgun Gothic', 'Gulim', 'Dotum', 'Batang', 'Gungsuh', 'NanumGothic'
-    ];
-    
-    const availableFonts: string[] = [];
-    const testString = 'mmmmmmmmmmlli';
-    const testSize = '72px';
-    const baseFonts = ['monospace', 'sans-serif', 'serif'];
-    
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    if (!context) return [];
-    
-    canvas.width = 2000;
-    canvas.height = 200;
-    
-    const baseWidths: { [key: string]: number } = {};
-    
-    for (const baseFont of baseFonts) {
-      context.font = testSize + ' ' + baseFont;
-      baseWidths[baseFont] = context.measureText(testString).width;
-    }
-    
-    for (const font of fonts) {
-      let detected = false;
-      for (const baseFont of baseFonts) {
-        context.font = testSize + ' ' + font + ',' + baseFont;
-        const width = context.measureText(testString).width;
-        if (width !== baseWidths[baseFont]) {
-          detected = true;
-          break;
-        }
-      }
-      if (detected) {
-        availableFonts.push(font);
-      }
-    }
-    
-    return availableFonts;
-  }
-
-  // 배터리 정보 수집
-  private async getBatteryInfo(): Promise<{ level?: number; charging?: boolean }> {
-    try {
-      if ('getBattery' in navigator) {
-        const battery = await (navigator as any).getBattery();
-        return {
-          level: Math.round(battery.level * 100),
-          charging: battery.charging
-        };
-      }
-    } catch (e) {
-      // Battery API not supported
-    }
-    return {};
-  }
-
-  // 광고 차단기 감지
-  private async detectAdBlocker(): Promise<boolean> {
-    try {
-      // 광고 관련 요소 생성 테스트
-      const adElement = document.createElement('div');
-      adElement.innerHTML = '&nbsp;';
-      adElement.className = 'adsbox';
-      adElement.style.position = 'absolute';
-      adElement.style.left = '-10000px';
-      document.body.appendChild(adElement);
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      const detected = adElement.offsetHeight === 0;
-      document.body.removeChild(adElement);
-      
-      return detected;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  // 방문 기록 관리
-  private getVisitInfo(): { visitCount: number; lastVisit?: string; sessionDuration: number } {
-    const sessionStart = sessionStorage.getItem('sessionStart') || Date.now().toString();
-    const visitCount = parseInt(localStorage.getItem('visitCount') || '0') + 1;
-    const lastVisit = localStorage.getItem('lastVisit');
-    
-    // 현재 방문 정보 저장
-    localStorage.setItem('visitCount', visitCount.toString());
-    localStorage.setItem('lastVisit', new Date().toISOString());
-    sessionStorage.setItem('sessionStart', sessionStart);
-    
-    return {
-      visitCount,
-      lastVisit: lastVisit || undefined,
-      sessionDuration: Date.now() - parseInt(sessionStart)
-    };
-  }
-
-  // 추가 브라우저 정보 수집
-  private getExtendedBrowserInfo(): Partial<ComprehensiveDeviceInfo['misc']> {
-    const nav = navigator as any;
-    
-    return {
-      cpuClass: nav.cpuClass,
-      oscpu: nav.oscpu,
-      buildID: nav.buildID,
-      product: nav.product,
-      productSub: nav.productSub,
-      vendor: nav.vendor,
-      vendorSub: nav.vendorSub,
-      webdriver: nav.webdriver,
-      pdfViewerEnabled: nav.pdfViewerEnabled,
-      mozApps: !!nav.mozApps,
-      mozConnection: !!nav.mozConnection
-    };
-  }
-
-  // 종합 디바이스 정보 수집
-  public async getComprehensiveDeviceInfo(): Promise<ComprehensiveDeviceInfo> {
-    if (this.deviceInfo) {
-      return this.deviceInfo;
-    }
-
-    const ua = navigator.userAgent;
-    const [capabilities, location, battery, adBlock] = await Promise.all([
-      this.getCapabilities(),
-      this.getLocationInfo(),
-      this.getBatteryInfo(),
-      this.detectAdBlocker()
-    ]);
-
-    const visitInfo = this.getVisitInfo();
-    const extendedInfo = this.getExtendedBrowserInfo();
-
-    this.deviceInfo = {
-      userAgent: ua,
+    misc: {
+      timezoneOffset: new Date().getTimezoneOffset(),
+      currentTime: new Date().toISOString(),
+      referrer: document.referrer,
+      onlineStatus: navigator.onLine,
+      ...batteryInfo,
+      installedFonts: getInstalledFonts(),
+      canvasFingerprint: generateCanvasFingerprint(),
+      audioFingerprint: generateAudioFingerprint(),
+      languages: navigator.languages ? Array.from(navigator.languages) : [navigator.language],
       platform: navigator.platform,
-      language: navigator.language,
-      languages: Array.from(navigator.languages || [navigator.language]),
-      
-      device: this.parseUserAgent(ua),
-      hardware: this.getHardwareInfo(),
-      network: this.getNetworkInfo(),
-      location,
-      capabilities,
-      
-      misc: {
-        timezoneOffset: new Date().getTimezoneOffset(),
-        currentTime: new Date().toISOString(),
-        referrer: document.referrer,
-        onlineStatus: navigator.onLine,
-        batteryLevel: battery.level,
-        batteryCharging: battery.charging,
-        installedFonts: this.getInstalledFonts(),
-        canvasFingerprint: this.getCanvasFingerprint(),
-        audioFingerprint: this.getAudioFingerprint(),
-        
-        // 추가 정보
-        sessionDuration: visitInfo.sessionDuration,
-        visitCount: visitInfo.visitCount,
-        lastVisit: visitInfo.lastVisit,
-        adBlock,
-        ...extendedInfo
-      }
-    };
-
-    return this.deviceInfo;
-  }
-
-  // 간단한 요약 정보 반환
-  public async getDeviceSummary(): Promise<string> {
-    const info = await this.getComprehensiveDeviceInfo();
+      plugins: Array.from(navigator.plugins).map(p => p.name),
+      mimeTypes: Array.from(navigator.mimeTypes).map(m => m.type),
+      webdriver: (navigator as any).webdriver,
+      phantomJS: !!(window as any).callPhantom,
+      selenium: !!(window as any).selenium,
+    },
     
-    return `${info.device.brand} ${info.device.model} | ${info.device.os} ${info.device.osVersion} | ${info.device.browser} ${info.device.browserVersion} | ${info.location.city}, ${info.location.country} | ${info.location.isp}`;
+    survey: {
+      entryPoint: surveySpecific?.entryPoint || 'direct',
+      referralSource: surveySpecific?.referralSource || 'direct',
+      landingSessionId: surveySpecific?.landingSessionId,
+      surveyVersion: surveySpecific?.surveyVersion || '1.0',
+    },
+  };
+
+  return deviceInfo;
+}
+
+// 디바이스 정보를 간단한 문자열로 요약
+export function summarizeDeviceInfo(deviceInfo: ComprehensiveDeviceInfo): string {
+  const { device, hardware, location } = deviceInfo;
+  
+  const deviceStr = device.brand && device.model 
+    ? `${device.brand} ${device.model}` 
+    : device.browser || 'Unknown';
+  
+  const locationStr = location.city && location.country
+    ? `${location.city}, ${location.country}`
+    : location.country || 'Unknown';
+  
+  const screenStr = `${hardware.screenWidth}x${hardware.screenHeight}`;
+  
+  return `${deviceStr} | ${device.os} | ${screenStr} | ${locationStr}`;
+}
+
+// 세션 ID 생성 (Landing용)
+export function generateSessionId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  return `landing_${timestamp}_${random}`;
+}
+
+// Survey와 호환성을 위한 별칭
+export const generateSurveySessionId = generateSessionId;
+
+// 세션 스토리지에서 기존 세션 정보 확인
+export function getExistingSession(): string | null {
+  try {
+    return sessionStorage.getItem('sessionId');
+  } catch (e) {
+    return null;
   }
 }
 
-// 전역 인스턴스
-export const deviceDetection = new DeviceDetection();
+// Survey와 호환성을 위한 별칭
+export const getExistingSurveySession = getExistingSession;
+
+// 세션 ID를 세션 스토리지에 저장
+export function saveSessionId(sessionId: string): void {
+  try {
+    sessionStorage.setItem('sessionId', sessionId);
+  } catch (e) {
+    console.warn('Failed to save session ID to sessionStorage');
+  }
+}
+
+// Survey와 호환성을 위한 별칭
+export const saveSurveySessionId = saveSessionId;
+
+const deviceDetection = {
+  collectComprehensiveDeviceInfo,
+  summarizeDeviceInfo,
+  generateSurveySessionId,
+  getExistingSurveySession,
+  saveSurveySessionId,
+};
+
+export default deviceDetection;

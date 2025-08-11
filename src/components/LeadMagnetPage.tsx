@@ -246,7 +246,7 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
 
   const handleSubmit = async () => {
     if (!selectedOption || !inputValue.trim()) {
-      detailedAnalytics.trackError('form_validation', 'Missing required fields', {
+      detailedAnalytics.trackError('form_validation: Missing required fields', {
         selectedOption,
         inputValueLength: inputValue.length,
         page: 'leadmagnet'
@@ -255,7 +255,7 @@ const LeadMagnetPage: React.FC<LeadMagnetPageProps> = ({ onComplete, typeCode })
     }
     
     if (selectedOption === 'kakao' && !channelAdded) {
-      detailedAnalytics.trackError('form_validation', 'Kakao channel not added', {
+      detailedAnalytics.trackError('form_validation: Kakao channel not added', {
         selectedOption,
         channelAdded,
         page: 'leadmagnet'

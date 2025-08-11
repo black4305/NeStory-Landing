@@ -10,7 +10,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// 기존 PostgresService와 동일한 인터페이스 유지
+// 기존 PostgresService와 동일한 인터페이스 유지 + Survey와 동일한 필드 추가
 export interface AnonymousSession {
   id?: string;
   session_id: string;
@@ -37,6 +37,36 @@ export interface AnonymousSession {
   visit_count?: number;
   first_visit?: string;
   last_visit?: string;
+  // Survey와 동일하게 추가된 필드들
+  device_brand?: string;
+  device_model?: string;
+  os?: string;
+  os_version?: string;
+  browser?: string;
+  browser_version?: string;
+  screen_width?: number;
+  screen_height?: number;
+  pixel_ratio?: number;
+  connection_type?: string;
+  effective_type?: string;
+  downlink?: number;
+  rtt?: number;
+  save_data?: boolean;
+  webgl_support?: boolean;
+  webgl_vendor?: string;
+  webgl_renderer?: string;
+  local_storage?: boolean;
+  session_storage?: boolean;
+  indexed_db?: boolean;
+  service_workers?: boolean;
+  geolocation?: boolean;
+  language?: string;
+  languages?: string[];
+  timezone_offset?: number;
+  ad_blocker_detected?: boolean;
+  canvas_fingerprint?: string;
+  audio_fingerprint?: string;
+  installed_fonts?: string[];
 }
 
 export interface PageVisit {
@@ -172,18 +202,18 @@ export class SupabaseService {
     }
   }
 
-  // 2. 세션 생성/업데이트 (RPC 사용)
+  // 2. 세션 생성/업데이트 (RPC 사용) - Survey와 동일하게 모든 필드 포함
   async createOrUpdateSession(sessionData: AnonymousSession) {
     try {
       const { data, error } = await supabase.rpc('landing_create_or_update_session', {
         p_session_id: sessionData.session_id,
-        p_user_agent: sessionData.user_agent,
+        p_user_agent: sessionData.user_agent || navigator.userAgent,
         p_ip_address: sessionData.ip_address,
-        p_device_type: sessionData.device_type,
+        p_device_type: sessionData.device_type || (/Mobile|Android|iPhone/.test(navigator.userAgent) ? 'mobile' : 'desktop'),
         p_country: sessionData.country,
         p_city: sessionData.city,
-        p_referrer: sessionData.referrer,
-        p_landing_page: sessionData.landing_page,
+        p_referrer: sessionData.referrer || document.referrer,
+        p_landing_page: sessionData.landing_page || window.location.href,
         // 추가 위치 정보 파라미터
         p_country_code: sessionData.country_code,
         p_region: sessionData.region,
@@ -191,10 +221,36 @@ export class SupabaseService {
         p_zip_code: sessionData.zip_code,
         p_latitude: sessionData.latitude,
         p_longitude: sessionData.longitude,
-        p_timezone: sessionData.timezone,
+        p_timezone: sessionData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
         p_isp: sessionData.isp,
         p_organization: sessionData.organization,
-        p_asn: sessionData.asn
+        p_asn: sessionData.asn,
+        // Survey와 동일하게 추가 필드들
+        p_device_brand: (sessionData as any).device_brand,
+        p_device_model: (sessionData as any).device_model,
+        p_os: (sessionData as any).os,
+        p_os_version: (sessionData as any).os_version,
+        p_browser: (sessionData as any).browser,
+        p_browser_version: (sessionData as any).browser_version,
+        p_screen_width: (sessionData as any).screen_width || window.screen?.width,
+        p_screen_height: (sessionData as any).screen_height || window.screen?.height,
+        p_pixel_ratio: window.devicePixelRatio,
+        p_connection_type: (navigator as any).connection?.type,
+        p_effective_type: (navigator as any).connection?.effectiveType,
+        p_downlink: (navigator as any).connection?.downlink,
+        p_rtt: (navigator as any).connection?.rtt,
+        p_save_data: (navigator as any).connection?.saveData,
+        p_webgl_support: !!document.createElement('canvas').getContext('webgl'),
+        p_local_storage: typeof(Storage) !== "undefined",
+        p_session_storage: typeof(Storage) !== "undefined",
+        p_indexed_db: !!window.indexedDB,
+        p_service_workers: 'serviceWorker' in navigator,
+        p_geolocation: 'geolocation' in navigator,
+        p_language: navigator.language,
+        p_languages: navigator.languages ? JSON.stringify(navigator.languages) : null,
+        p_timezone_offset: new Date().getTimezoneOffset(),
+        p_visit_count: (sessionData as any).visit_count || 1,
+        p_ad_blocker_detected: (sessionData as any).ad_blocker_detected || false
       });
 
       if (error) throw error;
@@ -281,7 +337,7 @@ export class SupabaseService {
     }
   }
 
-  // 6. 리드 저장 (직접 테이블 저장)
+  // 6. 리드 저장 (RPC 함수 사용으로 변경)
   async saveLead(leadData: Lead) {
     try {
       console.log('📊 리드 저장 시작:', {
@@ -298,82 +354,44 @@ export class SupabaseService {
         return { success: false, error: '세션 ID가 필요합니다' };
       }
 
-      // 먼저 기존 리드가 있는지 확인
-      const { data: existingLead, error: checkError } = await supabase
-        .from('squeeze_leads')
-        .select('id')
-        .eq('session_id', leadData.session_id)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('❌ 리드 확인 중 오류:', checkError);
-      }
-
-      let data, error;
-      
-      if (existingLead) {
-        console.log('📝 기존 리드 업데이트');
-        // 업데이트
-        ({ data, error } = await supabase
-          .from('squeeze_leads')
-          .update({
-            email: leadData.email || null,
-            phone: leadData.phone || null,
-            name: leadData.name || null,
-            contact_type: leadData.contact_type,
-            contact_value: leadData.contact_value,
-            marketing_consent: Boolean(leadData.marketing_consent) || false,
-            privacy_consent: Boolean(leadData.privacy_consent) || true,
-            kakao_channel_added: Boolean(leadData.kakao_channel_added) || false,
-            lead_source: leadData.lead_source || leadData.source || 'organic',
-            travel_type: leadData.travel_type || null,
-            lead_score: leadData.lead_score || 50,
-            webhook_sent: leadData.webhook_sent || false,
-            device_type: leadData.device_type || null,
-            device_info: leadData.device_info || null,
-            ip_address: leadData.ip_address || null,
-            ip_location: leadData.ip_location || null,
-            page_url: leadData.page_url || null,
-            utm_source: leadData.utm_source || null,
-            utm_medium: leadData.utm_medium || null,
-            utm_campaign: leadData.utm_campaign || null,
-            updated_at: new Date().toISOString()
-          })
-          .eq('session_id', leadData.session_id)
-          .select()
-          .single());
-      } else {
-        console.log('✨ 새 리드 생성');
-        // 새로 삽입
-        ({ data, error } = await supabase
-          .from('squeeze_leads')
-          .insert({
-            session_id: leadData.session_id,
-            email: leadData.email || null,
-            phone: leadData.phone || null,
-            name: leadData.name || null,
-            contact_type: leadData.contact_type,
-            contact_value: leadData.contact_value,
-            marketing_consent: Boolean(leadData.marketing_consent) || false,
-            privacy_consent: Boolean(leadData.privacy_consent) || true,
-            kakao_channel_added: Boolean(leadData.kakao_channel_added) || false,
-            lead_source: leadData.lead_source || leadData.source || 'organic',
-            travel_type: leadData.travel_type || null,
-            lead_score: leadData.lead_score || 50,
-            webhook_sent: leadData.webhook_sent || false,
-            device_type: leadData.device_type || null,
-            device_info: leadData.device_info || null,
-            ip_address: leadData.ip_address || null,
-            ip_location: leadData.ip_location || null,
-            page_url: leadData.page_url || null,
-            utm_source: leadData.utm_source || null,
-            utm_medium: leadData.utm_medium || null,
-            utm_campaign: leadData.utm_campaign || null,
-            created_at: new Date().toISOString()
-          })
-          .select()
-          .single());
-      }
+      // RPC 함수 호출로 변경 (Survey와 동일한 방식)
+      const { data, error } = await supabase.rpc('landing_save_lead', {
+        p_session_id: leadData.session_id,
+        p_email: leadData.email || null,
+        p_phone: leadData.phone || null,
+        p_name: leadData.name || null,
+        p_company: (leadData as any).company || null,
+        p_job_title: (leadData as any).job_title || null,
+        p_email_consent: Boolean((leadData as any).email_consent) || false,
+        p_sms_consent: Boolean((leadData as any).sms_consent) || false,
+        p_marketing_consent: Boolean(leadData.marketing_consent) || false,
+        p_privacy_consent: Boolean(leadData.privacy_consent) || true,
+        p_newsletter_consent: Boolean((leadData as any).newsletter_consent) || false,
+        p_preferred_contact_method: (leadData as any).preferred_contact_method || leadData.contact_type,
+        p_preferred_contact_time: (leadData as any).preferred_contact_time,
+        p_source_campaign: (leadData as any).source_campaign || leadData.utm_campaign,
+        p_lead_score: leadData.lead_score || 50,
+        p_lead_quality: (leadData as any).lead_quality || 'medium',
+        p_lead_source: leadData.lead_source || leadData.source || 'organic',
+        p_webhook_sent: leadData.webhook_sent || false,
+        p_webhook_sent_at: (leadData as any).webhook_sent_at,
+        p_webhook_response: (leadData as any).webhook_response,
+        p_crm_synced: (leadData as any).crm_synced || false,
+        p_crm_contact_id: (leadData as any).crm_contact_id,
+        // 추가 필드들
+        p_contact_type: leadData.contact_type,
+        p_contact_value: leadData.contact_value,
+        p_kakao_channel_added: Boolean(leadData.kakao_channel_added) || false,
+        p_travel_type: leadData.travel_type || null,
+        p_device_type: leadData.device_type || null,
+        p_device_info: leadData.device_info || null,
+        p_ip_address: leadData.ip_address || null,
+        p_ip_location: leadData.ip_location || null,
+        p_page_url: leadData.page_url || null,
+        p_utm_source: leadData.utm_source || null,
+        p_utm_medium: leadData.utm_medium || null,
+        p_utm_campaign: leadData.utm_campaign || null
+      });
 
       if (error) {
         console.error('❌ 리드 저장 실패:', error);
@@ -441,6 +459,63 @@ export class SupabaseService {
     } catch (error) {
       console.error('전환 추적 오류:', error);
       return { success: false, error: '전환을 기록할 수 없습니다.' };
+    }
+  }
+
+  // 8-1. 완료 추적 (Survey와 동일한 방식으로 추가)
+  async saveCompletion(completionData: any) {
+    try {
+      console.log('📊 완료 추적 시작:', {
+        session_id: completionData.session_id,
+        completion_status: completionData.completion_status,
+        completion_percentage: completionData.completion_percentage
+      });
+
+      // 세션 ID 검증
+      if (!completionData.session_id) {
+        console.error('❌ 세션 ID가 없습니다');
+        return { success: false, error: '세션 ID가 필요합니다' };
+      }
+
+      // RPC 함수가 없으므로 직접 테이블에 저장 (나중에 RPC로 변경 예정)
+      const { data, error } = await supabase
+        .from('squeeze_completions')
+        .upsert({
+          session_id: completionData.session_id,
+          completion_status: completionData.completion_status || 'completed',
+          completion_percentage: completionData.completion_percentage || 100,
+          total_steps: completionData.total_steps || 3,
+          completed_steps: completionData.completed_steps || 3,
+          started_at: completionData.started_at || new Date().toISOString(),
+          completed_at: completionData.completed_at || new Date().toISOString(),
+          total_duration_ms: completionData.total_duration_ms,
+          average_response_time_ms: completionData.average_response_time_ms,
+          quality_score: completionData.quality_score || 80,
+          consistency_score: completionData.consistency_score || 85,
+          engagement_score: completionData.engagement_score || 90,
+          test_type: completionData.test_type || 'family_travel',
+          test_result: completionData.test_result,
+          axis_scores: completionData.axis_scores,
+          user_journey_stage: completionData.user_journey_stage || 'completed',
+          metadata: completionData.metadata,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'session_id'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ 완료 추적 실패:', error);
+        throw error;
+      }
+
+      console.log('✅ 완료 추적 성공:', data);
+      return { success: true, data };
+    } catch (error) {
+      console.error('완료 추적 오류:', error);
+      return { success: false, error: '완료를 기록할 수 없습니다.' };
     }
   }
 
