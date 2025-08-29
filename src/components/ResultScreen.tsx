@@ -385,6 +385,192 @@ const Button = styled(motion.button)<{ variant?: 'primary' | 'secondary'; disabl
   }
 `;
 
+const SurveyPopupOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+`;
+
+const SurveyPopup = styled(motion.div)`
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+    border-radius: 15px;
+  }
+`;
+
+const PopupCloseButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    transform: rotate(90deg);
+    color: #333;
+  }
+`;
+
+const PopupTitle = styled.h2`
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #2d3748;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    font-size: 1.6rem;
+  }
+`;
+
+const PopupContent = styled.div`
+  text-align: center;
+  color: #4a5568;
+`;
+
+const PopupDescription = styled.p`
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+`;
+
+const PopupBenefit = styled.div`
+  background: linear-gradient(135deg, #fff5cc, #ffe4b3);
+  border: 2px solid #ffa500;
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.2rem;
+  }
+`;
+
+const PopupBenefitTitle = styled.h3`
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+`;
+
+const PopupBenefitText = styled.p`
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+`;
+
+const PopupButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const PopupButton = styled(motion.button)<{ primary?: boolean }>`
+  background: ${props => props.primary 
+    ? 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)' 
+    : '#f0f0f0'};
+  color: ${props => props.primary ? 'white' : '#666'};
+  border: none;
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const ReturnMessage = styled(motion.div)`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 2000;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem 2rem;
+  }
+`;
+
+const ReturnMessageTitle = styled.h2`
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const ReturnMessageText = styled.p`
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+`;
+
+const LoadingDots = styled.span`
+  &::after {
+    content: '';
+    animation: dots 1.5s steps(3, end) infinite;
+  }
+  
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+  }
+`;
+
 
 interface ResultScreenProps {
   typeCode: string;
@@ -427,8 +613,13 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
 }) => {
   const [showConfetti, setShowConfetti] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showSurveyPopup, setShowSurveyPopup] = useState(false);
+  const [hasShownPopup, setHasShownPopup] = useState(false);
+  const [hasSharedToKakao, setHasSharedToKakao] = useState(false);
+  const [showReturnMessage, setShowReturnMessage] = useState(false);
   const resultCardRef = useRef<HTMLDivElement>(null);
   const captureAreaRef = useRef<HTMLDivElement>(null);
+  const kakaoShareTimeRef = useRef<number>(0);
   
   const travelType = travelTypes[typeCode] || {
     code: typeCode,
@@ -455,11 +646,104 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
     };
   }, []);
 
+  // 스크롤 이벤트 감지하여 서베이 팝업 표시
+  useEffect(() => {
+    const handleScroll = () => {
+      if (hasShownPopup) return;
+      
+      const scrollPercentage = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100;
+      
+      // 50% 이상 스크롤했을 때 팝업 표시
+      if (scrollPercentage > 50) {
+        setShowSurveyPopup(true);
+        setHasShownPopup(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [hasShownPopup]);
+
+  // 카카오톡 공유 후 돌아왔을 때 감지 및 자동 팝업
+  useEffect(() => {
+    if (!hasSharedToKakao) return;
+
+    let returnCheckTimer: NodeJS.Timeout;
+    let autoPopupTimer: NodeJS.Timeout;
+    
+    // 페이지가 다시 활성화되었을 때 (카카오톡에서 돌아왔을 때)
+    const handlePageReturn = () => {
+      const now = Date.now();
+      const timeSinceShare = now - kakaoShareTimeRef.current;
+      
+      // 카카오톡 공유 후 2초 이상 지났고, 30초 이내라면 돌아온 것으로 판단
+      if (timeSinceShare > 2000 && timeSinceShare < 30000) {
+        console.log('카카오톡에서 돌아옴 감지');
+        
+        // 환영 메시지 표시
+        setShowReturnMessage(true);
+        
+        // 3초 후 환영 메시지 숨기고 서베이 팝업 표시
+        autoPopupTimer = setTimeout(() => {
+          setShowReturnMessage(false);
+          if (!hasShownPopup) {
+            setShowSurveyPopup(true);
+            setHasShownPopup(true);
+            detailedAnalytics.trackCustomEvent('auto_survey_popup_after_kakao', {
+              triggerType: 'kakao_return',
+              timeAfterShare: timeSinceShare
+            });
+          }
+        }, 3000);
+      }
+    };
+
+    // Page Visibility API
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        handlePageReturn();
+      }
+    };
+
+    // Window Focus 이벤트
+    const handleFocus = () => {
+      handlePageReturn();
+    };
+
+    // 이벤트 리스너 등록
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // 모바일 브라우저 대응 - pageshow 이벤트
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) {
+        handlePageReturn();
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('pageshow', handlePageShow);
+      if (returnCheckTimer) clearTimeout(returnCheckTimer);
+      if (autoPopupTimer) clearTimeout(autoPopupTimer);
+    };
+  }, [hasSharedToKakao, hasShownPopup]);
+
 
   const downloadResult = async () => {
     if (!captureAreaRef.current) return;
     
     setIsDownloading(true);
+    
+    // 카카오톡 공유 시작 시점 기록
+    setHasSharedToKakao(true);
+    kakaoShareTimeRef.current = Date.now();
+    
     try {
       // 스크롤을 맨 위로 이동
       window.scrollTo(0, 0);
@@ -756,6 +1040,94 @@ const ResultScreen: React.FC<ResultScreenProps> = ({
           </Button>
         </ButtonGroup>
       </ResultCard>
+
+      {/* 카카오톡에서 돌아온 환영 메시지 */}
+      {showReturnMessage && (
+        <ReturnMessage
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        >
+          <ReturnMessageTitle>
+            🎉 다시 오신 것을 환영해요!
+          </ReturnMessageTitle>
+          <ReturnMessageText>
+            공유해주셔서 감사합니다!<br/>
+            잠시 후 특별한 혜택을 준비했어요
+            <LoadingDots />
+          </ReturnMessageText>
+        </ReturnMessage>
+      )}
+
+      {/* 서베이 유도 팝업 */}
+      {showSurveyPopup && (
+        <SurveyPopupOverlay
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setShowSurveyPopup(false)}
+        >
+          <SurveyPopup
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <PopupCloseButton onClick={() => setShowSurveyPopup(false)}>
+              ✕
+            </PopupCloseButton>
+            
+            <PopupTitle>
+              🎁 잠깐! 특별한 혜택이 기다려요
+            </PopupTitle>
+            
+            <PopupContent>
+              <PopupDescription>
+                <strong>{character.name}</strong> 유형이신 당신께<br/>
+                더 깊이 있는 여행 인사이트를 드려요!
+              </PopupDescription>
+              
+              <PopupBenefit>
+                <PopupBenefitTitle>
+                  🎯 심층 분석 설문 참여 시
+                </PopupBenefitTitle>
+                <PopupBenefitText>
+                  • 맞춤형 여행 코스 추천<br/>
+                  • 예산별 최적 플랜<br/>
+                  • 숨은 여행지 정보<br/>
+                  • <strong>2025 충청·전라 비밀지도</strong> 무료 제공!
+                </PopupBenefitText>
+              </PopupBenefit>
+              
+              <PopupButtonGroup>
+                <PopupButton
+                  primary
+                  onClick={() => {
+                    const sessionInfo = detailedAnalytics.getSessionInfo();
+                    const surveyUrl = process.env.REACT_APP_SURVEY_URL || 'https://survey.nestory.co.kr';
+                    const urlWithParams = `${surveyUrl}?landing_session=${sessionInfo.sessionId}&ref=landing_popup`;
+                    window.open(urlWithParams, '_blank');
+                    setShowSurveyPopup(false);
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  심층 분석 받기 (3-4분)
+                </PopupButton>
+                <PopupButton
+                  onClick={() => setShowSurveyPopup(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  다음에 할게요
+                </PopupButton>
+              </PopupButtonGroup>
+            </PopupContent>
+          </SurveyPopup>
+        </SurveyPopupOverlay>
+      )}
     </Container>
   );
 };

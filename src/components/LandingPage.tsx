@@ -222,12 +222,11 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <EmotionalHook>가족 여행, 늘 계획이 복잡하셨나요?</EmotionalHook>
+                <EmotionalHook>우리 가족 여행 스타일은?</EmotionalHook>
                 <MainTitle>
-                  이제 <HighlightText>NeStory</HighlightText>와 함께<br />
-                  우리 가족 맞춤 여행을 찾아보세요
+                  <HighlightText>2분</HighlightText>이면 충분해요!
                 </MainTitle>
-                <SubText>10가지 간단한 질문으로 가족의 여행 스타일을 파악하여<br />맞춤형 여행 계획을 세워보세요.</SubText>
+                <SubText>딱 3개 질문으로 찾는 우리 가족 여행 유형</SubText>
               </motion.div>
             </MainHeadline>
             <motion.div
@@ -238,11 +237,11 @@ const LandingPage: React.FC = () => {
               <EmotionalBenefits>
                 <BenefitItem>
                   <BenefitEmoji>😍</BenefitEmoji>
-                  <BenefitText>"나에게 딱 맞는 여행 코스 추천"</BenefitText>
+                  <BenefitText>딱 맞는 여행 코스</BenefitText>
                 </BenefitItem>
                 <BenefitItem>
                   <BenefitEmoji>🎁</BenefitEmoji>
-                  <BenefitText>"여행 준비부터 일정까지 한 번에"</BenefitText>
+                  <BenefitText>무료 여행 가이드북</BenefitText>
                 </BenefitItem>
               </EmotionalBenefits>
             </motion.div>
@@ -265,8 +264,8 @@ const LandingPage: React.FC = () => {
 
               <CTAButtonGroup>
                 <PrimaryCTAButton onClick={handleMainCTA}>
-                  <ButtonText>우리 가족 여행 유형, 무료로 진단하기</ButtonText>
-                  <ButtonSubtext>⏰ 단 2분! 서로를 이해하는 첫걸음</ButtonSubtext>
+                  <ButtonText>지금 바로 시작하기</ButtonText>
+                  <ButtonSubtext>⏰ 2분이면 끝!</ButtonSubtext>
                 </PrimaryCTAButton>
                 <TrustIndicators>
                   <TrustItem>🔥 오늘 이미 847명이 참여</TrustItem>
@@ -528,26 +527,25 @@ const MainHeadline = styled.h1`
 `;
 
 const EmotionalHook = styled.div`
-  font-size: 1.8rem;
+  font-size: 2.5rem;
   color: #7c3aed;
-  font-weight: 700;
+  font-weight: 900;
   margin-bottom: 1.5rem;
-  font-style: italic;
   text-align: center;
   opacity: 0.95;
   
   @media (max-width: 768px) {
-    font-size: 1.4rem;
+    font-size: 2rem;
     margin-bottom: 1.2rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.2rem;
+    font-size: 1.8rem;
     margin-bottom: 1rem;
   }
   
   @media (max-width: 375px) {
-    font-size: 1.1rem;
+    font-size: 1.6rem;
     margin-bottom: 0.8rem;
   }
 `;
@@ -644,20 +642,20 @@ const BenefitEmoji = styled.div`
 `;
 
 const BenefitText = styled.div`
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 800;
   color: #2d3748;
   
   @media (max-width: 768px) {
-    font-size: 0.95rem;
+    font-size: 1.2rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
   }
   
   @media (max-width: 375px) {
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
 `;
 
@@ -862,26 +860,26 @@ const TrustItem = styled.div`
 `;
 
 const MainTitle = styled.h1`
-  font-size: 3.2rem;
-  font-weight: 800;
+  font-size: 4rem;
+  font-weight: 900;
   line-height: 1.2;
   margin-bottom: 1.5rem;
   color: #2d3748;
   text-align: center;
 
   @media (max-width: 768px) {
-    font-size: 2.5rem;
+    font-size: 3.2rem;
     line-height: 1.3;
   }
   
   @media (max-width: 480px) {
-    font-size: 2.2rem;
+    font-size: 2.8rem;
     line-height: 1.4;
   }
 `;
 
 const SubText = styled.p`
-  font-size: 1.3rem;
+  font-size: 1.8rem;
   color: #4a5568;
   line-height: 1.6;
   margin-bottom: 3rem;
@@ -889,14 +887,15 @@ const SubText = styled.p`
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  font-weight: 600;
 
   @media (max-width: 768px) {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     margin-bottom: 2rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
 `;
 
